@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet  id="1.0"  author="Cristian Tone">
+        <createTable tableName="users">
+            <column  name="id" type="int"
+                     autoIncrement="true"
+                     startWith="0"
+                     incrementBy="1">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column  name="username" type="varchar(200)">
+                <constraints  nullable="false"/>
+            </column>
+            <column  name="password" type="varchar(200)">
+                <constraints  nullable="false"/>
+            </column>
+            <column  name="email" type="varchar(80)">
+                <constraints  nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="idx_id" tableName="users" unique="true">
+            <column name="id"/>
+        </createIndex>
+        <createIndex indexName="idx_email" tableName="users" unique="true">
+            <column name="email"/>
+        </createIndex>
+        <createIndex indexName="idx_username_password" tableName="users" unique="true">
+            <column name="username"/>
+            <column name="password"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet  id="1.1"  author="Cristian Tone">
+        <createTable tableName="login">
+            <column  name="id" type="int"
+                     autoIncrement="true"
+                     startWith="0"
+                     incrementBy="1">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column  name="user_id" type="int">
+                <constraints  nullable="false"/>
+            </column>
+            <column  name="date" type="datetime"/>
+            <column  name="validation_code" type="int"/>
+            <column  name="token" type="varchar(200)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet  id="1.2"  author="Cristian Tone">
+        <createTable tableName="purchases">
+            <column  name="id" type="int"
+                     autoIncrement="true"
+                     startWith="0"
+                     incrementBy="1">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column  name="user_id" type="int">
+                <constraints  nullable="false"/>
+            </column>
+            <column  name="metal_type" type="varchar(20)">
+                <constraints  nullable="false"/>
+            </column>
+            <column  name="amount" type="float(20)">
+                <constraints  nullable="false"/>
+            </column>
+            <column  name="date" type="datetime">
+                <constraints  nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="idx_id" tableName="purchases" unique="true">
+            <column name="id"/>
+        </createIndex>
+        <createIndex indexName="idx_user_id" tableName="purchases" unique="true">
+            <column name="user_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet  id="1.3"  author="Cristian Tone">
+        <createTable tableName="metalPrices">
+            <column  name="id" type="int"
+                     autoIncrement="true"
+                     startWith="0"
+                     incrementBy="1">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column  name="metal_type" type="varchar(20)">
+                <constraints  nullable="false"/>
+            </column>
+            <column  name="price" type="float(20)">
+                <constraints  nullable="false"/>
+            </column>
+            <column  name="date" type="datetime">
+                <constraints  nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="idx_id" tableName="metalPrices" unique="true">
+            <column name="id"/>
+        </createIndex>
+        <createIndex indexName="idx_metal_type" tableName="metalPrices" unique="true">
+            <column name="metal_type"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
