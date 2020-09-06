@@ -19,19 +19,18 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled=true)
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
+    private final AuthenticationProvider provider;
 
     private static final RequestMatcher PROTECTED_URLS = new OrRequestMatcher(
             new AntPathRequestMatcher("/api/**")
     );
 
-    AuthenticationProvider provider;
-
     public SecurityConfiguration(final AuthenticationProvider authenticationProvider) {
         super();
-        this.provider=authenticationProvider;
+        this.provider = authenticationProvider;
     }
 
     @Override
@@ -67,7 +66,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     AuthenticationFilter authenticationFilter() throws Exception {
         final AuthenticationFilter filter = new AuthenticationFilter(PROTECTED_URLS);
         filter.setAuthenticationManager(authenticationManager());
-        //filter.setAuthenticationSuccessHandler(successHandler());
         return filter;
     }
 

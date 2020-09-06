@@ -45,13 +45,33 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
             <column  name="user_id" type="int">
                 <constraints  nullable="false"/>
             </column>
-            <column  name="date" type="datetime"/>
+            <column  name="time" type="datetime"/>
             <column  name="validation_code" type="int"/>
+            <column  name="validated" type="int(1)"/>
+            <column  name="logged_in" type="int(1)"/>
             <column  name="token" type="varchar(200)"/>
+            <column  name="failed_attempts" type="int"/>
+            <column  name="token_expire_time" type="datetime"/>
         </createTable>
     </changeSet>
 
     <changeSet  id="1.2"  author="Cristian Tone">
+        <createTable tableName="bannedaccounts">
+            <column  name="id" type="int"
+                     autoIncrement="true"
+                     startWith="0"
+                     incrementBy="1">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column  name="user_id" type="int">
+                <constraints  nullable="false"/>
+            </column>
+            <column  name="banned_until" type="datetime"/>
+            <column  name="reason" type="varchar(400)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet  id="1.3"  author="Cristian Tone">
         <createTable tableName="purchases">
             <column  name="id" type="int"
                      autoIncrement="true"
@@ -80,7 +100,7 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         </createIndex>
     </changeSet>
 
-    <changeSet  id="1.3"  author="Cristian Tone">
+    <changeSet  id="1.4"  author="Cristian Tone">
         <createTable tableName="metalPrices">
             <column  name="id" type="int"
                      autoIncrement="true"

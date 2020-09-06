@@ -1,5 +1,6 @@
-package com.investment.metal;
+package com.investment.metal.service;
 
+import com.investment.metal.MetalType;
 import kong.unirest.HttpResponse;
 import kong.unirest.JsonNode;
 import kong.unirest.Unirest;

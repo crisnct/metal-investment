@@ -4,6 +4,7 @@ package com.investment.metal.database;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.sql.Timestamp;
 
 @Entity
 @Table(name = "login")
@@ -13,12 +14,20 @@ public class Login {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String userId;
+    private Long userId;
 
-    private long time;
+    private Timestamp time;
 
     private String token;
 
     private int validationCode;
+
+    private Boolean validated;
+
+    private Boolean loggedIn;
+
+    private int failedAttempts;
+
+    private Timestamp tokenExpireTime;
 
 }

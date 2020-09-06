@@ -1,5 +1,6 @@
 package com.investment.metal.security;
 
+import com.investment.metal.Util;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -13,11 +14,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Optional;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 public class AuthenticationFilter extends AbstractAuthenticationProcessingFilter {
-
 
     AuthenticationFilter(final RequestMatcher requiresAuth) {
         super(requiresAuth);
@@ -25,13 +26,9 @@ public class AuthenticationFilter extends AbstractAuthenticationProcessingFilter
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws AuthenticationException, IOException, ServletException {
-
-        //Optional<String> tokenParam = Optional.ofNullable(httpServletRequest.getHeader(AUTHORIZATION)); //Authorization: Bearer TOKEN
-        String token= StringUtils.isNotEmpty(httpServletRequest.getHeader(AUTHORIZATION))? httpServletRequest.getHeader(AUTHORIZATION) : "";
-        token= StringUtils.removeStart(token, "Bearer").trim();
+        String token = Util.getTokenFromRequest(httpServletRequest);
         Authentication requestAuthentication = new UsernamePasswordAuthenticationToken(token, token);
         return getAuthenticationManager().authenticate(requestAuthentication);
-
     }
 
     @Override

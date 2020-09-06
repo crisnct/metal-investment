@@ -1,9 +1,12 @@
 package com.investment.metal;
 
 import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Random;
+
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 public class Util {
 
@@ -32,6 +35,14 @@ public class Util {
             }
         }
         return request.getRemoteAddr();
+    }
+
+    public static String getTokenFromRequest(HttpServletRequest httpServletRequest){
+        String token = httpServletRequest.getHeader(AUTHORIZATION);
+        if (token == null) {
+            token = "";
+        }
+        return StringUtils.removeStart(token, "Bearer").trim();
     }
 
 }
