@@ -20,5 +20,5 @@ public interface LoginService {
 
     Login logout(String token) throws BusinessException;
 
-    void checkToken(String token) throws BusinessException;
+    Login checkToken(String token) throws BusinessException;
 }

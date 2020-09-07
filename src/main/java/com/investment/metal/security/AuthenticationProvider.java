@@ -44,13 +44,10 @@ public class AuthenticationProvider extends AbstractUserDetailsAuthenticationPro
         Optional<User> result = Optional.empty();
         final Optional<Login> login = this.loginService.findByToken(token);
         if (login.isPresent()) {
-            Optional<Customer> customerOp = this.accountService.findById(login.get().getUserId());
-            if (customerOp.isPresent()) {
-                Customer customer = customerOp.get();
-                User user = new User(customer.getUsername(), customer.getPassword(), true, true, true, true,
-                        AuthorityUtils.createAuthorityList("USER"));
-                result = Optional.of(user);
-            }
+            Customer customer = this.accountService.findById(login.get().getUserId());
+            User user = new User(customer.getUsername(), customer.getPassword(), true, true, true, true,
+                    AuthorityUtils.createAuthorityList("USER"));
+            result = Optional.of(user);
         }
         return result;
     }

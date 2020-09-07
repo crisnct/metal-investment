@@ -1,10 +1,30 @@
 package com.investment.metal.dto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+
 public class ProfitDto {
 
-    private double profit;
+    @Getter
+    private final String username;
+
+    @Getter
+    private Timestamp time;
+
+    @Getter
+    private final List<MetalInfo> metalInfo = new ArrayList<>();
+
+    public ProfitDto(String username) {
+        this.username = username;
+        this.time = new Timestamp(System.currentTimeMillis());
+    }
+
+    public void addInfo(MetalInfo info) {
+        this.metalInfo.add(info);
+    }
 
 }

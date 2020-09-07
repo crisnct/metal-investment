@@ -126,7 +126,7 @@ public class DefaultLoginService implements LoginService {
     }
 
     @Override
-    public void checkToken(String token) throws BusinessException {
+    public Login checkToken(String token) throws BusinessException {
         Optional<Login> loginOp = this.loginRepository.findByToken(token);
         if (loginOp.isPresent()) {
             Login login = loginOp.get();
@@ -145,6 +145,7 @@ public class DefaultLoginService implements LoginService {
                 this.loginRepository.save(login);
                 throw new BusinessException(CustomErrorCodes.VALIDATE_ACCOUNT, "The token expired! You need to validate your account");
             }
+            return login;
         } else {
             throw new BusinessException(CustomErrorCodes.VALIDATE_ACCOUNT, "Token not found in the database");
         }

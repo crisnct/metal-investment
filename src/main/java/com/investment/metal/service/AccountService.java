@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface AccountService {
 
-    Optional<Customer> findById(Long id);
+    Customer findById(Long id);
 
     Customer registerNewUser(String username, String password, String email) throws BusinessException;
 

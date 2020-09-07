@@ -1,5 +1,6 @@
 package com.investment.metal;
 
+import com.investment.metal.exceptions.BusinessException;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 
@@ -9,6 +10,8 @@ import java.util.Random;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 public class Util {
+    //1ounce = 0.0283495231 kg
+    public static final double ounce = 0.0283495231;
 
     @Getter
     private static final Random randomGenerator = new Random();
@@ -27,6 +30,14 @@ public class Util {
             "REMOTE_ADDR"
     };
 
+    public static void sleep(int duration) {
+        try {
+            Thread.sleep(duration);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
     public String getClientIpAddress(HttpServletRequest request) {
         for (String header : HEADERS_TO_TRY) {
             String ip = request.getHeader(header);
@@ -43,6 +54,12 @@ public class Util {
             token = "";
         }
         return StringUtils.removeStart(token, "Bearer").trim();
+    }
+
+    public static void check(boolean condition, int errCode, String message) throws BusinessException {
+        if (condition) {
+            throw new BusinessException(errCode, message);
+        }
     }
 
 }

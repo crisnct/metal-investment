@@ -56,7 +56,9 @@ public class DefaultAccountService implements AccountService {
     }
 
     @Override
-    public Optional<Customer> findById(Long id) {
-        return customerRepository.findById(id);
+    public Customer findById(Long id) throws BusinessException {
+        return this.customerRepository
+                .findById(id)
+                .orElseThrow(() -> new BusinessException(CustomErrorCodes.USER_RETRIEVE, "Can not find user with id " + id));
     }
 }

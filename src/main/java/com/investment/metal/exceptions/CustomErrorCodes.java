@@ -11,4 +11,6 @@ public interface CustomErrorCodes extends HttpStatus {
     int VALIDATE_ACCOUNT = 1002;
 
     int USER_RETRIEVE = 1003;
+
+    int PURCHASE = 1004;
 }
