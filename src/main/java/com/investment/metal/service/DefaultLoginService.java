@@ -93,7 +93,7 @@ public class DefaultLoginService implements LoginService {
         if (loginOp.isPresent()) {
             Login login = loginOp.get();
             if (!login.getValidated()) {
-                throw new BusinessException(CustomErrorCodes.VALIDATE_ACCOUNT, "The account is not validated!");
+                throw new BusinessException(CustomErrorCodes.VALIDATE_ACCOUNT, "The account needs to be validated first!");
             }
             token = generateToken();
             login.setToken(token);
@@ -109,6 +109,18 @@ public class DefaultLoginService implements LoginService {
     }
 
     @Override
+    public void markLoginFailed(Customer user) {
+        Optional<Login> loginOp = this.loginRepository.findByUserId(user.getId());
+        if (loginOp.isPresent()) {
+            Login login = loginOp.get();
+            int attempts = login.getFailedAttempts() + 1;
+            login.setFailedAttempts(attempts);
+        } else {
+            throw new BusinessException(CustomErrorCodes.VALIDATE_ACCOUNT, "User is not registered");
+        }
+    }
+
+    @Override
     public Login logout(String token) throws BusinessException {
         Optional<Login> loginOp = this.loginRepository.findByToken(token);
         if (loginOp.isPresent()) {
@@ -117,8 +129,8 @@ public class DefaultLoginService implements LoginService {
                 throw new BusinessException(CustomErrorCodes.VALIDATE_ACCOUNT, "The user is not logged in!");
             }
             login.setToken("");
-            login.setFailedAttempts(0);
             login.setLoggedIn(false);
+            login.setValidated(false);
             return this.loginRepository.save(login);
         } else {
             throw new BusinessException(CustomErrorCodes.VALIDATE_ACCOUNT, "Token not found");

@@ -11,8 +11,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -33,6 +33,9 @@ public class Config {
 
     @Value("${spring.datasource.password}")
     private String password;
+
+    @Value("${encoder.secrete}")
+    private String encoderSecrete;
 
     @Bean
     public SpringLiquibase liquibase() {
@@ -85,7 +88,10 @@ public class Config {
 
     @Bean
     public PasswordEncoder encoder() {
-        return new BCryptPasswordEncoder(20);
+        Pbkdf2PasswordEncoder encoder = new Pbkdf2PasswordEncoder(encoderSecrete, 300, 255);
+        encoder.setEncodeHashAsBase64(true);
+        encoder.setAlgorithm(Pbkdf2PasswordEncoder.SecretKeyFactoryAlgorithm.PBKDF2WithHmacSHA256);
+        return encoder;
     }
 
 }
