@@ -25,7 +25,7 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         <createIndex indexName="idx_id" tableName="users" unique="true">
             <column name="id"/>
         </createIndex>
-        <createIndex indexName="idx_email" tableName="users" unique="true">
+        <createIndex indexName="idx_email" tableName="users">
             <column name="email"/>
         </createIndex>
         <createIndex indexName="idx_username_password" tableName="users" unique="true">
