@@ -8,14 +8,17 @@ import io.github.resilience4j.timelimiter.TimeLimiterConfig;
 import io.github.resilience4j.timelimiter.TimeLimiterRegistry;
 import liquibase.integration.spring.SpringLiquibase;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Locale;
 import java.util.concurrent.TimeoutException;
 
 @Configuration
@@ -36,6 +39,7 @@ public class Config {
 
     @Value("${encoder.secrete}")
     private String encoderSecrete;
+
 
     @Bean
     public SpringLiquibase liquibase() {
@@ -94,4 +98,11 @@ public class Config {
         return encoder;
     }
 
+    @Bean
+    public MessageSource messageSource() {
+        ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+        messageSource.setBasename("classpath:messages");
+        messageSource.setDefaultEncoding("UTF-8");
+        return messageSource;
+    }
 }

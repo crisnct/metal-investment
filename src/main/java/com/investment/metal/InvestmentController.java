@@ -5,10 +5,9 @@ import com.investment.metal.database.Customer;
 import com.investment.metal.database.Login;
 import com.investment.metal.database.Purchase;
 import com.investment.metal.dto.*;
-import com.investment.metal.exceptions.BusinessException;
-import com.investment.metal.exceptions.CustomErrorCodes;
 import com.investment.metal.exceptions.NoRollbackBusinessException;
 import com.investment.metal.service.*;
+import com.investment.metal.service.impl.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,6 +45,9 @@ public class InvestmentController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private ExceptionService exceptionService;
 
     @RequestMapping(value = "/userRegistration", method = RequestMethod.POST)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
@@ -91,11 +93,12 @@ public class InvestmentController {
         this.bannedAccountsService.checkBanned(user.getId());
         if (!passwordEncoder.matches(password, user.getPassword())){
             this.loginService.markLoginFailed(user);
-            throw new BusinessException(CustomErrorCodes.USER_RETRIEVE, "Password doesn't match!");
+            throw exceptionService.createException(MessageKey.PASSWORD_DO_NOT_MATCH);
         }
         String token = this.loginService.login(user);
         UserLoginDto dto = new UserLoginDto();
         dto.setToken(token);
+
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
@@ -122,7 +125,7 @@ public class InvestmentController {
             @RequestHeader("cost") final double cost,
             HttpServletResponse response) {
         MetalType metalType = MetalType.lookup(metalSymbol);
-        Util.check(metalType == null, CustomErrorCodes.PURCHASE, "metalSymbol header is invalid");
+        this.exceptionService.check(metalType == null, MessageKey.INVALID_REQUEST, "metalSymbol header is invalid");
         String token = Util.getTokenFromRequest(request);
         Login loginEntity = this.loginService.checkToken(token);
 
@@ -142,7 +145,7 @@ public class InvestmentController {
             @RequestHeader("value") final double value,
             HttpServletResponse response) {
         MetalType metalType = MetalType.lookup(metalSymbol);
-        Util.check(metalType == null, CustomErrorCodes.PURCHASE, "metalSymbol header is invalid");
+        this.exceptionService.check(metalType == null, MessageKey.INVALID_REQUEST, "metalSymbol header is invalid");
         String token = Util.getTokenFromRequest(request);
         Login loginEntity = this.loginService.checkToken(token);
 
@@ -184,7 +187,7 @@ public class InvestmentController {
         String token = Util.getTokenFromRequest(request);
         this.loginService.checkToken(token);
         MetalType metalType = MetalType.lookup(metalSymbol);
-        Util.check(metalType == null, CustomErrorCodes.VALIDATE_ACCOUNT, "Invalid metalSymbol header");
+        this.exceptionService.check(metalType == null, MessageKey.INVALID_REQUEST, "metalSymbol header is invalid");
         final double profit = this.revolutService.calculateRevolutProfit(revolutPriceOunce, usdRonRate, metalType);
         SimpleMessageDto dto = new SimpleMessageDto();
         dto.setMessage("Revolut profit is %.5f%%", profit * 100);

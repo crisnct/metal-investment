@@ -2,7 +2,7 @@ package com.investment.metal;
 
 import com.investment.metal.database.MetalPrice;
 import com.investment.metal.service.ExternalMetalPriceService;
-import com.investment.metal.service.MetalPricesService;
+import com.investment.metal.service.impl.MetalPricesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;

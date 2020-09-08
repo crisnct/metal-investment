@@ -1,6 +1,5 @@
 package com.investment.metal;
 
-import com.investment.metal.exceptions.BusinessException;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 
@@ -56,10 +55,5 @@ public class Util {
         return StringUtils.removeStart(token, "Bearer").trim();
     }
 
-    public static void check(boolean condition, int errCode, String message) throws BusinessException {
-        if (condition) {
-            throw new BusinessException(errCode, message);
-        }
-    }
 
 }

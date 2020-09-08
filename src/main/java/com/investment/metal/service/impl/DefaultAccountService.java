@@ -1,16 +1,19 @@
-package com.investment.metal.service;
+package com.investment.metal.service.impl;
 
 import com.investment.metal.database.Customer;
 import com.investment.metal.database.CustomerRepository;
 import com.investment.metal.exceptions.BusinessException;
-import com.investment.metal.exceptions.CustomErrorCodes;
+import com.investment.metal.MessageKey;
+import com.investment.metal.service.AbstractService;
+import com.investment.metal.service.AccountService;
+import com.investment.metal.service.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service("customerService")
-public class DefaultAccountService implements AccountService {
+public class DefaultAccountService extends AbstractService implements AccountService {
 
     @Autowired
     private CustomerRepository customerRepository;
@@ -32,8 +35,12 @@ public class DefaultAccountService implements AccountService {
 
         Optional<Customer> customerOp = this.customerRepository.findByUsernameAndPassword(username, password);
         if (customerOp.isPresent()) {
-            throw new BusinessException(CustomErrorCodes.REGISTER_NEW_USER, "There user " + username + " is already registered in the database");
+            throw this.exceptionService
+                    .createBuilder(MessageKey.ALREADY_EXISTING_USER)
+                    .setArguments(username)
+                    .build();
         }
+
         final Customer user = new Customer();
         user.setUsername(username);
         user.setPassword(password);
@@ -45,20 +52,32 @@ public class DefaultAccountService implements AccountService {
     public Customer findByUsername(String username) throws BusinessException {
         return this.customerRepository
                 .findByUsername(username)
-                .orElseThrow(() -> new BusinessException(CustomErrorCodes.USER_RETRIEVE, "The username " + username + " doesn't exist in the database"));
+                .orElseThrow(() -> this.exceptionService
+                        .createBuilder(MessageKey.INEXISTING_USER)
+                        .setArguments(username)
+                        .build()
+                );
     }
 
     @Override
     public Customer findByUsernameAndPassword(String username, String password) {
         return this.customerRepository
                 .findByUsernameAndPassword(username, password)
-                .orElseThrow(() -> new BusinessException(CustomErrorCodes.USER_RETRIEVE, "Failed to login for " + username));
+                .orElseThrow(() -> this.exceptionService
+                        .createBuilder(MessageKey.LOGIN_FAILED)
+                        .setArguments(username)
+                        .build()
+                );
     }
 
     @Override
     public Customer findById(Long id) throws BusinessException {
         return this.customerRepository
                 .findById(id)
-                .orElseThrow(() -> new BusinessException(CustomErrorCodes.USER_RETRIEVE, "Can not find user with id " + id));
+                .orElseThrow(() -> this.exceptionService
+                        .createBuilder(MessageKey.INEXISTING_USER_ID)
+                        .setArguments(id)
+                        .build()
+                );
     }
 }

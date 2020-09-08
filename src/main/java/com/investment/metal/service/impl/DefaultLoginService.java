@@ -1,12 +1,14 @@
-package com.investment.metal.service;
+package com.investment.metal.service.impl;
 
 import com.investment.metal.Util;
 import com.investment.metal.database.Customer;
 import com.investment.metal.database.Login;
 import com.investment.metal.database.LoginRepository;
 import com.investment.metal.exceptions.BusinessException;
-import com.investment.metal.exceptions.CustomErrorCodes;
+import com.investment.metal.MessageKey;
 import com.investment.metal.exceptions.NoRollbackBusinessException;
+import com.investment.metal.service.AbstractService;
+import com.investment.metal.service.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,7 +19,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-public class DefaultLoginService implements LoginService {
+public class DefaultLoginService extends AbstractService implements LoginService {
 
     private static final long BANNED_LOGIN_ATTEMPTS = 24 * 3600 * 1000;
 
@@ -52,7 +54,11 @@ public class DefaultLoginService implements LoginService {
             this.emailService.sendMailWithCode(user, codeGenerated);
             this.saveAttempt(user.getId(), codeGenerated);
         } catch (MessagingException e) {
-            throw new BusinessException(CustomErrorCodes.MAIL_SERVICE, "Can not send email to " + user.getEmail());
+            throw this.exceptionService
+                    .createBuilder(MessageKey.CAN_NOT_SEND_MAIL)
+                    .setArguments(user.getEmail())
+                    .setExceptionCause(e)
+                    .build();
         }
     }
 
@@ -74,14 +80,19 @@ public class DefaultLoginService implements LoginService {
                 this.loginRepository.save(login);
                 if (attempts >= MAX_LOGIN_ATTEMPTS_FAILED) {
                     this.bannedAccountsService.banUser(userId, BANNED_LOGIN_ATTEMPTS, "Too many failed login attempts!");
-                    String bannedMessage = "Wrong code. Your account has been banned for 24h";
-                    throw new NoRollbackBusinessException(CustomErrorCodes.VALIDATE_ACCOUNT, bannedMessage);
+                    throw exceptionService
+                            .createBuilder(MessageKey.WRONG_CODE_ACCOUNT_BANNED)
+                            .setException(NoRollbackBusinessException::new)
+                            .build();
                 } else {
-                    throw new NoRollbackBusinessException(CustomErrorCodes.VALIDATE_ACCOUNT, "Wrong code. Please try again. Number attempts: " + login.getFailedAttempts());
+                    throw exceptionService.createBuilder(MessageKey.WRONG_CODE_TRY_AGAIN)
+                            .setArguments(login.getFailedAttempts())
+                            .setException(NoRollbackBusinessException::new)
+                            .build();
                 }
             }
         } else {
-            throw new BusinessException(CustomErrorCodes.VALIDATE_ACCOUNT, "User is not registered");
+            throw exceptionService.createException(MessageKey.USER_NOT_REGISTERED);
         }
         return token;
     }
@@ -93,7 +104,7 @@ public class DefaultLoginService implements LoginService {
         if (loginOp.isPresent()) {
             Login login = loginOp.get();
             if (!login.getValidated()) {
-                throw new BusinessException(CustomErrorCodes.VALIDATE_ACCOUNT, "The account needs to be validated first!");
+                throw exceptionService.createException(MessageKey.NEEDS_VALIDATION);
             }
             token = generateToken();
             login.setToken(token);
@@ -103,7 +114,7 @@ public class DefaultLoginService implements LoginService {
             login.setLoggedIn(true);
             this.loginRepository.save(login);
         } else {
-            throw new BusinessException(CustomErrorCodes.VALIDATE_ACCOUNT, "User is not registered");
+            throw exceptionService.createException(MessageKey.USER_NOT_REGISTERED);
         }
         return token;
     }
@@ -116,7 +127,7 @@ public class DefaultLoginService implements LoginService {
             int attempts = login.getFailedAttempts() + 1;
             login.setFailedAttempts(attempts);
         } else {
-            throw new BusinessException(CustomErrorCodes.VALIDATE_ACCOUNT, "User is not registered");
+            throw exceptionService.createException(MessageKey.USER_NOT_REGISTERED);
         }
     }
 
@@ -126,16 +137,17 @@ public class DefaultLoginService implements LoginService {
         if (loginOp.isPresent()) {
             Login login = loginOp.get();
             if (!login.getLoggedIn()) {
-                throw new BusinessException(CustomErrorCodes.VALIDATE_ACCOUNT, "The user is not logged in!");
+                throw exceptionService.createException(MessageKey.USER_NOT_LOGIN);
             }
             login.setToken("");
             login.setLoggedIn(false);
             login.setValidated(false);
             return this.loginRepository.save(login);
         } else {
-            throw new BusinessException(CustomErrorCodes.VALIDATE_ACCOUNT, "Token not found");
+            throw exceptionService.createException(MessageKey.WRONG_TOKEN);
         }
     }
+
 
     @Override
     public Login checkToken(String token) throws BusinessException {
@@ -144,10 +156,10 @@ public class DefaultLoginService implements LoginService {
             Login login = loginOp.get();
             this.bannedAccountsService.checkBanned(login.getUserId());
             if (!login.getValidated()) {
-                throw new BusinessException(CustomErrorCodes.VALIDATE_ACCOUNT, "The account is not validated!");
+                throw exceptionService.createException(MessageKey.NEEDS_VALIDATION);
             }
             if (!login.getLoggedIn()) {
-                throw new BusinessException(CustomErrorCodes.VALIDATE_ACCOUNT, "The user is not logged in!");
+                throw exceptionService.createException(MessageKey.USER_NOT_LOGIN);
             }
             Timestamp currentTime = new Timestamp(System.currentTimeMillis());
             if (login.getTokenExpireTime().before(currentTime)) {
@@ -155,11 +167,11 @@ public class DefaultLoginService implements LoginService {
                 login.setLoggedIn(false);
                 login.setValidated(false);
                 this.loginRepository.save(login);
-                throw new BusinessException(CustomErrorCodes.VALIDATE_ACCOUNT, "The token expired! You need to validate your account");
+                throw exceptionService.createException(MessageKey.EXPIRED_TOKEN);
             }
             return login;
         } else {
-            throw new BusinessException(CustomErrorCodes.VALIDATE_ACCOUNT, "Token not found in the database");
+            throw exceptionService.createException(MessageKey.WRONG_TOKEN);
         }
     }
 

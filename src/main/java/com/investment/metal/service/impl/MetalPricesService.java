@@ -1,4 +1,4 @@
-package com.investment.metal.service;
+package com.investment.metal.service.impl;
 
 import com.investment.metal.MetalType;
 import com.investment.metal.Util;
@@ -7,6 +7,7 @@ import com.investment.metal.database.MetalPriceRepository;
 import com.investment.metal.database.Purchase;
 import com.investment.metal.dto.MetalInfo;
 import com.investment.metal.exceptions.BusinessException;
+import com.investment.metal.service.AbstractService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class MetalPricesService {
+public class MetalPricesService extends AbstractService {
 
     //TODO save this in the database and make a scheduler to update it from https://www.bnr.ro/RSS_200004_USD.aspx
     private static final double usdRonRate = 4.0915;// * 0.9958d;

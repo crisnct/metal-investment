@@ -1,9 +1,10 @@
-package com.investment.metal.service;
+package com.investment.metal.service.impl;
 
 import com.investment.metal.database.BannedAccount;
 import com.investment.metal.database.BannedRepository;
 import com.investment.metal.exceptions.BusinessException;
-import com.investment.metal.exceptions.CustomErrorCodes;
+import com.investment.metal.MessageKey;
+import com.investment.metal.service.AbstractService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +12,7 @@ import java.sql.Timestamp;
 import java.util.Optional;
 
 @Service
-public class BannedAccountsService {
+public class BannedAccountsService extends AbstractService {
 
     @Autowired
     private BannedRepository bannedRepository;
@@ -39,9 +40,13 @@ public class BannedAccountsService {
     public void checkBanned(long userId) throws BusinessException {
         Optional<BannedAccount> bannedInfo = getBanInfo(userId);
         if (bannedInfo.isPresent()) {
-            BannedAccount bannedAccount = bannedInfo.get();
-            String message = "This account is banned until " + bannedAccount.getBannedUntil().toString() + ". Reason: " + bannedAccount.getReason();
-            throw new BusinessException(CustomErrorCodes.USER_RETRIEVE, message);
+            BannedAccount entity = bannedInfo.get();
+            String endTime = entity.getBannedUntil().toString();
+            String reason = entity.getReason();
+            throw this.exceptionService
+                    .createBuilder(MessageKey.BANNED_ACCOUNT_UNTIL)
+                    .setArguments(endTime, reason)
+                    .build();
         }
     }
 }

@@ -1,11 +1,11 @@
-package com.investment.metal.service;
+package com.investment.metal.service.impl;
 
+import com.investment.metal.MessageKey;
 import com.investment.metal.MetalType;
-import com.investment.metal.Util;
 import com.investment.metal.database.Purchase;
 import com.investment.metal.database.PurchaseRepository;
 import com.investment.metal.exceptions.BusinessException;
-import com.investment.metal.exceptions.CustomErrorCodes;
+import com.investment.metal.service.AbstractService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +13,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 @Service
-public class PurchaseService {
+public class PurchaseService extends AbstractService {
 
     @Autowired
     private PurchaseRepository purchaseRepo;
@@ -31,7 +31,7 @@ public class PurchaseService {
     public void sell(Long userId, double metalAmount, MetalType metalType, double value) throws BusinessException {
         final List<Purchase> purchases = this.purchaseRepo.findByUserIdAndMetalSymbol(userId, metalType.getSymbol());
         final double totalAmount = purchases.stream().map(Purchase::getAmount).reduce(Double::sum).orElse(0.0d);
-        Util.check(metalAmount > totalAmount, CustomErrorCodes.VALIDATE_ACCOUNT, "You can not sell more than you have in your account! Total amount of " + metalType.getSymbol() + " that you have is " + totalAmount);
+        this.exceptionService.check(metalAmount > totalAmount, MessageKey.SELL_MORE_THAN_YOU_HAVE, metalType.getSymbol(), totalAmount);
 
         double toSubstract = metalAmount;
         for (Purchase purchase : purchases) {

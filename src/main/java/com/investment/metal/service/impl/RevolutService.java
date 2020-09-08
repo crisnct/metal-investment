@@ -1,17 +1,19 @@
-package com.investment.metal.service;
+package com.investment.metal.service.impl;
 
 import com.investment.metal.MetalType;
 import com.investment.metal.Util;
 import com.investment.metal.database.RevolutProfit;
 import com.investment.metal.database.RevolutProfitRepository;
 import com.investment.metal.exceptions.BusinessException;
+import com.investment.metal.service.AbstractService;
+import com.investment.metal.service.ExternalMetalPriceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 
 @Service
-public class RevolutService {
+public class RevolutService extends AbstractService {
 
     @Autowired
     private RevolutProfitRepository revolutRepository;

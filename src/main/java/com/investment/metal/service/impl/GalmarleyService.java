@@ -1,13 +1,15 @@
-package com.investment.metal.service;
+package com.investment.metal.service.impl;
 
 import com.investment.metal.MetalType;
+import com.investment.metal.service.AbstractService;
+import com.investment.metal.service.ExternalMetalPriceService;
 import kong.unirest.HttpResponse;
 import kong.unirest.JsonNode;
 import kong.unirest.Unirest;
 import org.springframework.stereotype.Service;
 
 @Service
-public class GalmarleyService implements ExternalMetalPriceService {
+public class GalmarleyService extends AbstractService implements ExternalMetalPriceService {
 
     @Override
     public double fetchPrice(MetalType metalType) {

@@ -1,23 +1,22 @@
-package com.investment.metal.service;
+package com.investment.metal.service.impl;
 
 import com.google.common.base.Charsets;
 import com.investment.metal.database.Customer;
+import com.investment.metal.service.AbstractService;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
-import javax.activation.FileTypeMap;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.io.IOException;
 import java.io.InputStream;
 
 @Service
-public class EmailService {
+public class EmailService extends AbstractService {
 
     @Value("${spring.application.name}")
     private String appName;
