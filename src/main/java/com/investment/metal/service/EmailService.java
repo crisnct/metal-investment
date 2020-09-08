@@ -36,7 +36,7 @@ public class EmailService {
     }
 
     public void sendMailWithCode(Customer user, int codeGenerated) throws MessagingException {
-        final String emailContent = mailTemplateCode
+        final String emailContent = this.mailTemplateCode
                 .replace("{user}", user.getUsername())
                 .replace("{code}", String.valueOf(codeGenerated));
         this.sendMail(user.getEmail(), appName, emailContent);

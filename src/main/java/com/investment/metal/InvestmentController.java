@@ -5,12 +5,14 @@ import com.investment.metal.database.Customer;
 import com.investment.metal.database.Login;
 import com.investment.metal.database.Purchase;
 import com.investment.metal.dto.*;
+import com.investment.metal.exceptions.BusinessException;
 import com.investment.metal.exceptions.CustomErrorCodes;
 import com.investment.metal.exceptions.NoRollbackBusinessException;
 import com.investment.metal.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,6 +44,9 @@ public class InvestmentController {
     @Autowired
     private RevolutService revolutService;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @RequestMapping(value = "/userRegistration", method = RequestMethod.POST)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
     public ResponseEntity<UserRegistrationDto> userRegistration(
@@ -51,7 +56,7 @@ public class InvestmentController {
             @RequestHeader String email,
             HttpServletResponse response) {
 
-        Customer user = this.accountService.registerNewUser(username, password, email);
+        Customer user = this.accountService.registerNewUser(username, this.passwordEncoder.encode(password), email);
         this.loginService.validateAccount(user);
         UserRegistrationDto dto = new UserRegistrationDto();
         dto.setMessage("An email was sent to " + email + " with a code. Call validation request with that code");
@@ -82,8 +87,12 @@ public class InvestmentController {
             @RequestHeader("password") final String password,
             HttpServletResponse response
     ) {
-        Customer user = this.accountService.findByUsernameAndPassword(username, password);
+        final Customer user = this.accountService.findByUsername(username);
         this.bannedAccountsService.checkBanned(user.getId());
+        if (!passwordEncoder.matches(password, user.getPassword())){
+            this.loginService.markLoginFailed(user);
+            throw new BusinessException(CustomErrorCodes.USER_RETRIEVE, "Password doesn't match!");
+        }
         String token = this.loginService.login(user);
         UserLoginDto dto = new UserLoginDto();
         dto.setToken(token);
@@ -121,6 +130,26 @@ public class InvestmentController {
 
         SimpleMessageDto dto = new SimpleMessageDto();
         dto.setMessage("Your purchase of %.7f %s was recorded in the database", metalAmount, metalType.getSymbol());
+        return new ResponseEntity<>(dto, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/api/sell", method = RequestMethod.DELETE)
+    @Transactional(noRollbackFor = NoRollbackBusinessException.class)
+    public ResponseEntity<SimpleMessageDto> sell(
+            HttpServletRequest request,
+            @RequestHeader("metalAmount") final double metalAmount,
+            @RequestHeader("metalSymbol") final String metalSymbol,
+            @RequestHeader("value") final double value,
+            HttpServletResponse response) {
+        MetalType metalType = MetalType.lookup(metalSymbol);
+        Util.check(metalType == null, CustomErrorCodes.PURCHASE, "metalSymbol header is invalid");
+        String token = Util.getTokenFromRequest(request);
+        Login loginEntity = this.loginService.checkToken(token);
+
+        this.purchaseService.sell(loginEntity.getUserId(), metalAmount, metalType, value);
+
+        SimpleMessageDto dto = new SimpleMessageDto();
+        dto.setMessage("Your sold of %.7f %s was recorded in the database", metalAmount, metalType.getSymbol());
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
