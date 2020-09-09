@@ -1,7 +1,6 @@
 package com.investment.metal;
 
 import com.investment.metal.service.CurrencyType;
-import com.investment.metal.service.ExternalMetalPriceService;
 import com.investment.metal.service.impl.AlertsTrigger;
 import com.investment.metal.service.impl.CurrencyService;
 import com.investment.metal.service.impl.ExceptionService;
@@ -18,9 +17,6 @@ import java.io.IOException;
 @Configuration
 @EnableScheduling
 public class Scheduler {
-
-    @Autowired
-    private ExternalMetalPriceService externalPriceService;
 
     @Autowired
     private MetalPricesService metalPricesService;
@@ -49,7 +45,7 @@ public class Scheduler {
     @Transactional
     @Scheduled(fixedDelay = 3600 * 1000)
     public void fetchMetalPrices() {
-        final double metalPrice = this.externalPriceService.fetchPrice(metalType);
+        final double metalPrice = this.metalPricesService.fetchMetalPrice(metalType);
         this.metalPricesService.save(metalType, metalPrice);
         this.alertsTrigger.trigerAlerts(metalType);
 

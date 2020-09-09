@@ -192,7 +192,10 @@ public class InvestmentController {
         this.loginService.checkToken(token);
         MetalType metalType = MetalType.lookup(metalSymbol);
         this.exceptionService.check(metalType == null, MessageKey.INVALID_REQUEST, "metalSymbol header is invalid");
-        final double profit = this.revolutService.calculateRevolutProfit(revolutPriceOunce, metalType);
+
+        double priceMetalNowKg = this.metalPricesService.fetchMetalPrice(metalType);
+        final double profit = this.revolutService.calculateRevolutProfit(revolutPriceOunce, priceMetalNowKg, metalType);
+
         SimpleMessageDto dto = new SimpleMessageDto();
         dto.setMessage("Revolut profit is %.5f%%", profit * 100);
         return new ResponseEntity<>(dto, HttpStatus.OK);

@@ -10,6 +10,7 @@ import com.investment.metal.dto.MetalInfo;
 import com.investment.metal.exceptions.BusinessException;
 import com.investment.metal.service.AbstractService;
 import com.investment.metal.service.CurrencyType;
+import com.investment.metal.service.ExternalMetalPriceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,9 +34,16 @@ public class MetalPricesService extends AbstractService {
     @Autowired
     private CurrencyService currencyService;
 
+    @Autowired
+    private ExternalMetalPriceService externalPriceService;
+
     public MetalPrice getMetalPrice(MetalType metalType) throws BusinessException {
         Optional<List<MetalPrice>> price = this.metalPriceRepository.findByMetalSymbol(metalType.getSymbol());
         return price.map(metalPrices -> metalPrices.get(0)).orElse(null);
+    }
+
+    public double fetchMetalPrice(MetalType metalType) {
+        return this.externalPriceService.fetchPrice(metalType);
     }
 
     public MetalInfo calculatesUserProfit(Purchase purchase) {
@@ -43,10 +51,9 @@ public class MetalPricesService extends AbstractService {
         final double usdRonRate = currency.getRon();
 
         double revolutProfitPercentages = this.revolutService.getRevolutProfitFor(purchase.getMetalType());
-        final MetalPrice metalPriceNow = this.getMetalPrice(purchase.getMetalType());
-        double priceKgNow = metalPriceNow.getPrice();
+        final double metalPriceNowKg = this.externalPriceService.fetchPrice(purchase.getMetalType());
 
-        double revolutGoldPriceKg = priceKgNow * (revolutProfitPercentages + 1) * usdRonRate;
+        double revolutGoldPriceKg = metalPriceNowKg * (revolutProfitPercentages + 1) * usdRonRate;
         double revolutGoldPriceOunce = revolutGoldPriceKg * Util.ounce;
         double costNowUser = revolutGoldPriceOunce * purchase.getAmount();
         double profitRevolut = costNowUser - purchase.getCost();
