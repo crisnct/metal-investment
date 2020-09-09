@@ -8,7 +8,6 @@ import com.investment.metal.service.ExternalMetalPriceService;
 import com.investment.metal.service.impl.CurrencyService;
 import com.investment.metal.service.impl.ExceptionService;
 import com.investment.metal.service.impl.MetalPricesService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -67,16 +66,17 @@ public class Scheduler {
     @Scheduled(fixedDelay = 12 * 3600 * 1000)
     public void fetchCurrencyValues() {
         for (CurrencyType currency : CurrencyType.values()) {
-            if (currency.getFeelURL() != null) {
-                this.fetchCurrency(currency);
+            if (currency == CurrencyType.USD) {
+                this.fetchCurrency(currency, "https://www.bnr.ro/RSS_200004_USD.aspx");
             }
         }
     }
 
-    private void fetchCurrency(CurrencyType currency) {
+    @SuppressWarnings("SameParameterValue")
+    private void fetchCurrency(CurrencyType currency, String feedURL) {
         double ron;
         try {
-            ron = this.rssFeedParser.readFeed(currency.getFeelURL());
+            ron = this.rssFeedParser.readFeed(feedURL);
         } catch (IOException e) {
             e.printStackTrace();
             return;
