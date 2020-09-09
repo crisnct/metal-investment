@@ -2,10 +2,12 @@ package com.investment.metal.service.impl;
 
 import com.investment.metal.MetalType;
 import com.investment.metal.Util;
+import com.investment.metal.database.Currency;
 import com.investment.metal.database.RevolutProfit;
 import com.investment.metal.database.RevolutProfitRepository;
 import com.investment.metal.exceptions.BusinessException;
 import com.investment.metal.service.AbstractService;
+import com.investment.metal.service.CurrencyType;
 import com.investment.metal.service.ExternalMetalPriceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,9 +21,15 @@ public class RevolutService extends AbstractService {
     private RevolutProfitRepository revolutRepository;
 
     @Autowired
+    private CurrencyService currencyService;
+
+    @Autowired
     private ExternalMetalPriceService externalPriceService;
 
-    public double calculateRevolutProfit(double revolutPriceOunce, double usdRonRate, MetalType metalType) throws BusinessException {
+    public double calculateRevolutProfit(double revolutPriceOunce, MetalType metalType) throws BusinessException {
+        final Currency currency = currencyService.findBySymbol(CurrencyType.USD);
+        final double usdRonRate = currency.getRon();
+
         double priceMetalNowKg = this.externalPriceService.fetchPrice(metalType);
         double diffCostKg = revolutPriceOunce / (Util.ounce * usdRonRate) - priceMetalNowKg;
         final double profit = diffCostKg / priceMetalNowKg;

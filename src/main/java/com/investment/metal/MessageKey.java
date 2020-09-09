@@ -55,7 +55,10 @@ public enum MessageKey {
     EXPIRED_TOKEN(1014),
 
     //The account needs to be validated first!
-    NEEDS_VALIDATION(1015);
+    NEEDS_VALIDATION(1015),
+
+    //Currency not found in the database: {0}
+    INEXISTING_CURRENCY(1016);
 
     @Getter
     final int code;

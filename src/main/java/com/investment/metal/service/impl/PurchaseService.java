@@ -28,7 +28,7 @@ public class PurchaseService extends AbstractService {
         this.purchaseRepo.save(purchase);
     }
 
-    public void sell(Long userId, double metalAmount, MetalType metalType, double value) throws BusinessException {
+    public void sell(Long userId, double metalAmount, MetalType metalType) throws BusinessException {
         final List<Purchase> purchases = this.purchaseRepo.findByUserIdAndMetalSymbol(userId, metalType.getSymbol());
         final double totalAmount = purchases.stream().map(Purchase::getAmount).reduce(Double::sum).orElse(0.0d);
         this.exceptionService.check(metalAmount > totalAmount, MessageKey.SELL_MORE_THAN_YOU_HAVE, metalType.getSymbol(), totalAmount);

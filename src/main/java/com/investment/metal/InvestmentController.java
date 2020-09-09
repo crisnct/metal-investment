@@ -142,14 +142,13 @@ public class InvestmentController {
             HttpServletRequest request,
             @RequestHeader("metalAmount") final double metalAmount,
             @RequestHeader("metalSymbol") final String metalSymbol,
-            @RequestHeader("value") final double value,
             HttpServletResponse response) {
         MetalType metalType = MetalType.lookup(metalSymbol);
         this.exceptionService.check(metalType == null, MessageKey.INVALID_REQUEST, "metalSymbol header is invalid");
         String token = Util.getTokenFromRequest(request);
         Login loginEntity = this.loginService.checkToken(token);
 
-        this.purchaseService.sell(loginEntity.getUserId(), metalAmount, metalType, value);
+        this.purchaseService.sell(loginEntity.getUserId(), metalAmount, metalType);
 
         SimpleMessageDto dto = new SimpleMessageDto();
         dto.setMessage("Your sold of %.7f %s was recorded in the database", metalAmount, metalType.getSymbol());
@@ -181,14 +180,13 @@ public class InvestmentController {
     public ResponseEntity<SimpleMessageDto> calculateRevolutProfit(
             HttpServletRequest request,
             @RequestHeader("revolutPriceOunce") final double revolutPriceOunce,
-            @RequestHeader("usdRonRate") final double usdRonRate,
             @RequestHeader("metalSymbol") final String metalSymbol,
             HttpServletResponse response) {
         String token = Util.getTokenFromRequest(request);
         this.loginService.checkToken(token);
         MetalType metalType = MetalType.lookup(metalSymbol);
         this.exceptionService.check(metalType == null, MessageKey.INVALID_REQUEST, "metalSymbol header is invalid");
-        final double profit = this.revolutService.calculateRevolutProfit(revolutPriceOunce, usdRonRate, metalType);
+        final double profit = this.revolutService.calculateRevolutProfit(revolutPriceOunce, metalType);
         SimpleMessageDto dto = new SimpleMessageDto();
         dto.setMessage("Revolut profit is %.5f%%", profit * 100);
         return new ResponseEntity<>(dto, HttpStatus.OK);

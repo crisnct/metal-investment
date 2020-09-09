@@ -1,4 +1,4 @@
-package com.investment.metal;
+package com.investment.metal.exceptions;
 
 import com.investment.metal.exceptions.BusinessException;
 import com.investment.metal.exceptions.SecurityResponse;
