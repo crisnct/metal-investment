@@ -10,6 +10,7 @@ import com.investment.metal.service.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service("customerService")
@@ -68,6 +69,11 @@ public class DefaultAccountService extends AbstractService implements AccountSer
                         .setArguments(username)
                         .build()
                 );
+    }
+
+    @Override
+    public List<Customer> findAll() {
+        return this.customerRepository.findAll();
     }
 
     @Override

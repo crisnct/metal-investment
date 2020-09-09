@@ -3,7 +3,7 @@ package com.investment.metal.service;
 import com.investment.metal.database.Customer;
 import com.investment.metal.exceptions.BusinessException;
 
-import java.util.Optional;
+import java.util.List;
 
 public interface AccountService {
 
@@ -15,4 +15,5 @@ public interface AccountService {
 
     Customer findByUsernameAndPassword(String username, String password);
 
+    List<Customer> findAll();
 }

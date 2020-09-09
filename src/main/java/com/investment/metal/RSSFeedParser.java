@@ -25,8 +25,7 @@ public class RSSFeedParser {
             while (eventReader.hasNext()) {
                 XMLEvent event = eventReader.nextEvent();
                 if (event.isStartElement()) {
-                    String localPart = event.asStartElement().getName()
-                            .getLocalPart();
+                    String localPart = event.asStartElement().getName().getLocalPart();
                     switch (localPart) {
                         case ITEM:
                             isFeedHeader = false;

@@ -39,7 +39,7 @@ public class MetalPricesService extends AbstractService {
     }
 
     public MetalInfo calculatesUserProfit(Purchase purchase) {
-        final Currency currency = currencyService.findBySymbol(CurrencyType.USD);
+        final Currency currency = this.currencyService.findBySymbol(CurrencyType.USD);
         final double usdRonRate = currency.getRon();
 
         double revolutProfitPercentages = this.revolutService.getRevolutProfitFor(purchase.getMetalType());
@@ -61,16 +61,21 @@ public class MetalPricesService extends AbstractService {
                 .build();
     }
 
-    public void save(MetalPrice price) {
+    public void save(MetalType metalType, double price) {
         final Timestamp timeThreshold = new Timestamp(System.currentTimeMillis() - THRESHOLD_TOO_OLD_ENTITIES);
         final List<MetalPrice> tooOldEntities = this.metalPriceRepository
-                .findByMetalSymbol(price.getMetalSymbol()).orElse(new ArrayList<>())
+                .findByMetalSymbol(metalType.getSymbol()).orElse(new ArrayList<>())
                 .stream()
                 .filter(p -> p.getTime().before(timeThreshold))
                 .collect(Collectors.toList());
         if (!tooOldEntities.isEmpty()) {
             this.metalPriceRepository.deleteAll(tooOldEntities);
         }
-        this.metalPriceRepository.save(price);
+
+        final MetalPrice entity = new MetalPrice();
+        entity.setMetalSymbol(metalType.getSymbol());
+        entity.setPrice(price);
+        entity.setTime(new Timestamp(System.currentTimeMillis()));
+        this.metalPriceRepository.save(entity);
     }
 }

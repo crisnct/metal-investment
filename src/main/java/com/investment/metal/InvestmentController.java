@@ -6,7 +6,9 @@ import com.investment.metal.database.Login;
 import com.investment.metal.database.Purchase;
 import com.investment.metal.dto.*;
 import com.investment.metal.exceptions.NoRollbackBusinessException;
-import com.investment.metal.service.*;
+import com.investment.metal.service.AccountService;
+import com.investment.metal.service.AlertFrequency;
+import com.investment.metal.service.LoginService;
 import com.investment.metal.service.impl.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.script.ScriptException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
@@ -48,6 +51,9 @@ public class InvestmentController {
 
     @Autowired
     private ExceptionService exceptionService;
+
+    @Autowired
+    private AlertService alertService;
 
     @RequestMapping(value = "/userRegistration", method = RequestMethod.POST)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
@@ -91,7 +97,7 @@ public class InvestmentController {
     ) {
         final Customer user = this.accountService.findByUsername(username);
         this.bannedAccountsService.checkBanned(user.getId());
-        if (!passwordEncoder.matches(password, user.getPassword())){
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             this.loginService.markLoginFailed(user);
             throw exceptionService.createException(MessageKey.PASSWORD_DO_NOT_MATCH);
         }
@@ -189,6 +195,50 @@ public class InvestmentController {
         final double profit = this.revolutService.calculateRevolutProfit(revolutPriceOunce, metalType);
         SimpleMessageDto dto = new SimpleMessageDto();
         dto.setMessage("Revolut profit is %.5f%%", profit * 100);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/api/addAlert", method = RequestMethod.POST)
+    @Transactional(noRollbackFor = NoRollbackBusinessException.class)
+    public ResponseEntity<SimpleMessageDto> addAlert(
+            HttpServletRequest request,
+            @RequestHeader("expression") final String expression,
+            @RequestHeader("metalSymbol") final String metalSymbol,
+            @RequestHeader("frequency") final String frequency,
+            HttpServletResponse response) {
+        String token = Util.getTokenFromRequest(request);
+        Login loginEntity = this.loginService.checkToken(token);
+        Customer user = this.accountService.findById(loginEntity.getUserId());
+
+        AlertFrequency alertFrequency;
+        try {
+            alertFrequency = AlertFrequency.valueOf(frequency);
+        }catch(IllegalArgumentException e){
+            throw this.exceptionService
+                    .createBuilder(MessageKey.INVALID_REQUEST)
+                    .setArguments("Frequency header is invalid")
+                    .build();
+        }
+        MetalType metalType = MetalType.lookup(metalSymbol);
+        this.exceptionService.check(metalType == null, MessageKey.INVALID_REQUEST, "metalSymbol header is invalid");
+        try {
+            if (this.alertService.evaluateExpression(expression, 0)){
+                throw this.exceptionService
+                        .createBuilder(MessageKey.INVALID_REQUEST)
+                        .setArguments("The expression should be evaluated as FALSE for profit=0")
+                        .build();
+            }
+        }catch (ScriptException e){
+            throw this.exceptionService
+                    .createBuilder(MessageKey.INVALID_REQUEST)
+                    .setArguments("Invalid expression")
+                    .build();
+        }
+
+        this.alertService.addAlert(user.getId(), expression, alertFrequency, metalType);
+
+        SimpleMessageDto dto = new SimpleMessageDto();
+        dto.setMessage("Alert was added");
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 

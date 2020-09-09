@@ -1,10 +1,8 @@
 package com.investment.metal;
 
-import com.investment.metal.database.Currency;
-import com.investment.metal.database.MetalPrice;
-import com.investment.metal.exceptions.BusinessException;
 import com.investment.metal.service.CurrencyType;
 import com.investment.metal.service.ExternalMetalPriceService;
+import com.investment.metal.service.impl.AlertsTrigger;
 import com.investment.metal.service.impl.CurrencyService;
 import com.investment.metal.service.impl.ExceptionService;
 import com.investment.metal.service.impl.MetalPricesService;
@@ -16,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.sql.Timestamp;
 
 @Configuration
 @EnableScheduling
@@ -34,6 +31,9 @@ public class Scheduler {
     @Autowired
     protected ExceptionService exceptionService;
 
+    @Autowired
+    private AlertsTrigger alertsTrigger;
+
     private final RSSFeedParser rssFeedParser = new RSSFeedParser();
 
     private MetalType metalType = MetalType.GOLD;
@@ -44,19 +44,14 @@ public class Scheduler {
             this.metalType = type;
             this.fetchMetalPrices();
         }
-        this.fetchCurrencyValues();
     }
 
     @Transactional
     @Scheduled(fixedDelay = 3600 * 1000)
     public void fetchMetalPrices() {
         final double metalPrice = this.externalPriceService.fetchPrice(metalType);
-
-        MetalPrice price = new MetalPrice();
-        price.setMetalSymbol(metalType.getSymbol());
-        price.setPrice(metalPrice);
-        price.setTime(new Timestamp(System.currentTimeMillis()));
-        this.metalPricesService.save(price);
+        this.metalPricesService.save(metalType, metalPrice);
+        this.alertsTrigger.trigerAlerts(metalType);
 
         int ord = (this.metalType.ordinal() + 1) % MetalType.values().length;
         this.metalType = MetalType.values()[ord];
@@ -81,16 +76,7 @@ public class Scheduler {
             e.printStackTrace();
             return;
         }
-        Currency curr;
-        try {
-            curr = this.currencyService.findBySymbol(currency);
-        } catch (BusinessException e) {
-            curr = new Currency();
-        }
-        curr.setRon(ron);
-        curr.setSymbol(currency.name());
-        curr.setTime(new Timestamp(System.currentTimeMillis()));
-        this.currencyService.save(curr);
+        this.currencyService.save(currency, ron);
     }
 
 }

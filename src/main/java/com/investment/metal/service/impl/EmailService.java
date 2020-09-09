@@ -1,6 +1,8 @@
 package com.investment.metal.service.impl;
 
 import com.google.common.base.Charsets;
+import com.investment.metal.MetalType;
+import com.investment.metal.database.Alert;
 import com.investment.metal.database.Customer;
 import com.investment.metal.service.AbstractService;
 import org.apache.commons.io.IOUtils;
@@ -13,7 +15,7 @@ import org.springframework.stereotype.Service;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.io.IOException;
-import java.io.InputStream;
+import java.util.Objects;
 
 @Service
 public class EmailService extends AbstractService {
@@ -29,15 +31,37 @@ public class EmailService extends AbstractService {
 
     private final String mailTemplateCode;
 
+    private final String mailTemplateAlert;
+
     public EmailService() throws IOException {
-        InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("mail-template-code.html");
-        this.mailTemplateCode = IOUtils.toString(is, Charsets.UTF_8);
+        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+        this.mailTemplateCode = IOUtils.toString(
+                Objects.requireNonNull(contextClassLoader.getResourceAsStream("mail-template-code.html")),
+                Charsets.UTF_8);
+        this.mailTemplateAlert = IOUtils.toString(
+                Objects.requireNonNull(contextClassLoader.getResourceAsStream("mail-template-alert-trigger.html")),
+                Charsets.UTF_8);
     }
 
     public void sendMailWithCode(Customer user, int codeGenerated) throws MessagingException {
         final String emailContent = this.mailTemplateCode
                 .replace("{user}", user.getUsername())
                 .replace("{code}", String.valueOf(codeGenerated));
+        this.sendMail(user.getEmail(), appName, emailContent);
+    }
+
+    public void sendMailWithProfit(UserProfit userInfo, Alert alert) throws MessagingException {
+        Customer user = userInfo.getUser();
+        MetalType metalType = alert.getMetalType();
+        final String emailContent = this.mailTemplateAlert
+                .replace("{user}", user.getUsername())
+                .replace("{metal}", metalType.name().toLowerCase())
+                .replace("{metalSymbol}", metalType.getSymbol())
+                .replace("{expression}", alert.getExpression())
+                .replace("{amount}", String.valueOf(userInfo.getMetalAmount()))
+                .replace("{cost}", String.format("%.2f", userInfo.getOriginalCost()))
+                .replace("{costNow}", String.format("%.2f", userInfo.getCurrentCost()))
+                .replace("{profit}", String.format("%.2f", userInfo.getProfit()));
         this.sendMail(user.getEmail(), appName, emailContent);
     }
 

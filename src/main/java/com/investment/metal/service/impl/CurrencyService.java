@@ -9,6 +9,8 @@ import com.investment.metal.service.CurrencyType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+
 @Service
 public class CurrencyService extends AbstractService {
 
@@ -24,8 +26,18 @@ public class CurrencyService extends AbstractService {
                         .build());
     }
 
-    public void save(Currency currency) {
-        this.currencyRepository.save(currency);
+    public void save(CurrencyType currencyType, double value) {
+        Currency curr;
+        try {
+            curr = this.findBySymbol(currencyType);
+        } catch (BusinessException e) {
+            curr = new Currency();
+        }
+        curr.setRon(value);
+        curr.setSymbol(currencyType.name());
+        curr.setTime(new Timestamp(System.currentTimeMillis()));
+
+        this.currencyRepository.save(curr);
     }
 
 }

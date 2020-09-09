@@ -6,7 +6,7 @@ import com.investment.metal.exceptions.BusinessException;
 import javax.annotation.Nullable;
 import java.util.Objects;
 
-class ExceptionBuilder {
+public class ExceptionBuilder {
 
     private MessageKey key;
 
