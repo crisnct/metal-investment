@@ -13,11 +13,16 @@ import com.investment.metal.service.CurrencyType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class MetalPricesService extends AbstractService {
+
+    private static final int THRESHOLD_TOO_OLD_ENTITIES = 24 * 3600 * 1000;
 
     @Autowired
     private MetalPriceRepository metalPriceRepository;
@@ -56,8 +61,16 @@ public class MetalPricesService extends AbstractService {
                 .build();
     }
 
-
     public void save(MetalPrice price) {
+        final Timestamp timeThreshold = new Timestamp(System.currentTimeMillis() - THRESHOLD_TOO_OLD_ENTITIES);
+        final List<MetalPrice> tooOldEntities = this.metalPriceRepository
+                .findByMetalSymbol(price.getMetalSymbol()).orElse(new ArrayList<>())
+                .stream()
+                .filter(p -> p.getTime().before(timeThreshold))
+                .collect(Collectors.toList());
+        if (!tooOldEntities.isEmpty()) {
+            this.metalPriceRepository.deleteAll(tooOldEntities);
+        }
         this.metalPriceRepository.save(price);
     }
 }
