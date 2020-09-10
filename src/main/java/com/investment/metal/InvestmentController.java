@@ -59,16 +59,21 @@ public class InvestmentController {
 
     @RequestMapping(value = "/userRegistration", method = RequestMethod.POST)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
-    public ResponseEntity<UserRegistrationDto> userRegistration(
+    public ResponseEntity<SimpleMessageDto> userRegistration(
             HttpServletRequest request,
             @RequestHeader String username,
             @RequestHeader String password,
             @RequestHeader String email,
             HttpServletResponse response) {
-
+        if (!Util.isValidEmailAddress(email)) {
+            throw this.exceptionService
+                    .createBuilder(MessageKey.INVALID_REQUEST)
+                    .setArguments("Invalid email address!")
+                    .build();
+        }
         Customer user = this.accountService.registerNewUser(username, this.passwordEncoder.encode(password), email);
-        this.loginService.validateAccount(user);
-        UserRegistrationDto dto = new UserRegistrationDto();
+        this.loginService.validateAccount(user, false);
+        SimpleMessageDto dto = new SimpleMessageDto();
         dto.setMessage("An email was sent to " + email + " with a code. Call validation request with that code");
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
@@ -84,9 +89,56 @@ public class InvestmentController {
         Customer user = this.accountService.findByUsername(username);
         this.bannedAccountsService.checkBanned(user.getId());
         String token = this.loginService.verifyCode(user.getId(), code);
-        UserLoginDto dto = new UserLoginDto();
-        dto.setToken(token);
+        UserLoginDto dto = new UserLoginDto(token);
         return new ResponseEntity<>(dto, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/resetPassword", method = RequestMethod.POST)
+    @Transactional(noRollbackFor = NoRollbackBusinessException.class)
+    public ResponseEntity<ResetPasswordDto> resetPassword(
+            HttpServletRequest request,
+            @RequestHeader("email") final String email,
+            HttpServletResponse response
+    ) {
+        if (!Util.isValidEmailAddress(email)) {
+            throw this.exceptionService
+                    .createBuilder(MessageKey.INVALID_REQUEST)
+                    .setArguments("Invalid email address!")
+                    .build();
+        }
+        final Customer user = this.accountService.findByEmail(email);
+        this.bannedAccountsService.checkBanned(user.getId());
+
+        this.loginService.validateAccount(user, true);
+        String token = this.loginService.generateNewToken(user);
+        String message = "A message with a code was sent to " + email;
+        return new ResponseEntity<>(new ResetPasswordDto(token, message), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/changePassword", method = RequestMethod.PUT)
+    @Transactional(noRollbackFor = NoRollbackBusinessException.class)
+    public ResponseEntity<ResetPasswordDto> changePassword(
+            HttpServletRequest request,
+            @RequestHeader("code") final int code,
+            @RequestHeader("newPassword") final String newPassword,
+            @RequestHeader("email") final String email,
+            @RequestHeader("token") final String token,
+            HttpServletResponse response
+    ) {
+        if (!Util.isValidEmailAddress(email)) {
+            throw this.exceptionService
+                    .createBuilder(MessageKey.INVALID_REQUEST)
+                    .setArguments("Invalid email address!")
+                    .build();
+        }
+        final Customer user = this.accountService.findByEmail(email);
+        this.bannedAccountsService.checkBanned(user.getId());
+
+        String loginToken = this.loginService.verifyCodeAndToken(user.getId(), code, token);
+        this.accountService.updatePassword(user, this.passwordEncoder.encode(newPassword));
+
+        String message = "Password was changed successfully!";
+        return new ResponseEntity<>(new ResetPasswordDto(loginToken, message), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/api/login", method = RequestMethod.POST)
@@ -100,13 +152,10 @@ public class InvestmentController {
         final Customer user = this.accountService.findByUsername(username);
         this.bannedAccountsService.checkBanned(user.getId());
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            this.loginService.markLoginFailed(user);
-            throw exceptionService.createException(MessageKey.PASSWORD_DO_NOT_MATCH);
+            this.loginService.markLoginFailed(user.getId());
         }
         String token = this.loginService.login(user);
-        UserLoginDto dto = new UserLoginDto();
-        dto.setToken(token);
-
+        UserLoginDto dto = new UserLoginDto(token);
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 

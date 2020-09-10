@@ -7,9 +7,9 @@ import com.investment.metal.database.Login;
 import com.investment.metal.database.LoginRepository;
 import com.investment.metal.exceptions.BusinessException;
 import com.investment.metal.exceptions.NoRollbackBusinessException;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.mail.MessagingException;
 import java.sql.Timestamp;
@@ -40,12 +40,21 @@ public class LoginService extends AbstractService {
         loginEntity.setUserId(userId);
         loginEntity.setValidationCode(validationCode);
         loginEntity.setValidated(false);
+        loginEntity.setLoggedIn(false);
         this.loginRepository.save(loginEntity);
     }
 
-    @Transactional
-    public void validateAccount(Customer user) throws BusinessException {
-        final int codeGenerated = 100000 + Util.getRandomGenerator().nextInt(999999);
+    public void validateAccount(Customer user, boolean strongCode) throws BusinessException {
+        if (strongCode) {
+            this.validateAccount(user, 100000000, 899999999);
+        } else {
+            this.validateAccount(user, 100000, 899999);
+        }
+    }
+
+    private void validateAccount(Customer user, int minValue, int maxValue) throws BusinessException {
+        final int diff = maxValue - minValue;
+        final int codeGenerated = minValue + Util.getRandomGenerator().nextInt() % diff;
         try {
             this.emailService.sendMailWithCode(user, codeGenerated);
             this.saveAttempt(user.getId(), codeGenerated);
@@ -56,6 +65,27 @@ public class LoginService extends AbstractService {
                     .setExceptionCause(e)
                     .build();
         }
+    }
+
+    public String verifyCodeAndToken(long userId, int code, String token) throws BusinessException{
+        Optional<Login> loginOp = this.loginRepository.findByUserId(userId);
+        final String newToken;
+        if (loginOp.isPresent()) {
+            Login login = loginOp.get();
+            if (login.getValidationCode() == code && StringUtils.equals(login.getToken(), token)) {
+                newToken = generateToken();
+                login.setToken(newToken);
+                login.setValidated(true);
+                login.setFailedAttempts(0);
+                this.loginRepository.save(login);
+            } else {
+                this.markLoginFailed(userId);
+                newToken = null;
+            }
+        } else {
+            throw exceptionService.createException(MessageKey.USER_NOT_REGISTERED);
+        }
+        return newToken;
     }
 
     public String verifyCode(long userId, int code) throws BusinessException {
@@ -70,21 +100,8 @@ public class LoginService extends AbstractService {
                 login.setFailedAttempts(0);
                 this.loginRepository.save(login);
             } else {
-                int attempts = login.getFailedAttempts() + 1;
-                login.setFailedAttempts(attempts);
-                this.loginRepository.save(login);
-                if (attempts >= MAX_LOGIN_ATTEMPTS_FAILED) {
-                    this.bannedAccountsService.banUser(userId, BANNED_LOGIN_ATTEMPTS, "Too many failed login attempts!");
-                    throw exceptionService
-                            .createBuilder(MessageKey.WRONG_CODE_ACCOUNT_BANNED)
-                            .setException(NoRollbackBusinessException::new)
-                            .build();
-                } else {
-                    throw exceptionService.createBuilder(MessageKey.WRONG_CODE_TRY_AGAIN)
-                            .setArguments(login.getFailedAttempts())
-                            .setException(NoRollbackBusinessException::new)
-                            .build();
-                }
+                this.markLoginFailed(userId);
+                token = null;
             }
         } else {
             throw exceptionService.createException(MessageKey.USER_NOT_REGISTERED);
@@ -113,12 +130,39 @@ public class LoginService extends AbstractService {
         return token;
     }
 
-    public void markLoginFailed(Customer user) {
+    public String generateNewToken(Customer user) throws BusinessException {
         Optional<Login> loginOp = this.loginRepository.findByUserId(user.getId());
+        final String token;
+        if (loginOp.isPresent()) {
+            Login login = loginOp.get();
+            token = generateToken();
+            login.setToken(token);
+            this.loginRepository.save(login);
+        } else {
+            throw exceptionService.createException(MessageKey.USER_NOT_REGISTERED);
+        }
+        return token;
+    }
+
+    public void markLoginFailed(long userId) throws BusinessException {
+        Optional<Login> loginOp = this.loginRepository.findByUserId(userId);
         if (loginOp.isPresent()) {
             Login login = loginOp.get();
             int attempts = login.getFailedAttempts() + 1;
             login.setFailedAttempts(attempts);
+
+            if (attempts >= MAX_LOGIN_ATTEMPTS_FAILED) {
+                this.bannedAccountsService.banUser(userId, BANNED_LOGIN_ATTEMPTS, "Too many failed login attempts!");
+                throw exceptionService
+                        .createBuilder(MessageKey.WRONG_CODE_ACCOUNT_BANNED)
+                        .setException(NoRollbackBusinessException::new)
+                        .build();
+            } else {
+                throw exceptionService.createBuilder(MessageKey.FAILED_LOGIN_VALIDATION)
+                        .setArguments(login.getFailedAttempts())
+                        .setException(NoRollbackBusinessException::new)
+                        .build();
+            }
         } else {
             throw exceptionService.createException(MessageKey.USER_NOT_REGISTERED);
         }
@@ -133,7 +177,6 @@ public class LoginService extends AbstractService {
             }
             login.setToken("");
             login.setLoggedIn(false);
-            login.setValidated(false);
             return this.loginRepository.save(login);
         } else {
             throw exceptionService.createException(MessageKey.WRONG_TOKEN);

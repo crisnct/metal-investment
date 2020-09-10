@@ -42,8 +42,8 @@ public enum MessageKey {
     //Wrong code. Your account has been banned for 24h.
     WRONG_CODE_ACCOUNT_BANNED(1010),
 
-    //Wrong code. Please try again. Number attempts: {0}.
-    WRONG_CODE_TRY_AGAIN(1011),
+    //Login/validation failed. Please try again. Number attempts: {0}.
+    FAILED_LOGIN_VALIDATION(1011),
 
     //User is not registered.
     USER_NOT_REGISTERED(1012),

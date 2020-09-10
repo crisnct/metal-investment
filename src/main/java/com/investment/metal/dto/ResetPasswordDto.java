@@ -5,6 +5,10 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class UserLoginDto {
+public class ResetPasswordDto {
+
     private String token;
+
+    private String message;
+
 }

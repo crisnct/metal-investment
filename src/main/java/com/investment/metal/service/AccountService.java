@@ -9,14 +9,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Service
 public class AccountService extends AbstractService {
-
-    private static final Pattern VALID_EMAIL_ADDRESS_REGEX =
-            Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
 
     @Autowired
     private CustomerRepository customerRepository;
@@ -31,13 +26,6 @@ public class AccountService extends AbstractService {
     private EmailService emailService;
 
     public Customer registerNewUser(String username, String password, String email) throws BusinessException {
-        if (!isValidEmailAddress(email)) {
-            throw this.exceptionService
-                    .createBuilder(MessageKey.INVALID_REQUEST)
-                    .setArguments("Invalid email address!")
-                    .build();
-        }
-
         Optional<Customer> customerOp = this.customerRepository.findByUsername(username);
         if (customerOp.isPresent()) {
             throw this.exceptionService
@@ -60,6 +48,11 @@ public class AccountService extends AbstractService {
         return this.customerRepository.save(user);
     }
 
+    public void updatePassword(Customer user, String newPassword) {
+        user.setPassword(newPassword);
+        this.customerRepository.save(user);
+    }
+
     public Customer findByUsername(String username) throws BusinessException {
         return this.customerRepository
                 .findByUsername(username)
@@ -70,12 +63,12 @@ public class AccountService extends AbstractService {
                 );
     }
 
-    public Customer findByUsernameAndPassword(String username, String password) {
+    public Customer findByEmail(String email) throws BusinessException {
         return this.customerRepository
-                .findByUsernameAndPassword(username, password)
+                .findByEmail(email)
                 .orElseThrow(() -> this.exceptionService
-                        .createBuilder(MessageKey.LOGIN_FAILED)
-                        .setArguments(username)
+                        .createBuilder(MessageKey.INVALID_REQUEST)
+                        .setArguments("Inexisting email address in the database")
                         .build()
                 );
     }
@@ -92,11 +85,6 @@ public class AccountService extends AbstractService {
                         .setArguments(id)
                         .build()
                 );
-    }
-
-    private boolean isValidEmailAddress(String emailStr) {
-        Matcher matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(emailStr);
-        return matcher.find();
     }
 
 }
