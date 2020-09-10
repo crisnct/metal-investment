@@ -1,14 +1,14 @@
-package com.investment.metal.service;
+package com.investment.metal.external;
 
+import com.investment.metal.common.CurrencyType;
 import com.investment.metal.common.MetalType;
 import kong.unirest.HttpResponse;
 import kong.unirest.JsonNode;
 import kong.unirest.Unirest;
-import org.springframework.stereotype.Service;
 
-@Service
-public class GalmarleyService extends AbstractService {
+public class GalmarleyFetchPrice implements MetalFetchPriceBean {
 
+    @Override
     public double fetchPrice(MetalType metalType) {
         HttpResponse<String> response = Unirest.get("https://www.galmarley.com/prices/prices.json?callback=jQuery341049419930235311216_1598937200774&noCache=1598968803664&version=v2&chartType=CHART_POINTS&valuationSecurityId=USD&interval=5&batch=Update&_=1598937201386")
                 .queryString("securityId", metalType.getSymbol())
@@ -29,5 +29,10 @@ public class GalmarleyService extends AbstractService {
         String jsonContent = content.substring(p1 + 1, p2);
         final JsonNode node = new JsonNode(jsonContent);
         return node.getObject().getJSONObject("latestPrice").getDouble("price");
+    }
+
+    @Override
+    public CurrencyType getCurrencyType() {
+        return CurrencyType.USD;
     }
 }

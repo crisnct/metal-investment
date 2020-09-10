@@ -1,5 +1,6 @@
 package com.investment.metal;
 
+import com.investment.metal.external.MetalFetchPriceBean;
 import io.github.resilience4j.bulkhead.BulkheadConfig;
 import io.github.resilience4j.bulkhead.BulkheadRegistry;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
@@ -17,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.time.Duration;
 import java.util.concurrent.TimeoutException;
 
@@ -37,6 +39,9 @@ public class Config {
 
     @Value("${encoder.secrete}")
     private String encoderSecrete;
+
+    @Value("${spring.metal.price.bean}")
+    private String metalPriceBean;
 
     @Bean
     public SpringLiquibase liquibase() {
@@ -101,6 +106,25 @@ public class Config {
         messageSource.setBasename("classpath:messages");
         messageSource.setDefaultEncoding("UTF-8");
         return messageSource;
+    }
+
+    @Bean
+    public MetalFetchPriceBean createExternalPriceService() {
+        try {
+            Constructor<?>[] ctors = Class.forName(metalPriceBean).getDeclaredConstructors();
+            Constructor<?> ctor = null;
+            for (Constructor<?> constructor : ctors) {
+                ctor = constructor;
+                if (ctor.getGenericParameterTypes().length == 0)
+                    break;
+            }
+            assert ctor != null;
+            ctor.setAccessible(true);
+            return (MetalFetchPriceBean) ctor.newInstance();
+        } catch (Exception x) {
+            x.printStackTrace();
+            return null;
+        }
     }
 
 }

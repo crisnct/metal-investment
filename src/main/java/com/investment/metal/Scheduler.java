@@ -38,6 +38,7 @@ public class Scheduler {
 
     @PostConstruct
     public void init() {
+        this.fetchCurrencyValues();
         for (MetalType type : MetalType.values()) {
             this.metalType = type;
             this.fetchMetalPrices();
@@ -59,8 +60,13 @@ public class Scheduler {
     @Scheduled(fixedDelay = 12 * 3600 * 1000)
     public void fetchCurrencyValues() {
         for (CurrencyType currency : CurrencyType.values()) {
-            if (currency == CurrencyType.USD) {
-                this.fetchCurrency(currency, "https://www.bnr.ro/RSS_200004_USD.aspx");
+            switch (currency) {
+                case USD:
+                    this.fetchCurrency(currency, "https://www.bnr.ro/RSS_200004_USD.aspx");
+                    break;
+                case GBP:
+                    this.fetchCurrency(currency, "https://www.bnr.ro/RSS_200014_GBP.aspx");
+                    break;
             }
         }
     }
