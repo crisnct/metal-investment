@@ -61,7 +61,10 @@ public enum MessageKey {
     INEXISTING_CURRENCY(1016),
 
     //There user {0} is already registered in the database
-    ALREADY_EXISTING_EMAIL_ADDRESS(1017);
+    ALREADY_EXISTING_EMAIL_ADDRESS(1017),
+
+    //The ip {0} is banned for this user.
+    BANED_IP(1018);
 
     @Getter
     final int code;

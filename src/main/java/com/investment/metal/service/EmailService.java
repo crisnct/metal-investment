@@ -2,6 +2,7 @@ package com.investment.metal.service;
 
 import com.google.common.base.Charsets;
 import com.investment.metal.common.MetalType;
+import com.investment.metal.common.Util;
 import com.investment.metal.database.Alert;
 import com.investment.metal.database.Customer;
 import org.apache.commons.io.IOUtils;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Objects;
 
@@ -27,6 +29,9 @@ public class EmailService extends AbstractService {
 
     @Autowired
     private JavaMailSender mailSender;
+
+    @Autowired
+    private HttpServletRequest request;
 
     private final String mailTemplateCode;
 
@@ -43,9 +48,11 @@ public class EmailService extends AbstractService {
     }
 
     public void sendMailWithCode(Customer user, int codeGenerated) throws MessagingException {
+        final String ip = Util.getClientIpAddress(request);
         final String emailContent = this.mailTemplateCode
                 .replace("{user}", user.getUsername())
-                .replace("{code}", String.valueOf(codeGenerated));
+                .replace("{code}", String.valueOf(codeGenerated))
+                .replace("{ip}", ip);
         this.sendMail(user.getEmail(), appName, emailContent);
     }
 

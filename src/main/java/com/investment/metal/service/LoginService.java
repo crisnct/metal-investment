@@ -158,20 +158,11 @@ public class LoginService extends AbstractService {
         }
     }
 
-    public Login logout(String token) throws BusinessException {
-        Optional<Login> loginOp = this.loginRepository.findByLoginToken(token);
-        if (loginOp.isPresent()) {
-            Login login = loginOp.get();
-            if (!login.getLoggedIn()) {
-                throw exceptionService.createException(MessageKey.USER_NOT_LOGIN);
-            }
-            login.setLoginToken("");
-            login.setResetPasswordToken("");
-            login.setLoggedIn(false);
-            return this.loginRepository.save(login);
-        } else {
-            throw exceptionService.createException(MessageKey.WRONG_TOKEN);
-        }
+    public Login logout(Login login){
+        login.setLoginToken("");
+        login.setResetPasswordToken("");
+        login.setLoggedIn(false);
+        return this.loginRepository.save(login);
     }
 
     public Login checkToken(String token) throws BusinessException {

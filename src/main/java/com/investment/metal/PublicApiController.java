@@ -58,8 +58,7 @@ public class PublicApiController {
         }
         Customer user = this.accountService.registerNewUser(username, this.passwordEncoder.encode(password), email);
         this.loginService.validateAccount(user, false);
-        SimpleMessageDto dto = new SimpleMessageDto();
-        dto.setMessage("An email was sent to " + email + " with a code. Call validation request with that code");
+        SimpleMessageDto dto = new SimpleMessageDto("An email was sent to " + email + " with a code. Call validation request with that code");
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
@@ -75,8 +74,7 @@ public class PublicApiController {
         this.bannedAccountsService.checkBanned(user.getId());
         this.loginService.verifyCode(user.getId(), code);
 
-        SimpleMessageDto dto = new SimpleMessageDto();
-        dto.setMessage("The account was validated. You can log in now.");
+        SimpleMessageDto dto = new SimpleMessageDto("The account was validated. You can log in now.");
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
@@ -142,8 +140,7 @@ public class PublicApiController {
         this.loginService.verifyCodeAndToken(user.getId(), code, token);
         this.accountService.updatePassword(user, this.passwordEncoder.encode(newPassword));
 
-        SimpleMessageDto dto = new SimpleMessageDto();
-        dto.setMessage("Password was changed successfully!");
+        SimpleMessageDto dto = new SimpleMessageDto("Password was changed successfully!");
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 

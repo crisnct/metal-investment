@@ -1,5 +1,6 @@
 package com.investment.metal.service.alerts;
 
+import com.investment.metal.MessageKey;
 import com.investment.metal.common.AlertFrequency;
 import com.investment.metal.common.MetalType;
 import com.investment.metal.database.Alert;
@@ -16,6 +17,7 @@ import javax.script.ScriptException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AlertService extends AbstractService {
@@ -57,4 +59,20 @@ public class AlertService extends AbstractService {
     public void saveAll(List<Alert> allAlerts) {
         this.alertRepository.saveAll(allAlerts);
     }
+
+    public List<Alert> findAllByUserId(Long userId) {
+        return this.alertRepository.findByUserId(userId).orElse(new ArrayList<>());
+    }
+
+    public void removeAlert(long alertId) throws BusinessException {
+        Optional<Alert> alert = this.alertRepository.findById(alertId);
+        if (alert.isPresent()) {
+            this.alertRepository.delete(alert.get());
+        } else
+            throw this.exceptionService
+                    .createBuilder(MessageKey.INVALID_REQUEST)
+                    .setArguments("Invalid alert id")
+                    .build();
+    }
+
 }

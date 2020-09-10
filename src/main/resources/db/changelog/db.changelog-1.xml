@@ -205,4 +205,21 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         </createTable>
     </changeSet>
 
+    <changeSet id="1.9"  author="Cristian Tone">
+        <createTable tableName="banip">
+            <column  name="id" type="int"
+                     autoIncrement="true"
+                     startWith="0"
+                     incrementBy="1">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column  name="user_id" type="int">
+                <constraints  nullable="false"/>
+            </column>
+            <column  name="ip" type="varchar(50)">
+                <constraints  nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
 </databaseChangeLog>

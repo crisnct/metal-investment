@@ -2,6 +2,7 @@ package com.investment.metal.common;
 
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Random;
@@ -31,7 +32,8 @@ public class Util {
             "HTTP_FORWARDED_FOR",
             "HTTP_FORWARDED",
             "HTTP_VIA",
-            "REMOTE_ADDR"
+            "REMOTE_ADDR",
+            "HOST"
     };
 
     public static void sleep(int duration) {
@@ -42,10 +44,10 @@ public class Util {
         }
     }
 
-    public String getClientIpAddress(HttpServletRequest request) {
+    public static String getClientIpAddress(HttpServletRequest request) {
         for (String header : HEADERS_TO_TRY) {
             String ip = request.getHeader(header);
-            if (ip != null && ip.length() != 0 && !"unknown".equalsIgnoreCase(ip)) {
+            if (Strings.isNotEmpty(ip) && !"unknown".equalsIgnoreCase(ip)) {
                 return ip;
             }
         }

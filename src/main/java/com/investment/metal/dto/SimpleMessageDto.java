@@ -6,13 +6,14 @@ import lombok.Getter;
 public class SimpleMessageDto {
 
     @Getter
-    private String message;
+    private final String message;
 
-    public void setMessage(String message) {
+    public SimpleMessageDto(String message) {
         this.message = message;
     }
 
-    public void setMessage(String messageFormat, Object... args) {
+    public SimpleMessageDto(String messageFormat, Object... args) {
         this.message = String.format(messageFormat, args);
     }
+
 }
