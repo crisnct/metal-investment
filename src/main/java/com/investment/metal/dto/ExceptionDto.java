@@ -1,18 +1,17 @@
-package com.investment.metal.exceptions;
+package com.investment.metal.dto;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
 
 @Data
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class SecurityResponse {
+public class ExceptionDto {
 
     private int statusCode;
 
     private String message;
 
-    public SecurityResponse(int statusCode, String message) {
+    public ExceptionDto(int statusCode, String message) {
         this.statusCode = statusCode;
         this.message = message;
     }

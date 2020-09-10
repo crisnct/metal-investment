@@ -1,7 +1,6 @@
 package com.investment.metal.exceptions;
 
-import com.investment.metal.exceptions.BusinessException;
-import com.investment.metal.exceptions.SecurityResponse;
+import com.investment.metal.dto.ExceptionDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -15,7 +14,7 @@ public class RestErrorHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
     public Object processValidationError(BusinessException ex) {
-        return new SecurityResponse(ex.getStatusCode(), ex.getMessage());
+        return new ExceptionDto(ex.getStatusCode(), ex.getMessage());
     }
 
 }

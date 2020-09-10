@@ -1,4 +1,4 @@
-package com.investment.metal.service.impl;
+package com.investment.metal.service;
 
 import com.investment.metal.database.Customer;
 import lombok.Builder;

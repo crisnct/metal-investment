@@ -18,11 +18,9 @@ import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.Locale;
 import java.util.concurrent.TimeoutException;
 
 @Configuration
-//@ImportResource(locations={"classpath:hibernate.cfg.xml"})
 public class Config {
 
     @Value("${liquibase.change-log}")
@@ -39,7 +37,6 @@ public class Config {
 
     @Value("${encoder.secrete}")
     private String encoderSecrete;
-
 
     @Bean
     public SpringLiquibase liquibase() {

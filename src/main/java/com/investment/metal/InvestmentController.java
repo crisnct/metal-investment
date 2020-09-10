@@ -1,15 +1,17 @@
 package com.investment.metal;
 
 
+import com.investment.metal.common.AlertFrequency;
+import com.investment.metal.common.MetalType;
+import com.investment.metal.common.Util;
 import com.investment.metal.database.Customer;
 import com.investment.metal.database.Login;
 import com.investment.metal.database.Purchase;
 import com.investment.metal.dto.*;
 import com.investment.metal.exceptions.NoRollbackBusinessException;
-import com.investment.metal.service.AccountService;
-import com.investment.metal.service.AlertFrequency;
-import com.investment.metal.service.LoginService;
-import com.investment.metal.service.impl.*;
+import com.investment.metal.service.*;
+import com.investment.metal.service.alerts.AlertService;
+import com.investment.metal.service.exception.ExceptionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -216,7 +218,7 @@ public class InvestmentController {
         AlertFrequency alertFrequency;
         try {
             alertFrequency = AlertFrequency.valueOf(frequency);
-        }catch(IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             throw this.exceptionService
                     .createBuilder(MessageKey.INVALID_REQUEST)
                     .setArguments("Frequency header is invalid")
@@ -225,13 +227,13 @@ public class InvestmentController {
         MetalType metalType = MetalType.lookup(metalSymbol);
         this.exceptionService.check(metalType == null, MessageKey.INVALID_REQUEST, "metalSymbol header is invalid");
         try {
-            if (this.alertService.evaluateExpression(expression, 0)){
+            if (this.alertService.evaluateExpression(expression, 0)) {
                 throw this.exceptionService
                         .createBuilder(MessageKey.INVALID_REQUEST)
                         .setArguments("The expression should be evaluated as FALSE for profit=0")
                         .build();
             }
-        }catch (ScriptException e){
+        } catch (ScriptException e) {
             throw this.exceptionService
                     .createBuilder(MessageKey.INVALID_REQUEST)
                     .setArguments("Invalid expression")

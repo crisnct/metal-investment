@@ -1,7 +1,7 @@
 package com.investment.metal.database;
 
-import com.investment.metal.MetalType;
-import com.investment.metal.service.AlertFrequency;
+import com.investment.metal.common.AlertFrequency;
+import com.investment.metal.common.MetalType;
 import lombok.Data;
 
 import javax.persistence.*;

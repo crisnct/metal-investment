@@ -1,10 +1,12 @@
 package com.investment.metal;
 
-import com.investment.metal.service.CurrencyType;
-import com.investment.metal.service.impl.AlertsTrigger;
-import com.investment.metal.service.impl.CurrencyService;
-import com.investment.metal.service.impl.ExceptionService;
-import com.investment.metal.service.impl.MetalPricesService;
+import com.investment.metal.common.CurrencyType;
+import com.investment.metal.common.MetalType;
+import com.investment.metal.common.RSSFeedParser;
+import com.investment.metal.service.CurrencyService;
+import com.investment.metal.service.MetalPricesService;
+import com.investment.metal.service.alerts.AlertsTrigger;
+import com.investment.metal.service.exception.ExceptionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;

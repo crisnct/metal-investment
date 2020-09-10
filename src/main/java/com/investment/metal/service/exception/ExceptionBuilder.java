@@ -1,7 +1,8 @@
-package com.investment.metal.service.impl;
+package com.investment.metal.service.exception;
 
 import com.investment.metal.MessageKey;
 import com.investment.metal.exceptions.BusinessException;
+import com.investment.metal.service.MessageService;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -43,7 +44,7 @@ public class ExceptionBuilder {
     }
 
     public BusinessException build() {
-        String message = messageService.getMessage(this.key.name(), this.arguments);
+        String message = this.messageService.getMessage(this.key.name(), this.arguments);
         if (this.exceptionSupplier == null) {
             return new BusinessException(this.key.getCode(), message, this.cause);
         } else {

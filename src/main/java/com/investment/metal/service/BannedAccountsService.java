@@ -1,10 +1,9 @@
-package com.investment.metal.service.impl;
+package com.investment.metal.service;
 
+import com.investment.metal.MessageKey;
 import com.investment.metal.database.BannedAccount;
 import com.investment.metal.database.BannedRepository;
 import com.investment.metal.exceptions.BusinessException;
-import com.investment.metal.MessageKey;
-import com.investment.metal.service.AbstractService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

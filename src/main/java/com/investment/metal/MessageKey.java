@@ -58,7 +58,10 @@ public enum MessageKey {
     NEEDS_VALIDATION(1015),
 
     //Currency not found in the database: {0}
-    INEXISTING_CURRENCY(1016);
+    INEXISTING_CURRENCY(1016),
+
+    //There user {0} is already registered in the database
+    ALREADY_EXISTING_EMAIL_ADDRESS(1017);
 
     @Getter
     final int code;

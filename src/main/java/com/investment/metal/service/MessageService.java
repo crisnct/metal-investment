@@ -1,4 +1,4 @@
-package com.investment.metal.service.impl;
+package com.investment.metal.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

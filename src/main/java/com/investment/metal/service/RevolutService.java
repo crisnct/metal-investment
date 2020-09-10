@@ -1,13 +1,12 @@
-package com.investment.metal.service.impl;
+package com.investment.metal.service;
 
-import com.investment.metal.MetalType;
-import com.investment.metal.Util;
+import com.investment.metal.common.CurrencyType;
+import com.investment.metal.common.MetalType;
+import com.investment.metal.common.Util;
 import com.investment.metal.database.Currency;
 import com.investment.metal.database.RevolutProfit;
 import com.investment.metal.database.RevolutProfitRepository;
 import com.investment.metal.exceptions.BusinessException;
-import com.investment.metal.service.AbstractService;
-import com.investment.metal.service.CurrencyType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

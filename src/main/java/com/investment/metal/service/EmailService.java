@@ -1,10 +1,9 @@
-package com.investment.metal.service.impl;
+package com.investment.metal.service;
 
 import com.google.common.base.Charsets;
-import com.investment.metal.MetalType;
+import com.investment.metal.common.MetalType;
 import com.investment.metal.database.Alert;
 import com.investment.metal.database.Customer;
-import com.investment.metal.service.AbstractService;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

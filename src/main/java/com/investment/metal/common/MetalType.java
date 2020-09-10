@@ -1,4 +1,4 @@
-package com.investment.metal;
+package com.investment.metal.common;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -23,8 +23,8 @@ public enum MetalType {
     };
 
     public static MetalType lookup(String metalSymbol) {
-        for (MetalType val: values()){
-            if (StringUtils.equalsAnyIgnoreCase(val.getSymbol(), metalSymbol)){
+        for (MetalType val : values()) {
+            if (StringUtils.equalsAnyIgnoreCase(val.getSymbol(), metalSymbol)) {
                 return val;
             }
         }

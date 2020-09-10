@@ -1,4 +1,4 @@
-package com.investment.metal.service.impl;
+package com.investment.metal.service.exception;
 
 import com.investment.metal.exceptions.BusinessException;
 

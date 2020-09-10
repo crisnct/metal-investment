@@ -1,11 +1,12 @@
-package com.investment.metal.service.impl;
+package com.investment.metal.service.alerts;
 
-import com.investment.metal.MetalType;
+import com.investment.metal.common.AlertFrequency;
+import com.investment.metal.common.MetalType;
 import com.investment.metal.database.Alert;
 import com.investment.metal.database.AlertRepository;
 import com.investment.metal.exceptions.BusinessException;
 import com.investment.metal.service.AbstractService;
-import com.investment.metal.service.AlertFrequency;
+import com.investment.metal.service.MetalPricesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

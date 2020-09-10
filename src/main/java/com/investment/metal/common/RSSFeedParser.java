@@ -1,4 +1,4 @@
-package com.investment.metal;
+package com.investment.metal.common;
 
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;

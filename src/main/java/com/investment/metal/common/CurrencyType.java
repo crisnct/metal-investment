@@ -1,4 +1,4 @@
-package com.investment.metal.service;
+package com.investment.metal.common;
 
 public enum CurrencyType {
     USD,

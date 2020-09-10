@@ -1,4 +1,4 @@
-package com.investment.metal;
+package com.investment.metal.common;
 
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
@@ -47,7 +47,7 @@ public class Util {
         return request.getRemoteAddr();
     }
 
-    public static String getTokenFromRequest(HttpServletRequest httpServletRequest){
+    public static String getTokenFromRequest(HttpServletRequest httpServletRequest) {
         String token = httpServletRequest.getHeader(AUTHORIZATION);
         if (token == null) {
             token = "";

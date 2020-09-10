@@ -1,11 +1,10 @@
-package com.investment.metal.service.impl;
+package com.investment.metal.service;
 
 import com.investment.metal.MessageKey;
+import com.investment.metal.common.CurrencyType;
 import com.investment.metal.database.Currency;
 import com.investment.metal.database.CurrencyRepository;
 import com.investment.metal.exceptions.BusinessException;
-import com.investment.metal.service.AbstractService;
-import com.investment.metal.service.CurrencyType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
