@@ -54,7 +54,7 @@ public class LoginService extends AbstractService {
 
     private void validateAccount(Customer user, int minValue, int maxValue) throws BusinessException {
         final int diff = maxValue - minValue;
-        final int codeGenerated = minValue + Util.getRandomGenerator().nextInt() % diff;
+        final int codeGenerated = minValue + Math.abs(Util.getRandomGenerator().nextInt()) % diff;
         try {
             this.emailService.sendMailWithCode(user, codeGenerated);
             this.saveAttempt(user.getId(), codeGenerated);
@@ -67,46 +67,36 @@ public class LoginService extends AbstractService {
         }
     }
 
-    public String verifyCodeAndToken(long userId, int code, String token) throws BusinessException{
+    public void verifyCodeAndToken(long userId, int code, String token) throws BusinessException {
         Optional<Login> loginOp = this.loginRepository.findByUserId(userId);
-        final String newToken;
         if (loginOp.isPresent()) {
             Login login = loginOp.get();
-            if (login.getValidationCode() == code && StringUtils.equals(login.getToken(), token)) {
-                newToken = generateToken();
-                login.setToken(newToken);
+            if (login.getValidationCode() == code && StringUtils.equals(login.getResetPasswordToken(), token)) {
                 login.setValidated(true);
                 login.setFailedAttempts(0);
                 this.loginRepository.save(login);
             } else {
                 this.markLoginFailed(userId);
-                newToken = null;
             }
         } else {
             throw exceptionService.createException(MessageKey.USER_NOT_REGISTERED);
         }
-        return newToken;
     }
 
-    public String verifyCode(long userId, int code) throws BusinessException {
+    public void verifyCode(long userId, int code) throws BusinessException {
         Optional<Login> loginOp = this.loginRepository.findByUserId(userId);
-        final String token;
         if (loginOp.isPresent()) {
             Login login = loginOp.get();
             if (login.getValidationCode() == code) {
-                token = generateToken();
-                login.setToken(token);
                 login.setValidated(true);
                 login.setFailedAttempts(0);
                 this.loginRepository.save(login);
             } else {
                 this.markLoginFailed(userId);
-                token = null;
             }
         } else {
             throw exceptionService.createException(MessageKey.USER_NOT_REGISTERED);
         }
-        return token;
     }
 
     public String login(Customer user) throws BusinessException {
@@ -118,7 +108,7 @@ public class LoginService extends AbstractService {
                 throw exceptionService.createException(MessageKey.NEEDS_VALIDATION);
             }
             token = generateToken();
-            login.setToken(token);
+            login.setLoginToken(token);
             login.setTime(new Timestamp(System.currentTimeMillis()));
             login.setTokenExpireTime(new Timestamp(System.currentTimeMillis() + TOKEN_EXPIRE_TIME));
             login.setFailedAttempts(0);
@@ -130,13 +120,13 @@ public class LoginService extends AbstractService {
         return token;
     }
 
-    public String generateNewToken(Customer user) throws BusinessException {
+    public String generateResetPasswordToken(Customer user) throws BusinessException {
         Optional<Login> loginOp = this.loginRepository.findByUserId(user.getId());
         final String token;
         if (loginOp.isPresent()) {
             Login login = loginOp.get();
             token = generateToken();
-            login.setToken(token);
+            login.setResetPasswordToken(token);
             this.loginRepository.save(login);
         } else {
             throw exceptionService.createException(MessageKey.USER_NOT_REGISTERED);
@@ -169,13 +159,14 @@ public class LoginService extends AbstractService {
     }
 
     public Login logout(String token) throws BusinessException {
-        Optional<Login> loginOp = this.loginRepository.findByToken(token);
+        Optional<Login> loginOp = this.loginRepository.findByLoginToken(token);
         if (loginOp.isPresent()) {
             Login login = loginOp.get();
             if (!login.getLoggedIn()) {
                 throw exceptionService.createException(MessageKey.USER_NOT_LOGIN);
             }
-            login.setToken("");
+            login.setLoginToken("");
+            login.setResetPasswordToken("");
             login.setLoggedIn(false);
             return this.loginRepository.save(login);
         } else {
@@ -184,7 +175,7 @@ public class LoginService extends AbstractService {
     }
 
     public Login checkToken(String token) throws BusinessException {
-        Optional<Login> loginOp = this.loginRepository.findByToken(token);
+        Optional<Login> loginOp = this.loginRepository.findByLoginToken(token);
         if (loginOp.isPresent()) {
             Login login = loginOp.get();
             this.bannedAccountsService.checkBanned(login.getUserId());
@@ -213,7 +204,7 @@ public class LoginService extends AbstractService {
     }
 
     public Optional<Login> findByToken(String token) {
-        return this.loginRepository.findByToken(token);
+        return this.loginRepository.findByLoginToken(token);
     }
 
 }

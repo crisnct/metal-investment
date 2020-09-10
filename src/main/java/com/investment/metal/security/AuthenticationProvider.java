@@ -42,7 +42,7 @@ public class AuthenticationProvider extends AbstractUserDetailsAuthenticationPro
 
     private Optional<User> findByToken(String token) {
         Optional<User> result = Optional.empty();
-        final Optional<Login> login = this.loginService.findByToken(token);
+        Optional<Login> login = this.loginService.findByToken(token);
         if (login.isPresent()) {
             Customer customer = this.accountService.findById(login.get().getUserId());
             User user = new User(customer.getUsername(), customer.getPassword(), true, true, true, true,

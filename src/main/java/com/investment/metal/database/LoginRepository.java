@@ -8,9 +8,7 @@ import java.util.Optional;
 @Repository
 public interface LoginRepository extends JpaRepository<Login, Long> {
 
-    Optional<Login> findByToken(String token);
-
-    Optional<Login> findByUserIdAndValidationCode(long userId, int code);
+    Optional<Login> findByLoginToken(String token);
 
     Optional<Login> findByUserId(Long id);
 }

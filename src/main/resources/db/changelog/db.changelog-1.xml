@@ -49,7 +49,8 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
             <column  name="validation_code" type="int"/>
             <column  name="validated" type="int(1)"/>
             <column  name="logged_in" type="int(1)"/>
-            <column  name="token" type="varchar(200)"/>
+            <column  name="login_token" type="varchar(200)"/>
+            <column  name="reset_password_token" type="varchar(200)"/>
             <column  name="failed_attempts" type="int"/>
             <column  name="token_expire_time" type="datetime"/>
         </createTable>
@@ -179,7 +180,6 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
     </changeSet>
 
     <changeSet id="1.8"  author="Cristian Tone">
-        <validCheckSum>8:224ffcf2c87b9cf78987d9f6c578f7bf</validCheckSum>
         <createTable tableName="alerts">
             <column  name="id" type="int"
                      autoIncrement="true"

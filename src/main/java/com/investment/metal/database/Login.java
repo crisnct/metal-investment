@@ -18,7 +18,9 @@ public class Login {
 
     private Timestamp time;
 
-    private String token;
+    private String resetPasswordToken;
+
+    private String loginToken;
 
     private int validationCode;
 
