@@ -9,6 +9,8 @@ import com.investment.metal.encryption.ConsistentEncoder;
 import com.investment.metal.exceptions.BusinessException;
 import com.investment.metal.exceptions.NoRollbackBusinessException;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +21,8 @@ import java.util.UUID;
 
 @Service
 public class LoginService extends AbstractService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LoginService.class);
 
     private static final long BANNED_LOGIN_ATTEMPTS = 24 * 3600 * 1000;
 
@@ -163,11 +167,11 @@ public class LoginService extends AbstractService {
         }
     }
 
-    public Login logout(Login login){
+    public void logout(Login login) {
         login.setLoginToken("");
         login.setResetPasswordToken("");
         login.setLoggedIn(false);
-        return this.loginRepository.save(login);
+        this.loginRepository.save(login);
     }
 
     public Login checkToken(String token) throws BusinessException {

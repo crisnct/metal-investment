@@ -52,7 +52,7 @@ public class MetalPricesService extends AbstractService {
         final double metalPriceNowKg = this.externalPriceService.fetchPrice(purchase.getMetalType());
 
         double revolutGoldPriceKg = metalPriceNowKg * (revolutProfitPercentages + 1) * currencyToRonRate;
-        double revolutGoldPriceOunce = revolutGoldPriceKg * Util.ounce;
+        double revolutGoldPriceOunce = revolutGoldPriceKg * Util.OUNCE;
         double costNowUser = revolutGoldPriceOunce * purchase.getAmount();
         double profitRevolut = costNowUser - purchase.getCost();
         return MetalInfo

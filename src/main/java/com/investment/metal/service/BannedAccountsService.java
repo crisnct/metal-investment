@@ -34,14 +34,14 @@ public class BannedAccountsService extends AbstractService {
         this.bannedRepository.save(entity);
     }
 
-    public void banIp(long userId, String ip) throws BusinessException{
+    public void banIp(long userId, String ip) throws BusinessException {
         Optional<BanIp> op = this.banIpRepository.findByUserIdAndIp(userId, ip);
-        if (op.isPresent()){
+        if (op.isPresent()) {
             throw this.exceptionService
                     .createBuilder(MessageKey.BANED_IP)
                     .setArguments(ip)
                     .build();
-        }else {
+        } else {
             BanIp banIp = new BanIp();
             banIp.setUserId(userId);
             banIp.setIp(ip);
@@ -69,7 +69,7 @@ public class BannedAccountsService extends AbstractService {
     public void checkBanned(long userId) throws BusinessException {
         final String ip = Util.getClientIpAddress(this.request);
         Optional<BanIp> banIp = this.banIpRepository.findByUserIdAndIp(userId, ip);
-        if (banIp.isPresent()){
+        if (banIp.isPresent()) {
             throw this.exceptionService
                     .createBuilder(MessageKey.BANED_IP)
                     .setArguments(ip)

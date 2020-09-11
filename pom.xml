@@ -136,6 +136,10 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
 					<addResources>true</addResources>
+					<profiles>
+						<profile>dev</profile>
+						<profile>prod</profile>
+					</profiles>
 				</configuration>
 				<executions>
 					<execution>

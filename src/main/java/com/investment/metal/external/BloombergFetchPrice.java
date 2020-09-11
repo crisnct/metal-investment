@@ -33,7 +33,7 @@ public class BloombergFetchPrice implements MetalFetchPriceBean {
         JSONArray array = node.getArray().getJSONObject(0).getJSONArray("price");
         double price = array.getJSONObject(array.length() - 1).getDouble("value");
 
-        return price / Util.ounce;
+        return price / Util.OUNCE;
     }
 
     private String getSymbol(MetalType metalType) {

@@ -3,6 +3,8 @@ package com.investment.metal.common;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Random;
@@ -13,10 +15,12 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 public class Util {
     //1ounce = 0.0283495231 kg
-    public static final double ounce = 0.0283495231;
+    public static final double OUNCE = 0.0283495231;
 
     private static final Pattern VALID_EMAIL_ADDRESS_REGEX =
             Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Util.class);
 
     @Getter
     private static final Random randomGenerator = new Random();
@@ -40,7 +44,7 @@ public class Util {
         try {
             Thread.sleep(duration);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
         }
     }
 

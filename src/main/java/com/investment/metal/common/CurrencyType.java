@@ -4,5 +4,5 @@ public enum CurrencyType {
     USD,
     RON,
     EUR,
-    GBP;
+    GBP
 }

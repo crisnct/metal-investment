@@ -12,7 +12,7 @@ public class ProfitDto {
     private final String username;
 
     @Getter
-    private Timestamp time;
+    private final Timestamp time;
 
     @Getter
     private final List<MetalInfo> metalInfo = new ArrayList<>();

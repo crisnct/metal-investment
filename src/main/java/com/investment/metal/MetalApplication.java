@@ -1,5 +1,8 @@
 package com.investment.metal;
 
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -9,8 +12,10 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.security.cert.X509Certificate;
 
+@Slf4j
 @SpringBootApplication
 public class MetalApplication {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MetalApplication.class);
 
     public static void main(String[] args) {
         disableSSLCheck();
@@ -38,7 +43,7 @@ public class MetalApplication {
             //          CloseableHttpClient httpclient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
 //            Unirest.config().httpClient(httpclient);
         } catch (Throwable e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
         }
     }
 

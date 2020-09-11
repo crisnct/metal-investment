@@ -7,6 +7,8 @@ import com.investment.metal.service.CurrencyService;
 import com.investment.metal.service.MetalPricesService;
 import com.investment.metal.service.alerts.AlertsTrigger;
 import com.investment.metal.service.exception.ExceptionService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -19,6 +21,7 @@ import java.io.IOException;
 @Configuration
 @EnableScheduling
 public class Scheduler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Scheduler.class);
 
     @Autowired
     private MetalPricesService metalPricesService;
@@ -77,7 +80,7 @@ public class Scheduler {
         try {
             ron = this.rssFeedParser.readFeed(feedURL);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return;
         }
         this.currencyService.save(currency, ron);

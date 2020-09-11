@@ -8,6 +8,8 @@ import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.timelimiter.TimeLimiterConfig;
 import io.github.resilience4j.timelimiter.TimeLimiterRegistry;
 import liquibase.integration.spring.SpringLiquibase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
@@ -24,6 +26,7 @@ import java.util.concurrent.TimeoutException;
 
 @Configuration
 public class Config {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Config.class);
 
     @Value("${liquibase.change-log}")
     private String liquibaseChangeLog;
@@ -121,8 +124,8 @@ public class Config {
             assert ctor != null;
             ctor.setAccessible(true);
             return (MetalFetchPriceBean) ctor.newInstance();
-        } catch (Exception x) {
-            x.printStackTrace();
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
             return null;
         }
     }
