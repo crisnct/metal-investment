@@ -5,6 +5,7 @@ import com.investment.metal.common.Util;
 import com.investment.metal.database.Customer;
 import com.investment.metal.database.Login;
 import com.investment.metal.database.LoginRepository;
+import com.investment.metal.encryption.ConsistentEncoder;
 import com.investment.metal.exceptions.BusinessException;
 import com.investment.metal.exceptions.NoRollbackBusinessException;
 import org.apache.commons.lang3.StringUtils;
@@ -33,6 +34,9 @@ public class LoginService extends AbstractService {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private ConsistentEncoder consistentEncoder;
 
     public void saveAttempt(final long userId, final int validationCode) throws BusinessException {
         final Login loginEntity = this.loginRepository.findByUserId(userId).orElse(new Login());
@@ -67,11 +71,12 @@ public class LoginService extends AbstractService {
         }
     }
 
-    public void verifyCodeAndToken(long userId, int code, String token) throws BusinessException {
+    public void verifyCodeAndToken(long userId, int code, String rawToken) throws BusinessException {
         Optional<Login> loginOp = this.loginRepository.findByUserId(userId);
         if (loginOp.isPresent()) {
             Login login = loginOp.get();
-            if (login.getValidationCode() == code && StringUtils.equals(login.getResetPasswordToken(), token)) {
+            String encryptedToken = consistentEncoder.encrypt(rawToken);
+            if (login.getValidationCode() == code && StringUtils.equals(login.getResetPasswordToken(), encryptedToken)) {
                 login.setValidated(true);
                 login.setFailedAttempts(0);
                 this.loginRepository.save(login);
@@ -108,7 +113,7 @@ public class LoginService extends AbstractService {
                 throw exceptionService.createException(MessageKey.NEEDS_VALIDATION);
             }
             token = generateToken();
-            login.setLoginToken(token);
+            login.setLoginToken(consistentEncoder.encrypt(token));
             login.setTime(new Timestamp(System.currentTimeMillis()));
             login.setTokenExpireTime(new Timestamp(System.currentTimeMillis() + TOKEN_EXPIRE_TIME));
             login.setFailedAttempts(0);
@@ -126,7 +131,7 @@ public class LoginService extends AbstractService {
         if (loginOp.isPresent()) {
             Login login = loginOp.get();
             token = generateToken();
-            login.setResetPasswordToken(token);
+            login.setResetPasswordToken(consistentEncoder.encrypt(token));
             this.loginRepository.save(login);
         } else {
             throw exceptionService.createException(MessageKey.USER_NOT_REGISTERED);
@@ -166,7 +171,7 @@ public class LoginService extends AbstractService {
     }
 
     public Login checkToken(String token) throws BusinessException {
-        Optional<Login> loginOp = this.loginRepository.findByLoginToken(token);
+        Optional<Login> loginOp = this.findByToken(token);
         if (loginOp.isPresent()) {
             Login login = loginOp.get();
             this.bannedAccountsService.checkBanned(login.getUserId());
@@ -194,8 +199,8 @@ public class LoginService extends AbstractService {
         return UUID.randomUUID().toString();
     }
 
-    public Optional<Login> findByToken(String token) {
-        return this.loginRepository.findByLoginToken(token);
+    public Optional<Login> findByToken(String rawToken) {
+        return this.loginRepository.findByLoginToken(consistentEncoder.encrypt(rawToken));
     }
 
 }

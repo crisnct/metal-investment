@@ -40,9 +40,9 @@ public class AuthenticationProvider extends AbstractUserDetailsAuthenticationPro
                 .orElseThrow(() -> new UsernameNotFoundException("Cannot find user with authentication token=" + token));
     }
 
-    private Optional<User> findByToken(String token) {
+    private Optional<User> findByToken(String rawToken) {
         Optional<User> result = Optional.empty();
-        Optional<Login> login = this.loginService.findByToken(token);
+        Optional<Login> login = this.loginService.findByToken(rawToken);
         if (login.isPresent()) {
             Customer customer = this.accountService.findById(login.get().getUserId());
             User user = new User(customer.getUsername(), customer.getPassword(), true, true, true, true,
