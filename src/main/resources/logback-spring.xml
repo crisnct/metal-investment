@@ -4,11 +4,12 @@
 
     <springProfile name="default | prod | dev">
         <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+        <timestamp key="timestamp" datePattern="yyyy-MM-dd_HH-mm-ss"/>
 
         <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-            <file>metal-investment.log</file>
+            <file>metal-investment_${timestamp}.log</file>
             <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-                <fileNamePattern>logs/archived/app.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+                <fileNamePattern>logs/archived/metal-investment_%d{yyyy-MM-dd}_%d{HH-mm-ss-SSS}.%i.log</fileNamePattern>
                 <!-- each archived file, size max 10MB -->
                 <maxFileSize>100MB</maxFileSize>
                 <!-- total size of all archive files, if total size > 20GB, it will delete old archived file -->
