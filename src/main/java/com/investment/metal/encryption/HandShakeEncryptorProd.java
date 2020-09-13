@@ -13,7 +13,7 @@ public class HandShakeEncryptorProd extends AbstractHandShakeEncryptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HandShakeEncryptorProd.class);
 
-    private static final int TIME_THRESHOLD = 5 * 60 * 1000;
+    private static final int TIME_THRESHOLD = 60 * 1000;
 
     public HandShakeEncryptorProd() {
         super();
