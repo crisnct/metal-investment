@@ -37,6 +37,9 @@ public class LoginService extends AbstractService {
     private BannedAccountsService bannedAccountsService;
 
     @Autowired
+    private BlockedIpService blockedIpService;
+
+    @Autowired
     private EmailService emailService;
 
     @Autowired
@@ -178,7 +181,10 @@ public class LoginService extends AbstractService {
         Optional<Login> loginOp = this.findByToken(token);
         if (loginOp.isPresent()) {
             Login login = loginOp.get();
-            this.bannedAccountsService.checkBanned(login.getUserId());
+            Long userId = login.getUserId();
+            this.bannedAccountsService.checkBanned(userId);
+            this.blockedIpService.checkBlockedIP(userId);
+
             if (!login.getValidated()) {
                 throw exceptionService.createException(MessageKey.NEEDS_VALIDATION);
             }

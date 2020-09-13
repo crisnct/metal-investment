@@ -29,6 +29,7 @@ class KeyGenerator {
 
     public void generateKey(File file) {
         AESEncryptor aesEncryptor = new AESEncryptor(StandardCharsets.UTF_8);
+        aesEncryptor.setKey(MultipleKeysEncoder.AES_KEY);
 
         StringBuilder key = new StringBuilder();
         // lines

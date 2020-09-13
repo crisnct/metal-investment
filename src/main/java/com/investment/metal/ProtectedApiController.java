@@ -45,6 +45,9 @@ public class ProtectedApiController {
     private BannedAccountsService bannedAccountsService;
 
     @Autowired
+    private BlockedIpService blockedIpService;
+
+    @Autowired
     private LoginService loginService;
 
     @Autowired
@@ -74,7 +77,7 @@ public class ProtectedApiController {
             @RequestHeader("ip") final String ip
     ) {
         final Login loginEntity = this.securityCheck(request);
-        this.bannedAccountsService.banIp(loginEntity.getUserId(), ip);
+        this.blockedIpService.blockIP(loginEntity.getUserId(), ip);
 
         SimpleMessageDto dto = new SimpleMessageDto("The ip %s was blocked", ip);
         return new ResponseEntity<>(dto, HttpStatus.OK);
@@ -86,7 +89,7 @@ public class ProtectedApiController {
             @RequestHeader("ip") final String ip
     ) {
         final Login loginEntity = this.securityCheck(request);
-        this.bannedAccountsService.unbanIp(loginEntity.getUserId(), ip);
+        this.blockedIpService.unblockIP(loginEntity.getUserId(), ip);
 
         SimpleMessageDto dto = new SimpleMessageDto("The ip %s was unblocked", ip);
         return new ResponseEntity<>(dto, HttpStatus.OK);

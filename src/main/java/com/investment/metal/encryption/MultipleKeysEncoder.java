@@ -15,6 +15,8 @@ import java.util.Objects;
 @Component
 public class MultipleKeysEncoder implements ConsistentEncoder {
 
+    public static final String AES_KEY = "metal-investment";
+
     private static final Charset CHARSET = StandardCharsets.UTF_8;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MultipleKeysEncoder.class);
@@ -25,6 +27,7 @@ public class MultipleKeysEncoder implements ConsistentEncoder {
 
     public MultipleKeysEncoder() {
         this.aesEncryptor = new AESEncryptor(CHARSET);
+        this.aesEncryptor.setKey(AES_KEY);
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         try {
             String key = IOUtils.toString(

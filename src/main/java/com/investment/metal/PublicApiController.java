@@ -6,9 +6,11 @@ import com.investment.metal.database.Customer;
 import com.investment.metal.dto.ResetPasswordDto;
 import com.investment.metal.dto.SimpleMessageDto;
 import com.investment.metal.dto.UserLoginDto;
+import com.investment.metal.encryption.AbstractHandShakeEncryptor;
 import com.investment.metal.exceptions.NoRollbackBusinessException;
 import com.investment.metal.service.AccountService;
 import com.investment.metal.service.BannedAccountsService;
+import com.investment.metal.service.BlockedIpService;
 import com.investment.metal.service.LoginService;
 import com.investment.metal.service.exception.ExceptionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +23,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 @RestController
 public class PublicApiController {
 
@@ -34,6 +33,9 @@ public class PublicApiController {
     private BannedAccountsService bannedAccountsService;
 
     @Autowired
+    private BlockedIpService blockedIpService;
+
+    @Autowired
     private LoginService loginService;
 
     @Autowired
@@ -42,13 +44,18 @@ public class PublicApiController {
     @Autowired
     private ExceptionService exceptionService;
 
+    @Autowired
+    private AbstractHandShakeEncryptor handShakeEncryptor;
+
     @RequestMapping(value = "/userRegistration", method = RequestMethod.POST)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
     public ResponseEntity<SimpleMessageDto> userRegistration(
-            @RequestHeader String username,
-            @RequestHeader String password,
-            @RequestHeader String email
+            @RequestHeader("username") String username,
+            @RequestHeader("password") String password,
+            @RequestHeader("email") String email,
+            @RequestHeader(value = "hs", defaultValue = "") String hs
     ) {
+        this.handShakeEncryptor.check(hs);
         if (!Util.isValidEmailAddress(email)) {
             throw this.exceptionService
                     .createBuilder(MessageKey.INVALID_REQUEST)
@@ -64,13 +71,14 @@ public class PublicApiController {
     @RequestMapping(value = "/validateAccount", method = RequestMethod.POST)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
     public ResponseEntity<SimpleMessageDto> validateAccount(
-            HttpServletRequest request,
             @RequestHeader("username") final String username,
             @RequestHeader("code") final int code,
-            HttpServletResponse response
+            @RequestHeader(value = "hs", defaultValue = "") String hs
     ) {
+        this.handShakeEncryptor.check(hs);
         Customer user = this.accountService.findByUsername(username);
-        this.bannedAccountsService.checkBanned(user.getId());
+        this.checkBannedOrBlocked(user.getId());
+
         this.loginService.verifyCode(user.getId(), code);
 
         SimpleMessageDto dto = new SimpleMessageDto("The account was validated. You can log in now.");
@@ -81,10 +89,13 @@ public class PublicApiController {
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
     public ResponseEntity<UserLoginDto> login(
             @RequestHeader("username") final String username,
-            @RequestHeader("password") final String password
+            @RequestHeader("password") final String password,
+            @RequestHeader(value = "hs", defaultValue = "") String hs
     ) {
+        this.handShakeEncryptor.check(hs);
         final Customer user = this.accountService.findByUsername(username);
-        this.bannedAccountsService.checkBanned(user.getId());
+        this.checkBannedOrBlocked(user.getId());
+
         if (!passwordEncoder.matches(password, user.getPassword())) {
             this.loginService.markLoginFailed(user.getId());
         }
@@ -96,8 +107,10 @@ public class PublicApiController {
     @RequestMapping(value = "/resetPassword", method = RequestMethod.POST)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
     public ResponseEntity<ResetPasswordDto> resetPassword(
-            @RequestHeader("email") final String email
+            @RequestHeader("email") final String email,
+            @RequestHeader(value = "hs", defaultValue = "") String hs
     ) {
+        this.handShakeEncryptor.check(hs);
         if (!Util.isValidEmailAddress(email)) {
             throw this.exceptionService
                     .createBuilder(MessageKey.INVALID_REQUEST)
@@ -105,7 +118,7 @@ public class PublicApiController {
                     .build();
         }
         final Customer user = this.accountService.findByEmail(email);
-        this.bannedAccountsService.checkBanned(user.getId());
+        this.checkBannedOrBlocked(user.getId());
 
         this.loginService.validateAccount(user, true);
         String token = this.loginService.generateResetPasswordToken(user);
@@ -119,8 +132,10 @@ public class PublicApiController {
             @RequestHeader("code") final int code,
             @RequestHeader("newPassword") final String newPassword,
             @RequestHeader("email") final String email,
-            @RequestHeader("token") final String token
+            @RequestHeader("token") final String token,
+            @RequestHeader(value = "hs", defaultValue = "") String hs
     ) {
+        this.handShakeEncryptor.check(hs);
         if (!Util.isValidEmailAddress(email)) {
             throw this.exceptionService
                     .createBuilder(MessageKey.INVALID_REQUEST)
@@ -128,7 +143,7 @@ public class PublicApiController {
                     .build();
         }
         final Customer user = this.accountService.findByEmail(email);
-        this.bannedAccountsService.checkBanned(user.getId());
+        this.checkBannedOrBlocked(user.getId());
 
         this.loginService.verifyCodeAndToken(user.getId(), code, token);
         this.accountService.updatePassword(user, this.passwordEncoder.encode(newPassword));
@@ -137,4 +152,8 @@ public class PublicApiController {
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
+    private void checkBannedOrBlocked(long userId) {
+        this.bannedAccountsService.checkBanned(userId);
+        this.blockedIpService.checkBlockedIP(userId);
+    }
 }

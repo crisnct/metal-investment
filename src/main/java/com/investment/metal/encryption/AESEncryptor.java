@@ -13,11 +13,11 @@ public class AESEncryptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AESEncryptor.class);
 
+    private static final String AES_INIT_VECTOR = "GoldSilverPlatin";
+
     private static final String ALGORITHM = "AES";
 
-    private static final String initVector = "GoldSilverPlatin";
-
-    private static final String key = "metal-investment";
+    private String key;
 
     private final Charset charset;
 
@@ -25,9 +25,13 @@ public class AESEncryptor {
         this.charset = charset;
     }
 
+    public void setKey(String key) {
+        this.key = key;
+    }
+
     public String encrypt(String value) {
         try {
-            IvParameterSpec iv = new IvParameterSpec(initVector.getBytes(charset));
+            IvParameterSpec iv = new IvParameterSpec(AES_INIT_VECTOR.getBytes(charset));
             SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes(charset), ALGORITHM);
 
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
@@ -43,7 +47,7 @@ public class AESEncryptor {
 
     public String decrypt(String encrypted) {
         try {
-            IvParameterSpec iv = new IvParameterSpec(initVector.getBytes(charset));
+            IvParameterSpec iv = new IvParameterSpec(AES_INIT_VECTOR.getBytes(charset));
             SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes(charset), ALGORITHM);
 
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
