@@ -6,13 +6,14 @@ import com.investment.metal.common.Util;
 import com.investment.metal.database.Alert;
 import com.investment.metal.database.Customer;
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
-import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -20,6 +21,8 @@ import java.util.Objects;
 
 @Service
 public class EmailService extends AbstractService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EmailService.class);
+
 
     @Value("${spring.application.name}")
     private String appName;
@@ -47,7 +50,7 @@ public class EmailService extends AbstractService {
                 Charsets.UTF_8);
     }
 
-    public void sendMailWithCode(Customer user, int codeGenerated) throws MessagingException {
+    public void sendMailWithCode(Customer user, int codeGenerated) {
         final String ip = Util.getClientIpAddress(request);
         final String emailContent = this.mailTemplateCode
                 .replace("{user}", user.getUsername())
@@ -56,7 +59,7 @@ public class EmailService extends AbstractService {
         this.sendMail(user.getEmail(), appName, emailContent);
     }
 
-    public void sendMailWithProfit(UserProfit userInfo, Alert alert) throws MessagingException {
+    public void sendMailWithProfit(UserProfit userInfo, Alert alert) {
         Customer user = userInfo.getUser();
         MetalType metalType = alert.getMetalType();
         final String emailContent = this.mailTemplateAlert
@@ -71,14 +74,18 @@ public class EmailService extends AbstractService {
         this.sendMail(user.getEmail(), appName, emailContent);
     }
 
-    private void sendMail(String toEmail, String subject, String message) throws MessagingException {
-        MimeMessage msg = this.mailSender.createMimeMessage();
-        MimeMessageHelper mailMessage = new MimeMessageHelper(msg, true);
-        mailMessage.setTo(toEmail);
-        mailMessage.setSubject(subject);
-        mailMessage.setText(message, true);
-        mailMessage.setFrom(emailFrom);
-        this.mailSender.send(msg);
+    private void sendMail(String toEmail, String subject, String message) {
+        try {
+            MimeMessage msg = this.mailSender.createMimeMessage();
+            MimeMessageHelper mailMessage = new MimeMessageHelper(msg, true);
+            mailMessage.setTo(toEmail);
+            mailMessage.setSubject(subject);
+            mailMessage.setText(message, true);
+            mailMessage.setFrom(emailFrom);
+            this.mailSender.send(msg);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+        }
     }
 
 

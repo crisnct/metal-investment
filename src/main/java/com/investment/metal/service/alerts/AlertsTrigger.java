@@ -54,8 +54,6 @@ public class AlertsTrigger {
                     }
                 } catch (ScriptException e) {
                     System.err.println("Invalid expression: " + alert.getExpression());
-                } catch (MessagingException e) {
-                    System.err.println("Can not send email to " + userProfit.getUser().getEmail());
                 }
             }
         }

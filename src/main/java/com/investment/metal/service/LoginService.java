@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.mail.MessagingException;
 import java.sql.Timestamp;
 import java.util.Optional;
 import java.util.UUID;
@@ -66,16 +65,8 @@ public class LoginService extends AbstractService {
     private void validateAccount(Customer user, int minValue, int maxValue) throws BusinessException {
         final int diff = maxValue - minValue;
         final int codeGenerated = minValue + Math.abs(Util.getRandomGenerator().nextInt()) % diff;
-        try {
-            this.emailService.sendMailWithCode(user, codeGenerated);
-            this.saveAttempt(user.getId(), codeGenerated);
-        } catch (MessagingException e) {
-            throw this.exceptionService
-                    .createBuilder(MessageKey.CAN_NOT_SEND_MAIL)
-                    .setArguments(user.getEmail())
-                    .setExceptionCause(e)
-                    .build();
-        }
+        this.emailService.sendMailWithCode(user, codeGenerated);
+        this.saveAttempt(user.getId(), codeGenerated);
     }
 
     public void verifyCodeAndToken(long userId, int code, String rawToken) throws BusinessException {

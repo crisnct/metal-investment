@@ -13,19 +13,26 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
+import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.time.Duration;
 import java.util.concurrent.TimeoutException;
 
+@EnableWebMvc
 @Configuration
-public class Config {
+@ComponentScan(basePackages = "com.investment.metal")
+public class Config implements WebMvcConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(Config.class);
 
     @Value("${liquibase.change-log}")
@@ -130,4 +137,18 @@ public class Config {
         }
     }
 
+    @Override
+    public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
+        configurer.enable();
+    }
+
+    @Bean
+    public CallsInterceptor interceptor() {
+        return new CallsInterceptor();
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(interceptor());
+    }
 }

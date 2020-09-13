@@ -6,7 +6,6 @@ import com.investment.metal.database.Customer;
 import com.investment.metal.dto.ResetPasswordDto;
 import com.investment.metal.dto.SimpleMessageDto;
 import com.investment.metal.dto.UserLoginDto;
-import com.investment.metal.encryption.AbstractHandShakeEncryptor;
 import com.investment.metal.exceptions.NoRollbackBusinessException;
 import com.investment.metal.service.AccountService;
 import com.investment.metal.service.BannedAccountsService;
@@ -44,18 +43,13 @@ public class PublicApiController {
     @Autowired
     private ExceptionService exceptionService;
 
-    @Autowired
-    private AbstractHandShakeEncryptor handShakeEncryptor;
-
     @RequestMapping(value = "/userRegistration", method = RequestMethod.POST)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
     public ResponseEntity<SimpleMessageDto> userRegistration(
             @RequestHeader("username") String username,
             @RequestHeader("password") String password,
-            @RequestHeader("email") String email,
-            @RequestHeader(value = "hs", defaultValue = "") String hs
+            @RequestHeader("email") String email
     ) {
-        this.handShakeEncryptor.check(hs);
         if (!Util.isValidEmailAddress(email)) {
             throw this.exceptionService
                     .createBuilder(MessageKey.INVALID_REQUEST)
@@ -72,10 +66,8 @@ public class PublicApiController {
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
     public ResponseEntity<SimpleMessageDto> validateAccount(
             @RequestHeader("username") final String username,
-            @RequestHeader("code") final int code,
-            @RequestHeader(value = "hs", defaultValue = "") String hs
+            @RequestHeader("code") final int code
     ) {
-        this.handShakeEncryptor.check(hs);
         Customer user = this.accountService.findByUsername(username);
         this.checkBannedOrBlocked(user.getId());
 
@@ -89,10 +81,8 @@ public class PublicApiController {
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
     public ResponseEntity<UserLoginDto> login(
             @RequestHeader("username") final String username,
-            @RequestHeader("password") final String password,
-            @RequestHeader(value = "hs", defaultValue = "") String hs
+            @RequestHeader("password") final String password
     ) {
-        this.handShakeEncryptor.check(hs);
         final Customer user = this.accountService.findByUsername(username);
         this.checkBannedOrBlocked(user.getId());
 
@@ -107,10 +97,8 @@ public class PublicApiController {
     @RequestMapping(value = "/resetPassword", method = RequestMethod.POST)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
     public ResponseEntity<ResetPasswordDto> resetPassword(
-            @RequestHeader("email") final String email,
-            @RequestHeader(value = "hs", defaultValue = "") String hs
+            @RequestHeader("email") final String email
     ) {
-        this.handShakeEncryptor.check(hs);
         if (!Util.isValidEmailAddress(email)) {
             throw this.exceptionService
                     .createBuilder(MessageKey.INVALID_REQUEST)
@@ -132,10 +120,8 @@ public class PublicApiController {
             @RequestHeader("code") final int code,
             @RequestHeader("newPassword") final String newPassword,
             @RequestHeader("email") final String email,
-            @RequestHeader("token") final String token,
-            @RequestHeader(value = "hs", defaultValue = "") String hs
+            @RequestHeader("token") final String token
     ) {
-        this.handShakeEncryptor.check(hs);
         if (!Util.isValidEmailAddress(email)) {
             throw this.exceptionService
                     .createBuilder(MessageKey.INVALID_REQUEST)

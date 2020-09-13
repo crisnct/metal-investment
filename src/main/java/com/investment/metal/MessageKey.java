@@ -12,9 +12,6 @@ public enum MessageKey {
     //There user {0} is already registered in the database
     ALREADY_EXISTING_USER(1000),
 
-    //Can not send email to {0}.
-    CAN_NOT_SEND_MAIL(1001),
-
     //Invalid request. {0}
     INVALID_REQUEST(1002),
 
