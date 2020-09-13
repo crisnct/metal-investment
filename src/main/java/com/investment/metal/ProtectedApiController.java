@@ -124,14 +124,15 @@ public class ProtectedApiController {
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
     public ResponseEntity<SimpleMessageDto> sell(
             @RequestHeader("metalAmount") final double metalAmount,
-            @RequestHeader("metalSymbol") final String metalSymbol
+            @RequestHeader("metalSymbol") final String metalSymbol,
+            @RequestHeader("price") final double price
     ) {
         MetalType metalType = MetalType.lookup(metalSymbol);
         this.exceptionService.check(metalType == null, MessageKey.INVALID_REQUEST, "metalSymbol header is invalid");
 
         final Login loginEntity = this.securityCheck(request);
 
-        this.purchaseService.sell(loginEntity.getUserId(), metalAmount, metalType);
+        this.purchaseService.sell(loginEntity.getUserId(), metalAmount, metalType, price);
 
         SimpleMessageDto dto = new SimpleMessageDto("Your sold of %.7f %s was recorded in the database", metalAmount, metalType.getSymbol());
         return new ResponseEntity<>(dto, HttpStatus.OK);

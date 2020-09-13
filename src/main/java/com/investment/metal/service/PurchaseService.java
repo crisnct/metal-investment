@@ -9,7 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PurchaseService extends AbstractService {
@@ -18,40 +20,40 @@ public class PurchaseService extends AbstractService {
     private PurchaseRepository purchaseRepo;
 
     public void purchase(long userId, double metalAmount, MetalType metalType, double cost) {
-        Purchase purchase = new Purchase();
-        purchase.setUserId(userId);
-        purchase.setAmount(metalAmount);
-        purchase.setMetalSymbol(metalType.getSymbol());
+        Optional<Purchase> purchaseOp = this.purchaseRepo.findByUserIdAndMetalSymbol(userId, metalType.getSymbol());
+        final Purchase purchase;
+        if (purchaseOp.isPresent()) {
+            purchase = purchaseOp.get();
+            purchase.setAmount(metalAmount + purchase.getAmount());
+            purchase.setCost(cost + purchase.getCost());
+        } else {
+            purchase = new Purchase();
+            purchase.setUserId(userId);
+            purchase.setMetalSymbol(metalType.getSymbol());
+            purchase.setAmount(metalAmount);
+            purchase.setCost(cost);
+        }
         purchase.setTime(new Timestamp(System.currentTimeMillis()));
-        purchase.setCost(cost);
         this.purchaseRepo.save(purchase);
     }
 
-    public void sell(Long userId, double metalAmount, MetalType metalType) throws BusinessException {
-        final List<Purchase> purchases = this.purchaseRepo.findByUserIdAndMetalSymbol(userId, metalType.getSymbol());
-        final double totalAmount = purchases.stream().map(Purchase::getAmount).reduce(Double::sum).orElse(0.0d);
-        this.exceptionService.check(metalAmount > totalAmount, MessageKey.SELL_MORE_THAN_YOU_HAVE, metalType.getSymbol(), totalAmount);
+    public void sell(Long userId, double metalAmount, MetalType metalType, double price) throws BusinessException {
+        @SuppressWarnings("OptionalGetWithoutIsPresent")
+        final Purchase purchase = this.purchaseRepo.findByUserIdAndMetalSymbol(userId, metalType.getSymbol()).get();
+        this.exceptionService.check(metalAmount > purchase.getAmount(), MessageKey.SELL_MORE_THAN_YOU_HAVE, metalType.getSymbol(), purchase.getAmount());
 
-        double toSubstract = metalAmount;
-        for (Purchase purchase : purchases) {
-            double amountPurchase = purchase.getAmount();
-            if (toSubstract >= amountPurchase) {
-                this.purchaseRepo.delete(purchase);
-                toSubstract -= amountPurchase;
-                //
-            } else if (toSubstract < amountPurchase) {
-                double newAmount = amountPurchase - toSubstract;
-                double newCost = purchase.getCost() * (newAmount) / amountPurchase;
-                purchase.setAmount(newAmount);
-                purchase.setCost(newCost);
-                this.purchaseRepo.save(purchase);
-                break;
-            }
-        }
+        double amount = purchase.getAmount();
+        double newAmount = amount - metalAmount;
+
+        double newCost = purchase.getCost() - price;
+        purchase.setAmount(newAmount);
+        purchase.setCost(newCost);
+        this.purchaseRepo.save(purchase);
     }
 
     public List<Purchase> getAllPurchase(long userId) {
-        return this.purchaseRepo.findByUserId(userId);
+        return this.purchaseRepo.findByUserId(userId)
+                .orElse(new ArrayList<>());
     }
 
 }

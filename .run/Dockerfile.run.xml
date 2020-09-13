@@ -1,0 +1,25 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Dockerfile" type="docker-deploy" factoryName="dockerfile" singleton="false" server-name="Docker">
+    <deployment type="dockerfile">
+      <settings>
+        <option name="imageTag" value="nelucristian" />
+        <option name="buildCliOptions" value="" />
+        <option name="command" value="" />
+        <option name="containerName" value="metal-investment" />
+        <option name="entrypoint" value="&quot;java&quot;, &quot;-cp&quot;, &quot;app:app/lib/*&quot;, &quot;com.investment.metal.MetalApplication&quot;" />
+        <option name="envVars">
+          <list>
+            <DockerEnvVarImpl>
+              <option name="name" value="mail.host" />
+              <option name="value" value="smtp.mail.yahoo.com" />
+            </DockerEnvVarImpl>
+          </list>
+        </option>
+        <option name="publishAllPorts" value="true" />
+        <option name="commandLineOptions" value="" />
+        <option name="sourceFilePath" value="Dockerfile" />
+      </settings>
+    </deployment>
+    <method v="2" />
+  </configuration>
+</component>

@@ -18,9 +18,6 @@ public class MetalInfo {
     private final double costPurchased;
 
     @Getter
-    private final Timestamp purchaseTime;
-
-    @Getter
     private final double costNow;
 
     @Getter

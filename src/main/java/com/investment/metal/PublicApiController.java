@@ -45,11 +45,10 @@ public class PublicApiController {
     @RequestMapping(value = "/userRegistration", method = RequestMethod.POST)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
     public ResponseEntity<SimpleMessageDto> userRegistration(
-            HttpServletRequest request,
             @RequestHeader String username,
             @RequestHeader String password,
-            @RequestHeader String email,
-            HttpServletResponse response) {
+            @RequestHeader String email
+    ) {
         if (!Util.isValidEmailAddress(email)) {
             throw this.exceptionService
                     .createBuilder(MessageKey.INVALID_REQUEST)
@@ -81,10 +80,8 @@ public class PublicApiController {
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
     public ResponseEntity<UserLoginDto> login(
-            HttpServletRequest request,
             @RequestHeader("username") final String username,
-            @RequestHeader("password") final String password,
-            HttpServletResponse response
+            @RequestHeader("password") final String password
     ) {
         final Customer user = this.accountService.findByUsername(username);
         this.bannedAccountsService.checkBanned(user.getId());
@@ -99,9 +96,7 @@ public class PublicApiController {
     @RequestMapping(value = "/resetPassword", method = RequestMethod.POST)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
     public ResponseEntity<ResetPasswordDto> resetPassword(
-            HttpServletRequest request,
-            @RequestHeader("email") final String email,
-            HttpServletResponse response
+            @RequestHeader("email") final String email
     ) {
         if (!Util.isValidEmailAddress(email)) {
             throw this.exceptionService
@@ -121,12 +116,10 @@ public class PublicApiController {
     @RequestMapping(value = "/changePassword", method = RequestMethod.PUT)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
     public ResponseEntity<SimpleMessageDto> changePassword(
-            HttpServletRequest request,
             @RequestHeader("code") final int code,
             @RequestHeader("newPassword") final String newPassword,
             @RequestHeader("email") final String email,
-            @RequestHeader("token") final String token,
-            HttpServletResponse response
+            @RequestHeader("token") final String token
     ) {
         if (!Util.isValidEmailAddress(email)) {
             throw this.exceptionService
