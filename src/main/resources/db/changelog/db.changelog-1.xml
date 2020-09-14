@@ -206,6 +206,7 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
     </changeSet>
 
     <changeSet id="1.9"  author="Cristian Tone">
+        <validCheckSum>8:88aed7bd3d5d26fc843326589bf4fc4d</validCheckSum>
         <createTable tableName="banip">
             <column  name="id" type="int"
                      autoIncrement="true"
@@ -219,6 +220,8 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
             <column  name="ip" type="varchar(50)">
                 <constraints  nullable="false"/>
             </column>
+            <column  name="blocked_until" type="datetime"/>
+            <column  name="reason" type="varchar(400)"/>
         </createTable>
     </changeSet>
 

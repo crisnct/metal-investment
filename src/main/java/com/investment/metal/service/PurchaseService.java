@@ -38,14 +38,16 @@ public class PurchaseService extends AbstractService {
     }
 
     public void sell(Long userId, double metalAmount, MetalType metalType, double price) throws BusinessException {
-        @SuppressWarnings("OptionalGetWithoutIsPresent")
-        final Purchase purchase = this.purchaseRepo.findByUserIdAndMetalSymbol(userId, metalType.getSymbol()).get();
+        @SuppressWarnings("OptionalGetWithoutIsPresent") final Purchase purchase = this.purchaseRepo.findByUserIdAndMetalSymbol(userId, metalType.getSymbol()).get();
         this.exceptionService.check(metalAmount > purchase.getAmount(), MessageKey.SELL_MORE_THAN_YOU_HAVE, metalType.getSymbol(), purchase.getAmount());
 
         double amount = purchase.getAmount();
         double newAmount = amount - metalAmount;
 
         double newCost = purchase.getCost() - price;
+        if (newCost < 0) {
+            newCost = 0;
+        }
         purchase.setAmount(newAmount);
         purchase.setCost(newCost);
         this.purchaseRepo.save(purchase);

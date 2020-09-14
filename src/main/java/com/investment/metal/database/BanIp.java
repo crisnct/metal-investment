@@ -3,6 +3,7 @@ package com.investment.metal.database;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.sql.Timestamp;
 
 @Entity
 @Table(name = "banip")
@@ -15,5 +16,9 @@ public class BanIp {
     private Long userId;
 
     private String ip;
+
+    private Timestamp blockedUntil;
+
+    private String reason;
 
 }

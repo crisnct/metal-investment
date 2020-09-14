@@ -74,10 +74,11 @@ public class ProtectedApiController {
     @RequestMapping(value = "/blockIp", method = RequestMethod.POST)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
     public ResponseEntity<SimpleMessageDto> blockIp(
-            @RequestHeader("ip") final String ip
+            @RequestHeader("ip") final String ip,
+            @RequestHeader(value = "reason", defaultValue = "unknown reason") final String reason
     ) {
         final Login loginEntity = this.securityCheck(request);
-        this.blockedIpService.blockIP(loginEntity.getUserId(), ip);
+        this.blockedIpService.blockIPForever(loginEntity.getUserId(), ip, reason);
 
         SimpleMessageDto dto = new SimpleMessageDto("The ip %s was blocked", ip);
         return new ResponseEntity<>(dto, HttpStatus.OK);

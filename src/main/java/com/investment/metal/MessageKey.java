@@ -60,7 +60,7 @@ public enum MessageKey {
     //There user {0} is already registered in the database
     ALREADY_EXISTING_EMAIL_ADDRESS(1017),
 
-    //The ip {0} is banned for this user.
+    //The ip {0} is banned for this user. Reason: {1}
     BANED_IP(1018);
 
     @Getter
