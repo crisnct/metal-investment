@@ -1,6 +1,8 @@
 package com.investment.metal;
 
 import com.investment.metal.encryption.AbstractHandShakeEncryptor;
+import com.investment.metal.service.exception.ExceptionService;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,18 +11,42 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Enumeration;
 
 public class CallsInterceptor extends HandlerInterceptorAdapter {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CallsInterceptor.class);
+
+    private static final int MAX_HEADER_SIZE = 500;
 
     @Autowired
     private AbstractHandShakeEncryptor handShakeEncryptor;
+
+    @Autowired
+    protected ExceptionService exceptionService;
 
     @Override
     @SuppressWarnings("NullableProblems")
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         HandlerMethod hm = (HandlerMethod) handler;
         LOGGER.info("Start request:" + hm.getShortLogMessage());
+
+        Enumeration<String> headerNames = request.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+            String header = headerNames.nextElement();
+            String value = request.getHeader(header);
+            if (StringUtils.isEmpty(value)) {
+                throw this.exceptionService
+                        .createBuilder(MessageKey.INVALID_REQUEST)
+                        .setArguments("Invalid header: " + header)
+                        .build();
+            } else if (value.length() > MAX_HEADER_SIZE) {
+                throw this.exceptionService
+                        .createBuilder(MessageKey.INVALID_REQUEST)
+                        .setArguments("Too long header: " + header)
+                        .build();
+            }
+        }
 
         final String hs = request.getHeader("hs");
         this.handShakeEncryptor.check(hs);

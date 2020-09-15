@@ -155,12 +155,10 @@ public class ProtectedApiController {
 
         final ProfitDto dto = new ProfitDto(user.getUsername());
         List<Purchase> purchases = this.purchaseService.getAllPurchase(loginEntity.getUserId());
-        if (!purchases.isEmpty()) {
-            for (Purchase purchase : purchases) {
-                final MetalInfo info = this.metalPricesService.calculatesUserProfit(purchase);
-                dto.addInfo(info);
-            }
-        }
+        purchases.stream()
+                .map(purchase -> this.metalPricesService.calculatesUserProfit(purchase))
+                .forEach(dto::addInfo);
+
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 

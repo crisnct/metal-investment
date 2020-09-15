@@ -1,5 +1,6 @@
 package com.investment.metal.service;
 
+import com.investment.metal.common.CurrencyType;
 import com.investment.metal.common.MetalType;
 import com.investment.metal.common.Util;
 import com.investment.metal.database.Currency;
@@ -7,6 +8,8 @@ import com.investment.metal.database.RevolutProfit;
 import com.investment.metal.database.RevolutProfitRepository;
 import com.investment.metal.exceptions.BusinessException;
 import com.investment.metal.external.MetalFetchPriceBean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +17,7 @@ import java.sql.Timestamp;
 
 @Service
 public class RevolutService extends AbstractService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RevolutService.class);
 
     @Autowired
     private RevolutProfitRepository revolutRepository;
@@ -25,7 +29,12 @@ public class RevolutService extends AbstractService {
     private MetalFetchPriceBean externalMetalPrice;
 
     public double calculateRevolutProfit(double revolutPriceOunce, double priceMetalNowKg, MetalType metalType) throws BusinessException {
-        final Currency currency = currencyService.findBySymbol(this.externalMetalPrice.getCurrencyType());
+        CurrencyType currencyType = this.externalMetalPrice.getCurrencyType();
+        final Currency currency = currencyService.findBySymbol(currencyType).orElse(null);
+        if (currency == null) {
+            LOGGER.error("Inexisting currency in the database: " + currencyType);
+            return 0;
+        }
         final double currencyToRonRate = currency.getRon();
 
         double diffCostKg = revolutPriceOunce / (Util.OUNCE * currencyToRonRate) - priceMetalNowKg;

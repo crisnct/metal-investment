@@ -1,5 +1,6 @@
 package com.investment.metal.service;
 
+import com.investment.metal.common.CurrencyType;
 import com.investment.metal.common.MetalType;
 import com.investment.metal.common.Util;
 import com.investment.metal.database.Currency;
@@ -9,6 +10,8 @@ import com.investment.metal.database.Purchase;
 import com.investment.metal.dto.MetalInfo;
 import com.investment.metal.exceptions.BusinessException;
 import com.investment.metal.external.MetalFetchPriceBean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +23,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class MetalPricesService extends AbstractService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MetalPricesService.class);
 
     private static final int THRESHOLD_TOO_OLD_ENTITIES = 24 * 3600 * 1000;
 
@@ -45,7 +50,12 @@ public class MetalPricesService extends AbstractService {
     }
 
     public MetalInfo calculatesUserProfit(Purchase purchase) {
-        final Currency currency = this.currencyService.findBySymbol(this.externalPriceService.getCurrencyType());
+        CurrencyType currencyType = this.externalPriceService.getCurrencyType();
+        final Currency currency = this.currencyService.findBySymbol(currencyType).orElse(null);
+        if (currency == null) {
+            LOGGER.error("Inexisting currency in the database: " + currencyType);
+            return null;
+        }
         final double currencyToRonRate = currency.getRon();
 
         double revolutProfitPercentages = this.revolutService.getRevolutProfitFor(purchase.getMetalType());
