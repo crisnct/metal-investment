@@ -1,11 +1,14 @@
 package com.investment.metal.service;
 
-import com.google.common.base.Charsets;
+import com.investment.metal.MessageKey;
+import com.investment.metal.common.MailParameterBuilder;
+import com.investment.metal.common.MailTemplates;
 import com.investment.metal.common.MetalType;
 import com.investment.metal.common.Util;
 import com.investment.metal.database.Alert;
 import com.investment.metal.database.Customer;
-import org.apache.commons.io.IOUtils;
+import com.investment.metal.dto.MetalInfo;
+import com.investment.metal.exceptions.BusinessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,13 +19,11 @@ import org.springframework.stereotype.Service;
 
 import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.util.Objects;
+import java.util.Map;
 
 @Service
 public class EmailService extends AbstractService {
     private static final Logger LOGGER = LoggerFactory.getLogger(EmailService.class);
-
 
     @Value("${spring.application.name}")
     private String appName;
@@ -36,45 +37,61 @@ public class EmailService extends AbstractService {
     @Autowired
     private HttpServletRequest request;
 
-    private final String mailTemplateCode;
-
-    private final String mailTemplateAlert;
-
-    public EmailService() throws IOException {
-        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-        this.mailTemplateCode = IOUtils.toString(
-                Objects.requireNonNull(contextClassLoader.getResourceAsStream("mail-template-code.html")),
-                Charsets.UTF_8);
-        this.mailTemplateAlert = IOUtils.toString(
-                Objects.requireNonNull(contextClassLoader.getResourceAsStream("mail-template-alert-trigger.html")),
-                Charsets.UTF_8);
-    }
-
     public void sendMailWithCode(Customer user, int codeGenerated) {
         final String ip = Util.getClientIpAddress(request);
-        final String emailContent = this.mailTemplateCode
+        final String emailContent = MailParameterBuilder.newInstance(MailTemplates.VERIFICATION_CODE)
                 .replace("{user}", user.getUsername())
-                .replace("{code}", String.valueOf(codeGenerated))
-                .replace("{ip}", ip);
+                .replace("{code}", codeGenerated)
+                .replace("{ip}", ip)
+                .build();
         this.sendMail(user.getEmail(), appName, emailContent);
     }
 
     public void sendMailWithProfit(UserProfit userInfo, Alert alert) {
         Customer user = userInfo.getUser();
         MetalType metalType = alert.getMetalType();
-        final String emailContent = this.mailTemplateAlert
+        String emailContent = MailParameterBuilder.newInstance(MailTemplates.ALERT)
                 .replace("{user}", user.getUsername())
                 .replace("{metal}", metalType.name().toLowerCase())
                 .replace("{metalSymbol}", metalType.getSymbol())
                 .replace("{expression}", alert.getExpression())
-                .replace("{amount}", String.valueOf(userInfo.getMetalAmount()))
-                .replace("{cost}", String.format("%.2f", userInfo.getOriginalCost()))
-                .replace("{costNow}", String.format("%.2f", userInfo.getCurrentCost()))
-                .replace("{profit}", String.format("%.2f", userInfo.getProfit()));
+                .replace("{amount}", userInfo.getMetalAmount())
+                .replaceDouble("{cost}", userInfo.getOriginalCost(), 2)
+                .replaceDouble("{costNow}", userInfo.getCurrentCost(), 2)
+                .replaceDouble("{profit}", userInfo.getProfit(), 2)
+                .build();
+
         this.sendMail(user.getEmail(), appName, emailContent);
     }
 
-    private void sendMail(String toEmail, String subject, String message) {
+    public void sendStatusNotification(Customer user, Map<String, MetalInfo> userProfit) {
+        MailParameterBuilder emailContentBuilder = MailParameterBuilder.newInstance(MailTemplates.STATUS)
+                .replace("{user}", user.getUsername());
+        for (MetalType metalType : MetalType.values()) {
+            String metalSymbol = metalType.getSymbol();
+            MetalInfo info = userProfit.get(metalSymbol);
+            final String part;
+            if (info != null) {
+                final double amountGrams = info.getAmountPurchased() * Util.OUNCE * 1000;
+                part = MailParameterBuilder.newInstance(MailTemplates.STATUS_PART)
+                        .replace("{amountOunces}", info.getAmountPurchased())
+                        .replaceDouble("{amountGrams}", amountGrams, 3)
+                        .replace("{metal}", metalType.name())
+                        .replace("{metalSymbol}", metalSymbol)
+                        .replaceDouble("{cost}", info.getCostPurchased(), 2)
+                        .replaceDouble("{priceNow}", info.getCostNow(), 2)
+                        .replaceDouble("{profit}", info.getProfit(), 2)
+                        .build();
+            } else {
+                part = "";
+            }
+            emailContentBuilder = emailContentBuilder.replace("{" + metalSymbol + "}", part);
+        }
+
+        this.sendMail(user.getEmail(), appName, emailContentBuilder.build());
+    }
+
+    private void sendMail(String toEmail, String subject, String message) throws BusinessException {
         try {
             MimeMessage msg = this.mailSender.createMimeMessage();
             MimeMessageHelper mailMessage = new MimeMessageHelper(msg, true);
@@ -84,9 +101,12 @@ public class EmailService extends AbstractService {
             mailMessage.setFrom(emailFrom);
             this.mailSender.send(msg);
         } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
+            throw this.exceptionService
+                    .createBuilder(MessageKey.FAIL_TO_SEND_EMAIL)
+                    .setExceptionCause(e)
+                    .setArguments(toEmail)
+                    .build();
         }
     }
-
 
 }

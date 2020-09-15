@@ -22,9 +22,6 @@ public class AccountService extends AbstractService {
     @Autowired
     private LoginService loginService;
 
-    @Autowired
-    private EmailService emailService;
-
     public Customer registerNewUser(String username, String password, String email) throws BusinessException {
         Optional<Customer> customerOp = this.customerRepository.findByUsername(username);
         if (customerOp.isPresent()) {

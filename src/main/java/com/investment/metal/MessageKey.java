@@ -61,7 +61,10 @@ public enum MessageKey {
     ALREADY_EXISTING_EMAIL_ADDRESS(1017),
 
     //The ip {0} is banned for this user. Reason: {1}
-    BANED_IP(1018);
+    BANED_IP(1018),
+
+    //Fail to send email to {0}
+    FAIL_TO_SEND_EMAIL(1019);
 
     @Getter
     final int code;

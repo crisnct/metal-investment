@@ -18,6 +18,7 @@ public class MetalApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(MetalApplication.class);
 
     public static void main(String[] args) {
+        //This is disabled temporary because RSS FEED parser fails
         disableSSLCheck();
         SpringApplication.run(MetalApplication.class, args);
     }
