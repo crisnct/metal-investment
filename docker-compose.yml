@@ -9,35 +9,41 @@
 #Connection url for connection in the DatabaseView:
 #  jdbc:mysql://0.0.0.0:13306/DOCKERDB, login=root, password=root
 #App is available at: http://localhost:18080/entitybus/post
-version: "2.1"
+version: "3.8"
 
 networks:
   test:
 
 services:
+
   app:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - "18080:8080"
-    depends_on:
-      db:
-        condition: service_healthy
     networks:
       - test
-    command: java -Djava.security.egd=file:/dev/./urandom -jar /target/metal-investment-0.0.1.jar
+    command: java -jar /target/metal-investment-0.0.1.jar
 
-  db:
-    image: opavlova/db-mysql:5.7-test
-    container_name: db
-    ports:
-      - "13306:3306"
+
+  docker-db:
+    image: mysql:5.7
     restart: always
+    environment:
+      MYSQL_DATABASE: metals
+      MYSQL_USER: test
+      MYSQL_PASSWORD: test
+      MYSQL_ROOT_PASSWORD: Nelu1810728
+    ports:
+      - '3307:3306'
     healthcheck:
-      test: ["CMD", "mysql", "-h", "localhost", "-P", "3306", "-u", "test", "--password=test", "-e", "select 1", "metals"]
+      test: [ "CMD", "mysql", "-h", "localhost", "-P", "3306", "-u", "test", "--password=test", "-e", "select 1", "metals" ]
       interval: 1s
       timeout: 3s
       retries: 30
+    expose:
+      # Opens port 3306 on the container
+      - '3306'
     networks:
       - test

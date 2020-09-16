@@ -1,11 +1,9 @@
 FROM openjdk:8-jdk-alpine
 VOLUME /tmp
-ARG JAR_FILE
-COPY ${JAR_FILE} app.jar
-ENTRYPOINT ["java", "-jar", "/app.jar",\
-"-Dmail.from=**********************",\
-"-Dmail.password=**********************",\
-"-Dmail.port=**********************",\
-"-Dmail.host=**********************",\
-"-Dencoder.secrete=**********************"]
-
+COPY /target/metal-investment-0.0.1.jar app.jar
+ENTRYPOINT ["java", "-jar", "/app.jar"]
+ENV MAIL_FROM=$METAL_INVESTMENT_MAIL_FROM
+ENV MAIL_PASSWORD=$METAL_INVESTMENT_MAIL_PASSWORD
+ENV MAIL_PORT=$METAL_INVESTMENT_MAIL_PORT
+ENV MAIL_HOST=$METAL_INVESTMENT_MAIL_HOST
+ENV ENCODER_SECRETE=$METAL_INVESTMENT_ENCODER_SECRETE
