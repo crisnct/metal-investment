@@ -5,6 +5,7 @@ import com.investment.metal.common.MetalType;
 import com.investment.metal.common.RSSFeedParser;
 import com.investment.metal.service.CurrencyService;
 import com.investment.metal.service.MetalPricesService;
+import com.investment.metal.service.NotificationService;
 import com.investment.metal.service.alerts.AlertsTrigger;
 import com.investment.metal.service.exception.ExceptionService;
 import org.slf4j.Logger;
@@ -34,6 +35,9 @@ public class Scheduler {
 
     @Autowired
     private AlertsTrigger alertsTrigger;
+
+    @Autowired
+    private NotificationService notificationService;
 
     private final RSSFeedParser rssFeedParser = new RSSFeedParser();
 
@@ -84,6 +88,11 @@ public class Scheduler {
             return;
         }
         this.currencyService.save(currency, ron);
+    }
+
+    @Scheduled(fixedDelay = 3600 * 1000)
+    public void checkNotifications() {
+        this.notificationService.checkNotifications();
     }
 
 }

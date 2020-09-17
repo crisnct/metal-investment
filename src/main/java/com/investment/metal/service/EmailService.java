@@ -92,18 +92,27 @@ public class EmailService extends AbstractService {
     }
 
     private void sendMail(String toEmail, String subject, String message) throws BusinessException {
-        try {
-            MimeMessage msg = this.mailSender.createMimeMessage();
-            MimeMessageHelper mailMessage = new MimeMessageHelper(msg, true);
-            mailMessage.setTo(toEmail);
-            mailMessage.setSubject(subject);
-            mailMessage.setText(message, true);
-            mailMessage.setFrom(emailFrom);
-            this.mailSender.send(msg);
-        } catch (Exception e) {
+        Exception cause = null;
+        for (int i = 0; i < 3; i++) {
+            try {
+                MimeMessage msg = this.mailSender.createMimeMessage();
+                MimeMessageHelper mailMessage = new MimeMessageHelper(msg, true);
+                mailMessage.setTo(toEmail);
+                mailMessage.setSubject(subject);
+                mailMessage.setText(message, true);
+                mailMessage.setFrom(emailFrom);
+                this.mailSender.send(msg);
+                cause = null;
+                break;
+            } catch (Exception e) {
+                Util.sleep(2000);
+                cause = e;
+            }
+        }
+        if (cause != null) {
             throw this.exceptionService
                     .createBuilder(MessageKey.FAIL_TO_SEND_EMAIL)
-                    .setExceptionCause(e)
+                    .setExceptionCause(cause)
                     .setArguments(toEmail)
                     .build();
         }

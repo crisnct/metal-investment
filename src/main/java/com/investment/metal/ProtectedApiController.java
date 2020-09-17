@@ -7,7 +7,10 @@ import com.investment.metal.common.Util;
 import com.investment.metal.database.Customer;
 import com.investment.metal.database.Login;
 import com.investment.metal.database.Purchase;
-import com.investment.metal.dto.*;
+import com.investment.metal.dto.AlertDto;
+import com.investment.metal.dto.AlertsDto;
+import com.investment.metal.dto.ProfitDto;
+import com.investment.metal.dto.SimpleMessageDto;
 import com.investment.metal.exceptions.BusinessException;
 import com.investment.metal.exceptions.NoRollbackBusinessException;
 import com.investment.metal.service.*;
@@ -25,9 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.script.ScriptException;
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -54,6 +55,9 @@ public class ProtectedApiController {
 
     @Autowired
     private PurchaseService purchaseService;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @Autowired
     private MetalPricesService metalPricesService;
@@ -162,7 +166,7 @@ public class ProtectedApiController {
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/revolutProfit", method = RequestMethod.GET)
+    @RequestMapping(value = "/revolutProfit", method = RequestMethod.PUT)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
     public ResponseEntity<SimpleMessageDto> calculateRevolutProfit(
             @RequestHeader("revolutPriceOunce") final double revolutPriceOunce,
@@ -195,7 +199,7 @@ public class ProtectedApiController {
         } catch (IllegalArgumentException e) {
             throw this.exceptionService
                     .createBuilder(MessageKey.INVALID_REQUEST)
-                    .setArguments("Frequency header is invalid")
+                    .setArguments("Invalid frequency header")
                     .build();
         }
         MetalType metalType = MetalType.lookup(metalSymbol);
@@ -241,8 +245,18 @@ public class ProtectedApiController {
             @RequestHeader("alertId") final long alertId
     ) {
         final Login loginEntity = this.securityCheck(request);
-        Customer user = this.accountService.findById(loginEntity.getUserId());
+        final boolean matchingUser = this.alertService.findAllByUserId(loginEntity.getUserId())
+                .stream()
+                .anyMatch(alert -> alert.getId() == alertId);
+        if (!matchingUser) {
+            throw this.exceptionService
+                    .createBuilder(MessageKey.INVALID_REQUEST)
+                    .setArguments("This alert id is not belonging to this user!")
+                    .build();
+        }
+
         this.alertService.removeAlert(alertId);
+        Customer user = this.accountService.findById(loginEntity.getUserId());
         return new ResponseEntity<>(new SimpleMessageDto("The alert %s was removed by user %s", alertId, user.getUsername()), HttpStatus.OK);
     }
 
@@ -253,22 +267,21 @@ public class ProtectedApiController {
     ) {
         this.securityCheck(request);
         Customer user = this.accountService.findByUsername(username);
-
-        final String message;
-        List<Purchase> purchases = this.purchaseService.getAllPurchase(user.getId());
-        if (purchases.isEmpty()) {
-            message = "The user didn't purchase any metal until now.";
-        } else {
-            Map<String, MetalInfo> userProfit = new HashMap<>();
-            for (Purchase purchase : purchases) {
-                final MetalInfo info = this.metalPricesService.calculatesUserProfit(purchase);
-                userProfit.put(info.getMetalSymbol(), info);
-            }
-            this.emailService.sendStatusNotification(user, userProfit);
-            message = "The user " + username + " was notified by email about his account status.";
-        }
-
+        this.notificationService.notifyUser(user.getId());
+        String message = "The user " + username + " was notified by email about his account status.";
         return new ResponseEntity<>(new SimpleMessageDto(message), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/setNotificationPeriod", method = RequestMethod.PUT)
+    @Transactional(noRollbackFor = NoRollbackBusinessException.class)
+    public ResponseEntity<SimpleMessageDto> setNotificationPeriod(
+            @RequestHeader("period") final int period
+    ) {
+        Login loginEntity = this.securityCheck(request);
+        this.exceptionService.check(period < NotificationService.MIN_NOTIFICATION_PERIOD && period != 0,
+                MessageKey.INVALID_REQUEST, "Invalid period");
+        this.notificationService.save(loginEntity.getUserId(), period * 1000);
+        return new ResponseEntity<>(new SimpleMessageDto("The notification period was changed to %s seconds", period), HttpStatus.OK);
     }
 
     private Login securityCheck(HttpServletRequest request) throws BusinessException {

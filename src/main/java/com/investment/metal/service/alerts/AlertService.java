@@ -53,7 +53,7 @@ public class AlertService extends AbstractService {
         final String filledExpression = new FilledExpressionBuilder(expression)
                 .setProfit(profit)
                 .build();
-        return (Boolean) engine.eval(filledExpression);
+        return (Boolean) this.engine.eval(filledExpression);
     }
 
     public void saveAll(List<Alert> allAlerts) {

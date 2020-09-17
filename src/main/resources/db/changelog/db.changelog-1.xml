@@ -144,17 +144,17 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
     <changeSet id="1.6"  author="Cristian Tone">
         <insert tableName="revolutprofit">
             <column name="metal_symbol" value="AUX"/>
-            <column name="profit" value="0.0828"/>
+            <column name="profit" value="-0.018155"/>
             <column name="time" value="2020-09-07 11:22:06"/>
         </insert>
         <insert tableName="revolutprofit">
             <column name="metal_symbol" value="AGX"/>
-            <column name="profit" value="0.0828"/>
+            <column name="profit" value="-0.0176441"/>
             <column name="time" value="2020-09-07 11:22:06"/>
         </insert>
         <insert tableName="revolutprofit">
             <column name="metal_symbol" value="PTX"/>
-            <column name="profit" value="0.0828"/>
+            <column name="profit" value="0.02"/>
             <column name="time" value="2020-09-07 11:22:06"/>
         </insert>
     </changeSet>
@@ -206,7 +206,6 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
     </changeSet>
 
     <changeSet id="1.9"  author="Cristian Tone">
-        <validCheckSum>8:88aed7bd3d5d26fc843326589bf4fc4d</validCheckSum>
         <createTable tableName="banip">
             <column  name="id" type="int"
                      autoIncrement="true"
@@ -223,6 +222,28 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
             <column  name="blocked_until" type="datetime"/>
             <column  name="reason" type="varchar(400)"/>
         </createTable>
+    </changeSet>
+
+    <changeSet  id="1.10"  author="Cristian Tone">
+        <validCheckSum>8:1d18d111dcefc0ccd84c3abae19c92c4</validCheckSum>
+        <createTable tableName="notifications">
+            <column  name="id" type="int"
+                     autoIncrement="true"
+                     startWith="0"
+                     incrementBy="1">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column  name="user_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="frequency" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column  name="last_time_notified" type="datetime"/>
+        </createTable>
+        <createIndex indexName="idx_user_id" tableName="notifications" unique="true">
+            <column name="user_id"/>
+        </createIndex>
     </changeSet>
 
 </databaseChangeLog>
