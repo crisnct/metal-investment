@@ -47,7 +47,7 @@ public class Config implements WebMvcConfigurer {
     @Value("${spring.datasource.password}")
     private String password;
 
-    @Value("${encoder.secrete}")
+    @Value("${METAL_INVESTMENT_ENCODER_SECRETE}")
     private String encoderSecrete;
 
     @Value("${spring.metal.price.bean}")
