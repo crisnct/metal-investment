@@ -1,8 +1,10 @@
 package com.investment.metal;
 
 import com.investment.metal.common.PropertyFile;
+import com.investment.metal.common.Util;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -27,10 +29,14 @@ public class MetalApplication {
     public static void main(String[] args) {
         if (args.length > 0 && StringUtils.equals(args[0], "-update.properties")) {
             updateApplicationProperties();
+            LogManager.shutdown();
             return;
         }
+
         //This is disabled temporary because RSS FEED parser fails
         disableSSLCheck();
+
+        //Starts the spring boot application
         SpringApplication.run(MetalApplication.class, args);
     }
 
@@ -38,9 +44,11 @@ public class MetalApplication {
         try {
             File applicationPropFile = new File(APPLICATION_PROPERTIES);
             if (!applicationPropFile.exists()) {
+                LOGGER.warn(APPLICATION_PROPERTIES + " is missing");
                 return;
             }
-            LOGGER.info("Updating "+APPLICATION_PROPERTIES);
+
+            LOGGER.info("Updating " + APPLICATION_PROPERTIES);
             final PropertyFile currentFileWorkDir = new PropertyFile();
             currentFileWorkDir.load(new FileInputStream(applicationPropFile));
 
@@ -70,9 +78,11 @@ public class MetalApplication {
             if (changes) {
                 sourceCodeProperties.save(new FileWriter(APPLICATION_PROPERTIES));
             }
-
+            LOGGER.info("Updated successfully");
         } catch (Exception e) {
             LOGGER.error("Can not update " + APPLICATION_PROPERTIES + " file", e);
+        } finally {
+            Util.sleep(2000);
         }
     }
 
