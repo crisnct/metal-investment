@@ -68,9 +68,10 @@ public class MetalApplication {
 
             //Add to sourceCodeProperties the values which are different in currentFileWorkDir
             for (String propName : sourceCodeProperties.getKeys()) {
-                String propValue = currentFileWorkDir.getProperty(propName);
-                if (StringUtils.isNotBlank(propValue)) {
-                    sourceCodeProperties.setProperty(propName, propValue);
+                String sourceCodeValue = sourceCodeProperties.getProperty(propName);
+                String propFileValue = currentFileWorkDir.getProperty(propName);
+                if (!StringUtils.equals(sourceCodeValue, propFileValue) && StringUtils.isNotBlank(propFileValue)) {
+                    sourceCodeProperties.setProperty(propName, propFileValue);
                     changes = true;
                 }
             }
