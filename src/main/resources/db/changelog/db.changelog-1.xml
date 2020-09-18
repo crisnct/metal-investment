@@ -142,6 +142,7 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
     </changeSet>
 
     <changeSet id="1.6"  author="Cristian Tone">
+        <validCheckSum>8:049c6cb62a8860c2fdb31d6b81e45df2</validCheckSum>
         <insert tableName="revolutprofit">
             <column name="metal_symbol" value="AUX"/>
             <column name="profit" value="-0.018155"/>
