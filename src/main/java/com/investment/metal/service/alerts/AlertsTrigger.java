@@ -4,13 +4,12 @@ import com.investment.metal.common.MetalType;
 import com.investment.metal.database.Alert;
 import com.investment.metal.database.Customer;
 import com.investment.metal.database.Purchase;
-import com.investment.metal.dto.MetalInfo;
+import com.investment.metal.dto.UserMetalInfo;
 import com.investment.metal.service.*;
 import com.investment.metal.service.exception.ExceptionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.mail.MessagingException;
 import javax.script.ScriptException;
 import java.sql.Timestamp;
 import java.util.HashMap;
@@ -72,7 +71,7 @@ public class AlertsTrigger {
             double totalAmount = 0;
             if (!purchases.isEmpty()) {
                 for (Purchase purchase : purchases) {
-                    final MetalInfo info = this.metalPricesService.calculatesUserProfit(purchase);
+                    final UserMetalInfo info = this.metalPricesService.calculatesUserProfit(purchase);
                     totalProfit += info.getProfit();
                     totalCost += purchase.getCost();
                     totalAmount += purchase.getAmount();

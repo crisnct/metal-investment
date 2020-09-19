@@ -1,26 +1,16 @@
 package com.investment.metal.dto;
 
-import lombok.Builder;
-import lombok.Getter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
-import java.sql.Timestamp;
-
-@Builder
+@Data
+@AllArgsConstructor
 public class MetalInfo {
 
-    @Getter
-    private final String metalSymbol;
+    private String symbol;
 
-    @Getter
-    private final double amountPurchased;
+    private final double price;
 
-    @Getter
-    private final double costPurchased;
-
-    @Getter
-    private final double costNow;
-
-    @Getter
-    private final double profit;
+    private final double revolutPriceAdjustment;
 
 }

@@ -7,7 +7,7 @@ import com.investment.metal.database.Currency;
 import com.investment.metal.database.MetalPrice;
 import com.investment.metal.database.MetalPriceRepository;
 import com.investment.metal.database.Purchase;
-import com.investment.metal.dto.MetalInfo;
+import com.investment.metal.dto.UserMetalInfo;
 import com.investment.metal.exceptions.BusinessException;
 import com.investment.metal.external.MetalFetchPriceBean;
 import org.slf4j.Logger;
@@ -49,7 +49,7 @@ public class MetalPricesService extends AbstractService {
         return this.externalPriceService.fetchPrice(metalType);
     }
 
-    public MetalInfo calculatesUserProfit(Purchase purchase) {
+    public UserMetalInfo calculatesUserProfit(Purchase purchase) {
         CurrencyType currencyType = this.externalPriceService.getCurrencyType();
         final Currency currency = this.currencyService.findBySymbol(currencyType).orElse(null);
         if (currency == null) {
@@ -65,7 +65,7 @@ public class MetalPricesService extends AbstractService {
         double revolutGoldPriceOunce = revolutGoldPriceKg * Util.OUNCE;
         double costNowUser = revolutGoldPriceOunce * purchase.getAmount();
         double profitRevolut = Util.reduceDecimals(costNowUser - purchase.getCost(), 2);
-        return MetalInfo
+        return UserMetalInfo
                 .builder()
                 .metalSymbol(purchase.getMetalSymbol())
                 .amountPurchased(purchase.getAmount())

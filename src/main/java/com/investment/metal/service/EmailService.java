@@ -7,7 +7,7 @@ import com.investment.metal.common.MetalType;
 import com.investment.metal.common.Util;
 import com.investment.metal.database.Alert;
 import com.investment.metal.database.Customer;
-import com.investment.metal.dto.MetalInfo;
+import com.investment.metal.dto.UserMetalInfo;
 import com.investment.metal.exceptions.BusinessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,12 +64,12 @@ public class EmailService extends AbstractService {
         this.sendMail(user.getEmail(), appName, emailContent);
     }
 
-    public void sendStatusNotification(Customer user, Map<String, MetalInfo> userProfit) {
+    public void sendStatusNotification(Customer user, Map<String, UserMetalInfo> userProfit) {
         MailParameterBuilder emailContentBuilder = MailParameterBuilder.newInstance(MailTemplates.STATUS)
                 .replace("{user}", user.getUsername());
         for (MetalType metalType : MetalType.values()) {
             String metalSymbol = metalType.getSymbol();
-            MetalInfo info = userProfit.get(metalSymbol);
+            UserMetalInfo info = userProfit.get(metalSymbol);
             final String part;
             if (info != null) {
                 final double amountGrams = info.getAmountPurchased() * Util.OUNCE * 1000;

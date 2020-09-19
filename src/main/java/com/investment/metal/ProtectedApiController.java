@@ -1,18 +1,11 @@
 package com.investment.metal;
 
-import com.investment.metal.common.AlertFrequency;
-import com.investment.metal.common.DtoConversion;
-import com.investment.metal.common.MetalType;
-import com.investment.metal.common.Util;
-import com.investment.metal.database.Customer;
-import com.investment.metal.database.Login;
-import com.investment.metal.database.Purchase;
-import com.investment.metal.dto.AlertDto;
-import com.investment.metal.dto.AlertsDto;
-import com.investment.metal.dto.ProfitDto;
-import com.investment.metal.dto.SimpleMessageDto;
+import com.investment.metal.common.*;
+import com.investment.metal.database.*;
+import com.investment.metal.dto.*;
 import com.investment.metal.exceptions.BusinessException;
 import com.investment.metal.exceptions.NoRollbackBusinessException;
+import com.investment.metal.external.MetalFetchPriceBean;
 import com.investment.metal.service.*;
 import com.investment.metal.service.alerts.AlertService;
 import com.investment.metal.service.exception.ExceptionService;
@@ -75,7 +68,13 @@ public class ProtectedApiController {
     private AlertService alertService;
 
     @Autowired
+    private CurrencyService currencyService;
+
+    @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private MetalFetchPriceBean metalPriceBean;
 
     @Autowired
     private HttpServletRequest request;
@@ -278,10 +277,38 @@ public class ProtectedApiController {
             @RequestHeader("period") final int period
     ) {
         Login loginEntity = this.securityCheck(request);
-        this.exceptionService.check(period < NotificationService.MIN_NOTIFICATION_PERIOD && period != 0,
+        int millis = period * 1000;
+        this.exceptionService.check(millis < NotificationService.MIN_NOTIFICATION_PERIOD && period != 0,
                 MessageKey.INVALID_REQUEST, "Invalid period");
-        this.notificationService.save(loginEntity.getUserId(), period * 1000);
+        this.notificationService.save(loginEntity.getUserId(), millis);
         return new ResponseEntity<>(new SimpleMessageDto("The notification period was changed to %s seconds", period), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/getNotificationPeriod", method = RequestMethod.GET)
+    @Transactional(noRollbackFor = NoRollbackBusinessException.class)
+    public ResponseEntity<SimpleMessageDto> getNotificationPeriod() {
+        Login loginEntity = this.securityCheck(request);
+        final int freq = this.notificationService.getNotificationFrequency(loginEntity.getUserId());
+        return new ResponseEntity<>(new SimpleMessageDto("The notification period is %d seconds", freq / 1000), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/metalInfo", method = RequestMethod.GET)
+    @Transactional(noRollbackFor = NoRollbackBusinessException.class)
+    public ResponseEntity<AppStatusInfoDto> metalInfo() {
+        this.securityCheck(request);
+        Currency currency = this.currencyService.findBySymbol(CurrencyType.USD).get();
+
+        AppStatusInfoDto dto = new AppStatusInfoDto();
+        dto.setUsdRonRate(currency.getRon());
+        dto.setMetalPriceHost(this.metalPriceBean.getClass().getName());
+        dto.setMetalCurrencyType(this.metalPriceBean.getCurrencyType());
+        for (MetalType metalType : MetalType.values()) {
+            MetalPrice price = this.metalPricesService.getMetalPrice(metalType);
+            double revProfit = this.revolutService.getRevolutProfitFor(metalType);
+
+            dto.addMetalPrice(metalType, new MetalInfo(metalType.getSymbol(), price.getPrice(), revProfit));
+        }
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
     private Login securityCheck(HttpServletRequest request) throws BusinessException {

@@ -5,6 +5,16 @@
     <springProfile name="default | prod | dev">
         <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
         <timestamp key="timestamp" datePattern="yyyy-MM-dd_HH-mm-ss"/>
+        <property name="defaultPattern"
+                  value="%d{yyyy-MM-dd} | %d{HH:mm:ss.SSS} | %5p | %thread | %lo{50} | %m%n" />
+
+        <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+            <!-- encoders are assigned the type ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+            <encoder>
+                <pattern>${defaultPattern}</pattern>
+                <charset>utf8</charset>
+            </encoder>
+        </appender>
 
         <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
             <file>metal-investment_${timestamp}.log</file>
@@ -18,9 +28,7 @@
                 <maxHistory>60</maxHistory>
             </rollingPolicy>
             <encoder>
-                <pattern>
-                    %d{yyyy-MM-dd} | %d{HH:mm:ss.SSS} | %-20.20thread | %5p | %-25.25logger{25} | %m%n
-                </pattern>
+                <pattern>${defaultPattern}</pattern>
                 <charset>utf8</charset>
             </encoder>
         </appender>
@@ -28,12 +36,12 @@
         <logger name="com.investment" level="INFO"/>
         <logger name="org.springframework" level="INFO" additivity="false">
             <appender-ref ref="FILE"/>
-            <appender-ref ref="CONSOLE" />
+            <appender-ref ref="STDOUT" />
         </logger>
 
         <root level="ERROR">
              <appender-ref ref="FILE"/>
-             <appender-ref ref="CONSOLE" />
+             <appender-ref ref="STDOUT" />
         </root>
     </springProfile>
 

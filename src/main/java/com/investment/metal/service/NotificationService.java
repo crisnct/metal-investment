@@ -5,7 +5,7 @@ import com.investment.metal.database.Customer;
 import com.investment.metal.database.Notification;
 import com.investment.metal.database.NotificationRepository;
 import com.investment.metal.database.Purchase;
-import com.investment.metal.dto.MetalInfo;
+import com.investment.metal.dto.UserMetalInfo;
 import com.investment.metal.exceptions.BusinessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,9 +65,9 @@ public class NotificationService extends AbstractService {
                     .setArguments("The user didn't have any purchase")
                     .build();
         } else {
-            Map<String, MetalInfo> userProfit = new HashMap<>();
+            Map<String, UserMetalInfo> userProfit = new HashMap<>();
             for (Purchase purchase : purchases) {
-                final MetalInfo info = this.metalPricesService.calculatesUserProfit(purchase);
+                final UserMetalInfo info = this.metalPricesService.calculatesUserProfit(purchase);
                 userProfit.put(info.getMetalSymbol(), info);
             }
             this.emailService.sendStatusNotification(user, userProfit);
@@ -96,4 +96,14 @@ public class NotificationService extends AbstractService {
         }
     }
 
+    public int getNotificationFrequency(Long userId) {
+        final Notification notification = this.notificationRepository
+                .findByUserId(userId)
+                .orElseGet(() -> {
+                    Notification empty = new Notification();
+                    empty.setFrequency(0);
+                    return empty;
+                });
+        return notification.getFrequency();
+    }
 }
