@@ -62,7 +62,6 @@ public class MetalApplication {
                 String propValue = currentFileWorkDir.getProperty(propName);
                 if (StringUtils.isBlank(sourceCodeProperties.getProperty(propName))) {
                     sourceCodeProperties.addProperty(propName, propValue);
-                    changes = true;
                 }
             }
 
@@ -72,13 +71,10 @@ public class MetalApplication {
                 String propFileValue = currentFileWorkDir.getProperty(propName);
                 if (!StringUtils.equals(sourceCodeValue, propFileValue) && StringUtils.isNotBlank(propFileValue)) {
                     sourceCodeProperties.setProperty(propName, propFileValue);
-                    changes = true;
                 }
             }
 
-            if (changes) {
-                sourceCodeProperties.save(new FileWriter(APPLICATION_PROPERTIES));
-            }
+            sourceCodeProperties.save(new FileWriter(APPLICATION_PROPERTIES));
             LOGGER.info("Updated successfully");
         } catch (Exception e) {
             LOGGER.error("Can not update " + APPLICATION_PROPERTIES + " file", e);
