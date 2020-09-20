@@ -19,6 +19,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,7 +27,7 @@ public class MetalPricesService extends AbstractService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MetalPricesService.class);
 
-    private static final int THRESHOLD_TOO_OLD_ENTITIES = 24 * 3600 * 1000;
+    private static final long THRESHOLD_TOO_OLD_ENTITIES = TimeUnit.DAYS.toMillis(7);
 
     @Autowired
     private MetalPriceRepository metalPriceRepository;
