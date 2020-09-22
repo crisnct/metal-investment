@@ -30,11 +30,7 @@ public class RevolutService extends AbstractService {
 
     public double calculateRevolutProfit(double revolutPriceOunce, double priceMetalNowKg, MetalType metalType) throws BusinessException {
         CurrencyType currencyType = this.externalMetalPrice.getCurrencyType();
-        final Currency currency = currencyService.findBySymbol(currencyType).orElse(null);
-        if (currency == null) {
-            LOGGER.error("Inexisting currency in the database: " + currencyType);
-            return 0;
-        }
+        final Currency currency = currencyService.findBySymbol(currencyType);
         final double currencyToRonRate = currency.getRon();
 
         double diffCostKg = revolutPriceOunce / (Util.OUNCE * currencyToRonRate) - priceMetalNowKg;

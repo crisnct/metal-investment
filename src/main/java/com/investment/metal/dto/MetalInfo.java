@@ -1,15 +1,19 @@
 package com.investment.metal.dto;
 
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
-@AllArgsConstructor
+@Builder
 public class MetalInfo {
 
     private String symbol;
 
-    private final double price;
+    private final double price1kg;
+
+    private final double price1oz;
+
+    private final double price1ozRON;
 
     private final double revolutPriceAdjustment;
 

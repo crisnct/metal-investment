@@ -15,12 +15,12 @@ public class CurrencyService extends AbstractService {
     @Autowired
     private CurrencyRepository currencyRepository;
 
-    public Optional<Currency> findBySymbol(CurrencyType type) {
+    public Currency findBySymbol(CurrencyType type) {
         return this.currencyRepository.findBySymbol(type.name());
     }
 
     public void save(CurrencyType currencyType, double value) {
-        Currency curr = this.findBySymbol(currencyType).orElse(new Currency());
+        Currency curr = this.findBySymbol(currencyType);
         curr.setRon(value);
         curr.setSymbol(currencyType.name());
         curr.setTime(new Timestamp(System.currentTimeMillis()));

@@ -296,7 +296,7 @@ public class ProtectedApiController {
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
     public ResponseEntity<AppStatusInfoDto> metalInfo() {
         this.securityCheck(request);
-        Currency currency = this.currencyService.findBySymbol(CurrencyType.USD).get();
+        Currency currency = this.currencyService.findBySymbol(CurrencyType.USD);
 
         AppStatusInfoDto dto = new AppStatusInfoDto();
         dto.setUsdRonRate(currency.getRon());
@@ -305,8 +305,17 @@ public class ProtectedApiController {
         for (MetalType metalType : MetalType.values()) {
             MetalPrice price = this.metalPricesService.getMetalPrice(metalType);
             double revProfit = this.revolutService.getRevolutProfitFor(metalType);
-
-            dto.addMetalPrice(metalType, new MetalInfo(metalType.getSymbol(), price.getPrice(), revProfit));
+            double price1kg = price.getPrice();
+            double ozq = price1kg * Util.OUNCE;
+            double ozqRon = ozq * this.currencyService.findBySymbol(CurrencyType.USD).getRon();
+            final MetalInfo mp = MetalInfo.builder()
+                    .symbol(metalType.getSymbol())
+                    .price1kg(price1kg)
+                    .price1oz(ozq)
+                    .price1ozRON(ozqRon)
+                    .revolutPriceAdjustment(revProfit)
+                    .build();
+            dto.addMetalPrice(metalType, mp);
         }
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }

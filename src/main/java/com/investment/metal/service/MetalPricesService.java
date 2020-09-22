@@ -52,11 +52,7 @@ public class MetalPricesService extends AbstractService {
 
     public UserMetalInfo calculatesUserProfit(Purchase purchase) {
         CurrencyType currencyType = this.externalPriceService.getCurrencyType();
-        final Currency currency = this.currencyService.findBySymbol(currencyType).orElse(null);
-        if (currency == null) {
-            LOGGER.error("Inexisting currency in the database: " + currencyType);
-            return null;
-        }
+        final Currency currency = this.currencyService.findBySymbol(currencyType);
         final double currencyToRonRate = currency.getRon();
 
         double revolutProfitPercentages = this.revolutService.getRevolutProfitFor(purchase.getMetalType());
