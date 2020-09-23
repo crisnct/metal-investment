@@ -1,14 +1,3 @@
-#The only difference between docker-compose.yaml and this debug file is moving
-#from Dockerfile "ENTRYPOINT"  into "command" of the compose file
-#don't forget in compose run config set=true "--build/force build images"
-
-#create a network and add our services into this network:
-#so, "app" service will be able to connect to the mysql database from "db" servoce by the hostname="db":
-#jdbc:mysql://db:3306/DOCKERDB
-
-#Connection url for connection in the DatabaseView:
-#  jdbc:mysql://0.0.0.0:13306/DOCKERDB, login=root, password=root
-#App is available at: http://localhost:18080/entitybus/post
 version: "3.8"
 
 networks:
@@ -21,7 +10,13 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "18080:8080"
+      - "8080:8080"
+    environment:
+      METAL_INVESTMENT_MAIL_FROM: ${METAL_INVESTMENT_MAIL_FROM}
+      METAL_INVESTMENT_MAIL_PASSWORD: $METAL_INVESTMENT_MAIL_PASSWORD
+      METAL_INVESTMENT_MAIL_PORT: $METAL_INVESTMENT_MAIL_PORT
+      METAL_INVESTMENT_MAIL_HOST: $METAL_INVESTMENT_MAIL_HOST
+      METAL_INVESTMENT_ENCODER_SECRETE: $METAL_INVESTMENT_ENCODER_SECRETE
     networks:
       - test
     command: java -jar /target/metal-investment-0.0.1.jar
@@ -35,15 +30,13 @@ services:
       MYSQL_USER: test
       MYSQL_PASSWORD: test
       MYSQL_ROOT_PASSWORD: Nelu1810728
+      MYSQL_ROOT_HOST: '%'
     ports:
       - '3307:3306'
     healthcheck:
-      test: [ "CMD", "mysql", "-h", "localhost", "-P", "3306", "-u", "test", "--password=test", "-e", "select 1", "metals" ]
+      test: "/usr/bin/mysql --user=test --password=test--execute \"SHOW DATABASES;\""
       interval: 1s
       timeout: 3s
       retries: 30
-    expose:
-      # Opens port 3306 on the container
-      - '3306'
     networks:
       - test

@@ -20,6 +20,9 @@ public class CurrencyService extends AbstractService {
 
     public void save(CurrencyType currencyType, double value) {
         Currency curr = this.findBySymbol(currencyType);
+        if (curr == null) {
+            curr = new Currency();
+        }
         curr.setRon(value);
         curr.setSymbol(currencyType.name());
         curr.setTime(new Timestamp(System.currentTimeMillis()));

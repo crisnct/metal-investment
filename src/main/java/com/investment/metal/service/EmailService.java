@@ -31,6 +31,12 @@ public class EmailService extends AbstractService {
     @Value("${spring.mail.from}")
     private String emailFrom;
 
+    @Value("${spring.mail.host}")
+    private String host;
+
+    @Value("${spring.mail.port}")
+    private String port;
+
     @Autowired
     private JavaMailSender mailSender;
 
@@ -93,6 +99,7 @@ public class EmailService extends AbstractService {
 
     private void sendMail(String toEmail, String subject, String message) throws BusinessException {
         Exception cause = null;
+        LOGGER.info("Trying to send email from " + emailFrom + " to " + toEmail + " on host " + host + ":" + port);
         for (int i = 0; i < 3; i++) {
             try {
                 MimeMessage msg = this.mailSender.createMimeMessage();
@@ -110,6 +117,7 @@ public class EmailService extends AbstractService {
             }
         }
         if (cause != null) {
+            LOGGER.error(cause.getMessage(), cause);
             throw this.exceptionService
                     .createBuilder(MessageKey.FAIL_TO_SEND_EMAIL)
                     .setExceptionCause(cause)
