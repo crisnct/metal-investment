@@ -168,7 +168,7 @@ public class LoginService extends AbstractService {
         this.loginRepository.save(login);
     }
 
-    public Login checkToken(String token) throws BusinessException {
+    public Login getLogin(String token) throws BusinessException {
         Optional<Login> loginOp = this.findByToken(token);
         if (loginOp.isPresent()) {
             Login login = loginOp.get();

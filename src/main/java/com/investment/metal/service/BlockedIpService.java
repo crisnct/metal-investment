@@ -61,6 +61,11 @@ public class BlockedIpService extends AbstractService {
                     .setArguments(ip, banIp.getReason())
                     .build();
         }
+        this.checkBlockedIPGlobal();
+    }
+
+    public void checkBlockedIPGlobal() throws BusinessException {
+        final String ip = Util.getClientIpAddress(this.request);
         final BanIp banIpGlobal = this.getBanIp(ID_GLOBAL_USER, ip);
         if (banIpGlobal != null) {
             throw this.exceptionService

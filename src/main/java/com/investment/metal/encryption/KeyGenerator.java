@@ -16,15 +16,21 @@ import java.nio.charset.StandardCharsets;
  */
 class KeyGenerator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(KeyGenerator.class);
-
     public static final String SYMBOLS = "v$ ?J<#uy,'9Ak6hFVW(1nLb[2`gQ>Yt!GP^\"OI}lMri-_\\USd4{]R/KZHE)fsX.=|N*DBpw%5~qe@x&3c:+;z0TCo78maj"; //$NON-NLS-1$
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(KeyGenerator.class);
 
     private final int keySize;
 
     public KeyGenerator(int keySize) {
         super();
         this.keySize = keySize;
+    }
+
+    public static void main(String[] args) {
+        KeyGenerator gen = new KeyGenerator(255);
+        gen.generateKey(new File("metal-investment.key"));
+        System.out.println("key was created");
     }
 
     public void generateKey(File file) {
@@ -54,11 +60,5 @@ class KeyGenerator {
             strReturn.insert((int) (Math.random() * (strReturn.length() + 1)), KeyGenerator.SYMBOLS.charAt(i));
         }
         return strReturn.toString();
-    }
-
-    public static void main(String[] args) {
-        KeyGenerator gen = new KeyGenerator(255);
-        gen.generateKey(new File("metal-investment.key"));
-        System.out.println("key was created");
     }
 }

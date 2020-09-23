@@ -1,9 +1,9 @@
-package com.investment.metal.external;
+package com.investment.metal.price;
 
 import com.investment.metal.common.CurrencyType;
 import com.investment.metal.common.MetalType;
 
-public interface MetalFetchPriceBean {
+public interface ExternalMetalPriceReader {
 
     /**
      * @param metalType type of metal

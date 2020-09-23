@@ -22,9 +22,9 @@ import java.security.cert.X509Certificate;
 @Slf4j
 @SpringBootApplication
 public class MetalApplication {
-    private static final Logger LOGGER = LoggerFactory.getLogger(MetalApplication.class);
-
     public static final String APPLICATION_PROPERTIES = "application.properties";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MetalApplication.class);
 
     public static void main(String[] args) {
         if (args.length > 0 && StringUtils.equals(args[0], "-update.properties")) {
@@ -57,7 +57,6 @@ public class MetalApplication {
             sourceCodeProperties.load(contextClassLoader.getResourceAsStream(APPLICATION_PROPERTIES));
 
             //Add missing properties
-            boolean changes = false;
             for (String propName : currentFileWorkDir.getKeys()) {
                 String propValue = currentFileWorkDir.getProperty(propName);
                 if (StringUtils.isBlank(sourceCodeProperties.getProperty(propName))) {
@@ -100,9 +99,6 @@ public class MetalApplication {
             SSLContext sslcontext = SSLContext.getInstance("SSL");
             sslcontext.init(null, trustAllCerts, new java.security.SecureRandom());
             HttpsURLConnection.setDefaultSSLSocketFactory(sslcontext.getSocketFactory());
-            //        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslcontext);
-            //          CloseableHttpClient httpclient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
-//            Unirest.config().httpClient(httpclient);
         } catch (Throwable e) {
             LOGGER.error(e.getMessage(), e);
         }

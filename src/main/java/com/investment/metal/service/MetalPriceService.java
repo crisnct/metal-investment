@@ -9,7 +9,7 @@ import com.investment.metal.database.MetalPriceRepository;
 import com.investment.metal.database.Purchase;
 import com.investment.metal.dto.UserMetalInfo;
 import com.investment.metal.exceptions.BusinessException;
-import com.investment.metal.external.MetalFetchPriceBean;
+import com.investment.metal.price.ExternalMetalPriceReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +23,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
-public class MetalPricesService extends AbstractService {
+public class MetalPriceService extends AbstractService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MetalPricesService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MetalPriceService.class);
 
     private static final long THRESHOLD_TOO_OLD_ENTITIES = TimeUnit.DAYS.toMillis(7);
 
@@ -39,7 +39,7 @@ public class MetalPricesService extends AbstractService {
     private CurrencyService currencyService;
 
     @Autowired
-    private MetalFetchPriceBean externalPriceService;
+    private ExternalMetalPriceReader externalPriceService;
 
     public MetalPrice getMetalPrice(MetalType metalType) throws BusinessException {
         Optional<List<MetalPrice>> price = this.metalPriceRepository.findByMetalSymbol(metalType.getSymbol());

@@ -21,19 +21,19 @@ import java.util.concurrent.TimeUnit;
 public class AlertsTrigger {
 
     @Autowired
+    protected ExceptionService exceptionService;
+
+    @Autowired
     private AccountService accountService;
 
     @Autowired
-    private MetalPricesService metalPricesService;
+    private MetalPriceService metalPricesService;
 
     @Autowired
     private AlertService alertService;
 
     @Autowired
     private PurchaseService purchaseService;
-
-    @Autowired
-    protected ExceptionService exceptionService;
 
     @Autowired
     private EmailService emailService;

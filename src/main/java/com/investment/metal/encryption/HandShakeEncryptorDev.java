@@ -7,17 +7,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+import java.util.concurrent.TimeUnit;
+
 @Component
 @Profile("dev")
 public class HandShakeEncryptorDev extends AbstractHandShakeEncryptor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HandShakeEncryptorProd.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HandShakeEncryptorDev.class);
 
-    private static final int TIME_THRESHOLD = 5 * 60 * 1000;
+    private static final long TIME_THRESHOLD = TimeUnit.HOURS.toMillis(5);
 
-    public HandShakeEncryptorDev() {
-        super();
-    }
+    private static final String HIJACK_HEADER_RESPONSE = "hijack";
 
     @Override
     public void check(String value) throws BusinessException {
@@ -34,7 +34,7 @@ public class HandShakeEncryptorDev extends AbstractHandShakeEncryptor {
                     .setArguments("The request was not placed from an unauthorized source")
                     .build();
         } finally {
-            this.response.setHeader("hijack", this.aesEncryptor.encrypt(String.valueOf(System.currentTimeMillis())));
+            this.response.setHeader(HIJACK_HEADER_RESPONSE, this.aesEncryptor.encrypt(String.valueOf(System.currentTimeMillis())));
         }
     }
 }

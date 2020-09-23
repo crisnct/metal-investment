@@ -1,6 +1,9 @@
 package com.investment.metal;
 
-import com.investment.metal.external.MetalFetchPriceBean;
+import com.investment.metal.common.PriceServiceType;
+import com.investment.metal.price.BloombergPriceReader;
+import com.investment.metal.price.ExternalMetalPriceReader;
+import com.investment.metal.price.GalmarleyPriceReader;
 import io.github.resilience4j.bulkhead.BulkheadConfig;
 import io.github.resilience4j.bulkhead.BulkheadRegistry;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
@@ -25,7 +28,6 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.time.Duration;
 import java.util.concurrent.TimeoutException;
 
@@ -50,8 +52,8 @@ public class Config implements WebMvcConfigurer {
     @Value("${METAL_INVESTMENT_ENCODER_SECRETE}")
     private String encoderSecrete;
 
-    @Value("${spring.metal.price.bean}")
-    private String metalPriceBean;
+    @Value("${service.metal.price.host}")
+    private PriceServiceType servicePriceType;
 
     @Bean
     public SpringLiquibase liquibase() {
@@ -119,22 +121,17 @@ public class Config implements WebMvcConfigurer {
     }
 
     @Bean
-    public MetalFetchPriceBean createExternalPriceService() {
-        try {
-            Constructor<?>[] ctors = Class.forName(metalPriceBean).getDeclaredConstructors();
-            Constructor<?> ctor = null;
-            for (Constructor<?> constructor : ctors) {
-                ctor = constructor;
-                if (ctor.getGenericParameterTypes().length == 0)
-                    break;
-            }
-            assert ctor != null;
-            ctor.setAccessible(true);
-            return (MetalFetchPriceBean) ctor.newInstance();
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
-            return null;
+    public ExternalMetalPriceReader createMetalPriceReader() {
+        ExternalMetalPriceReader priceService = null;
+        switch (servicePriceType) {
+            case GALMARLEY:
+                priceService = new GalmarleyPriceReader();
+                break;
+            case BLOOMBERG:
+                priceService = new BloombergPriceReader();
+                break;
         }
+        return priceService;
     }
 
     @Override

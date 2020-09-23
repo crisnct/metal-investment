@@ -20,11 +20,10 @@ public abstract class AbstractHandShakeEncryptor {
 
     private static final String AES_KEY_HANDSHAKE = "metal$investment";
 
-    @Autowired
-    protected BlockedIpService blockIpService;
+    protected final AESEncryptor aesEncryptor;
 
     @Autowired
-    private HttpServletRequest request;
+    protected BlockedIpService blockIpService;
 
     @Autowired
     protected HttpServletResponse response;
@@ -32,7 +31,8 @@ public abstract class AbstractHandShakeEncryptor {
     @Autowired
     protected ExceptionService exceptionService;
 
-    protected final AESEncryptor aesEncryptor;
+    @Autowired
+    private HttpServletRequest request;
 
     public AbstractHandShakeEncryptor() {
         this.aesEncryptor = new AESEncryptor(StandardCharsets.UTF_8);

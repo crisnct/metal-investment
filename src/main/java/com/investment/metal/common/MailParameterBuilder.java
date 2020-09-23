@@ -13,10 +13,6 @@ import java.util.Objects;
 public class MailParameterBuilder {
     private static final Logger LOGGER = LoggerFactory.getLogger(MailParameterBuilder.class);
 
-    private final String text;
-
-    private final Map<String, Object> parameters = new HashMap<>();
-
     private static final Map<MailTemplates, String> mailTemplates = new HashMap<>();
 
     static {
@@ -33,6 +29,10 @@ public class MailParameterBuilder {
             }
         }
     }
+
+    private final String text;
+
+    private final Map<String, Object> parameters = new HashMap<>();
 
     private MailParameterBuilder(String text) {
         this.text = text;

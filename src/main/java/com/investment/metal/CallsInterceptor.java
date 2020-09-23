@@ -15,15 +15,17 @@ import java.util.Enumeration;
 
 public class CallsInterceptor extends HandlerInterceptorAdapter {
 
+    public static final String HANDSHAKE_HEADER = "hs";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CallsInterceptor.class);
 
     private static final int MAX_HEADER_SIZE = 500;
 
     @Autowired
-    private AbstractHandShakeEncryptor handShakeEncryptor;
+    protected ExceptionService exceptionService;
 
     @Autowired
-    protected ExceptionService exceptionService;
+    private AbstractHandShakeEncryptor handShakeEncryptor;
 
     @Override
     @SuppressWarnings("NullableProblems")
@@ -31,6 +33,7 @@ public class CallsInterceptor extends HandlerInterceptorAdapter {
         HandlerMethod hm = (HandlerMethod) handler;
         LOGGER.info("Start request:" + hm.getShortLogMessage());
 
+        //Reject requests with empty headers or with headers which are too long
         Enumeration<String> headerNames = request.getHeaderNames();
         while (headerNames.hasMoreElements()) {
             String header = headerNames.nextElement();
@@ -48,7 +51,8 @@ public class CallsInterceptor extends HandlerInterceptorAdapter {
             }
         }
 
-        final String hs = request.getHeader("hs");
+        //Validate handshake token
+        final String hs = request.getHeader(HANDSHAKE_HEADER);
         this.handShakeEncryptor.check(hs);
         return super.preHandle(request, response, handler);
     }

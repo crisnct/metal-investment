@@ -1,4 +1,4 @@
-package com.investment.metal.external;
+package com.investment.metal.price;
 
 import com.investment.metal.common.CurrencyType;
 import com.investment.metal.common.MetalType;
@@ -8,7 +8,7 @@ import kong.unirest.JsonNode;
 import kong.unirest.Unirest;
 import kong.unirest.json.JSONArray;
 
-public class BloombergFetchPrice implements MetalFetchPriceBean {
+public class BloombergPriceReader implements ExternalMetalPriceReader {
 
     @Override
     public double fetchPrice(MetalType metalType) {

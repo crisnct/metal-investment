@@ -49,15 +49,13 @@ public class PublicApiController {
             @RequestHeader("password") String password,
             @RequestHeader("email") String email
     ) {
-        if (!Util.isValidEmailAddress(email)) {
-            throw this.exceptionService
-                    .createBuilder(MessageKey.INVALID_REQUEST)
-                    .setArguments("Invalid email address!")
-                    .build();
-        }
+        this.exceptionService.check(!Util.isValidEmailAddress(email), MessageKey.INVALID_REQUEST, "Invalid email address!");
+        this.blockedIpService.checkBlockedIPGlobal();
         Customer user = this.accountService.registerNewUser(username, this.passwordEncoder.encode(password), email);
+        this.bannedAccountsService.checkBanned(user.getId());
         this.loginService.validateAccount(user, false);
-        SimpleMessageDto dto = new SimpleMessageDto("An email was sent to " + email + " with a code. Call validation request with that code");
+
+        SimpleMessageDto dto = new SimpleMessageDto("An email was sent to %s with a code. Call validation request with that code", email);
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
@@ -67,9 +65,9 @@ public class PublicApiController {
             @RequestHeader("username") final String username,
             @RequestHeader("code") final int code
     ) {
+        this.blockedIpService.checkBlockedIPGlobal();
         Customer user = this.accountService.findByUsername(username);
-        this.checkBannedOrBlocked(user.getId());
-
+        this.bannedAccountsService.checkBanned(user.getId());
         this.loginService.verifyCode(user.getId(), code);
 
         SimpleMessageDto dto = new SimpleMessageDto("The account was validated. You can log in now.");
@@ -82,12 +80,13 @@ public class PublicApiController {
             @RequestHeader("username") final String username,
             @RequestHeader("password") final String password
     ) {
+        this.blockedIpService.checkBlockedIPGlobal();
         final Customer user = this.accountService.findByUsername(username);
-        this.checkBannedOrBlocked(user.getId());
-
+        this.bannedAccountsService.checkBanned(user.getId());
         if (!passwordEncoder.matches(password, user.getPassword())) {
             this.loginService.markLoginFailed(user.getId());
         }
+
         String token = this.loginService.login(user);
         UserLoginDto dto = new UserLoginDto(token);
         return new ResponseEntity<>(dto, HttpStatus.OK);
@@ -98,16 +97,12 @@ public class PublicApiController {
     public ResponseEntity<ResetPasswordDto> resetPassword(
             @RequestHeader("email") final String email
     ) {
-        if (!Util.isValidEmailAddress(email)) {
-            throw this.exceptionService
-                    .createBuilder(MessageKey.INVALID_REQUEST)
-                    .setArguments("Invalid email address!")
-                    .build();
-        }
+        this.exceptionService.check(!Util.isValidEmailAddress(email), MessageKey.INVALID_REQUEST, "Invalid email address!");
+        this.blockedIpService.checkBlockedIPGlobal();
         final Customer user = this.accountService.findByEmail(email);
-        this.checkBannedOrBlocked(user.getId());
-
+        this.bannedAccountsService.checkBanned(user.getId());
         this.loginService.validateAccount(user, true);
+
         String token = this.loginService.generateResetPasswordToken(user);
         String message = "A message with a code was sent to " + email;
         return new ResponseEntity<>(new ResetPasswordDto(token, message), HttpStatus.OK);
@@ -121,24 +116,16 @@ public class PublicApiController {
             @RequestHeader("email") final String email,
             @RequestHeader("token") final String token
     ) {
-        if (!Util.isValidEmailAddress(email)) {
-            throw this.exceptionService
-                    .createBuilder(MessageKey.INVALID_REQUEST)
-                    .setArguments("Invalid email address!")
-                    .build();
-        }
+        this.blockedIpService.checkBlockedIPGlobal();
+        this.exceptionService.check(!Util.isValidEmailAddress(email), MessageKey.INVALID_REQUEST, "Invalid email address!");
         final Customer user = this.accountService.findByEmail(email);
-        this.checkBannedOrBlocked(user.getId());
+        Long userId = user.getId();
+        this.bannedAccountsService.checkBanned(userId);
 
-        this.loginService.verifyCodeAndToken(user.getId(), code, token);
+        this.loginService.verifyCodeAndToken(userId, code, token);
         this.accountService.updatePassword(user, this.passwordEncoder.encode(newPassword));
 
-        SimpleMessageDto dto = new SimpleMessageDto("Password was changed successfully!");
-        return new ResponseEntity<>(dto, HttpStatus.OK);
+        return new ResponseEntity<>(new SimpleMessageDto("Password was changed successfully!"), HttpStatus.OK);
     }
 
-    private void checkBannedOrBlocked(long userId) {
-        this.bannedAccountsService.checkBanned(userId);
-        this.blockedIpService.checkBlockedIP(userId);
-    }
 }

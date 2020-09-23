@@ -7,7 +7,7 @@ import com.investment.metal.database.Alert;
 import com.investment.metal.database.AlertRepository;
 import com.investment.metal.exceptions.BusinessException;
 import com.investment.metal.service.AbstractService;
-import com.investment.metal.service.MetalPricesService;
+import com.investment.metal.service.MetalPriceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,13 +22,13 @@ import java.util.Optional;
 @Service
 public class AlertService extends AbstractService {
 
+    private final ScriptEngine engine;
+
     @Autowired
     private AlertRepository alertRepository;
 
     @Autowired
-    private MetalPricesService metalPricesService;
-
-    private final ScriptEngine engine;
+    private MetalPriceService metalPricesService;
 
     public AlertService() {
         ScriptEngineManager mgr = new ScriptEngineManager();

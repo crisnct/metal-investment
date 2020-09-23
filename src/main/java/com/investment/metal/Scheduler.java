@@ -4,10 +4,9 @@ import com.investment.metal.common.CurrencyType;
 import com.investment.metal.common.MetalType;
 import com.investment.metal.common.RSSFeedParser;
 import com.investment.metal.service.CurrencyService;
-import com.investment.metal.service.MetalPricesService;
+import com.investment.metal.service.MetalPriceService;
 import com.investment.metal.service.NotificationService;
 import com.investment.metal.service.alerts.AlertsTrigger;
-import com.investment.metal.service.exception.ExceptionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,22 +23,19 @@ import java.io.IOException;
 public class Scheduler {
     private static final Logger LOGGER = LoggerFactory.getLogger(Scheduler.class);
 
+    private final RSSFeedParser rssFeedParser = new RSSFeedParser();
+
     @Autowired
-    private MetalPricesService metalPricesService;
+    private MetalPriceService metalPricesService;
 
     @Autowired
     private CurrencyService currencyService;
-
-    @Autowired
-    protected ExceptionService exceptionService;
 
     @Autowired
     private AlertsTrigger alertsTrigger;
 
     @Autowired
     private NotificationService notificationService;
-
-    private final RSSFeedParser rssFeedParser = new RSSFeedParser();
 
     private MetalType metalType = MetalType.GOLD;
 
@@ -80,14 +76,12 @@ public class Scheduler {
 
     @SuppressWarnings("SameParameterValue")
     private void fetchCurrency(CurrencyType currency, String feedURL) {
-        double ron;
         try {
-            ron = this.rssFeedParser.readFeed(feedURL);
+            double ron = this.rssFeedParser.readFeed(feedURL);
+            this.currencyService.save(currency, ron);
         } catch (IOException e) {
-            LOGGER.error(e.getMessage(), e);
-            return;
+            LOGGER.error("Fail to read currency value " + currency + " " + feedURL, e);
         }
-        this.currencyService.save(currency, ron);
     }
 
     @Scheduled(fixedDelay = 3600 * 1000)

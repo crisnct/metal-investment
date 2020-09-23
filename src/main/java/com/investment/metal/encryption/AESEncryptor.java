@@ -17,9 +17,9 @@ public class AESEncryptor {
 
     private static final String ALGORITHM = "AES";
 
-    private String key;
-
     private final Charset charset;
+
+    private String key;
 
     public AESEncryptor(Charset charset) {
         this.charset = charset;

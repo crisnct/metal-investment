@@ -7,8 +7,6 @@ import lombok.Data;
 @Builder
 public class MetalInfo {
 
-    private String symbol;
-
     private final double price1kg;
 
     private final double price1oz;
@@ -16,5 +14,7 @@ public class MetalInfo {
     private final double price1ozRON;
 
     private final double revolutPriceAdjustment;
+
+    private String symbol;
 
 }

@@ -66,9 +66,6 @@ public enum MessageKey {
     //Fail to send email to {0}
     FAIL_TO_SEND_EMAIL(1019);
 
-    @Getter
-    final int code;
-
     static {
         Set<Integer> collection = new HashSet<>();
         for (MessageKey key : MessageKey.values()) {
@@ -78,5 +75,8 @@ public enum MessageKey {
             collection.add(key.code);
         }
     }
+
+    @Getter
+    final int code;
 
 }

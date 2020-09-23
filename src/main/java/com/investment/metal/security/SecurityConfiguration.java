@@ -22,11 +22,11 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-    private final AuthenticationProvider provider;
-
     private static final RequestMatcher PROTECTED_URLS = new OrRequestMatcher(
             new AntPathRequestMatcher("/api/**")
     );
+
+    private final AuthenticationProvider provider;
 
     public SecurityConfiguration(final AuthenticationProvider authenticationProvider) {
         super();

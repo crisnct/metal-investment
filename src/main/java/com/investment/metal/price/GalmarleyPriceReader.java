@@ -1,4 +1,4 @@
-package com.investment.metal.external;
+package com.investment.metal.price;
 
 import com.investment.metal.common.CurrencyType;
 import com.investment.metal.common.MetalType;
@@ -6,7 +6,7 @@ import kong.unirest.HttpResponse;
 import kong.unirest.JsonNode;
 import kong.unirest.Unirest;
 
-public class GalmarleyFetchPrice implements MetalFetchPriceBean {
+public class GalmarleyPriceReader implements ExternalMetalPriceReader {
 
     @Override
     public double fetchPrice(MetalType metalType) {

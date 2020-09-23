@@ -7,7 +7,7 @@ import com.investment.metal.database.Currency;
 import com.investment.metal.database.RevolutProfit;
 import com.investment.metal.database.RevolutProfitRepository;
 import com.investment.metal.exceptions.BusinessException;
-import com.investment.metal.external.MetalFetchPriceBean;
+import com.investment.metal.price.ExternalMetalPriceReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ public class RevolutService extends AbstractService {
     private CurrencyService currencyService;
 
     @Autowired
-    private MetalFetchPriceBean externalMetalPrice;
+    private ExternalMetalPriceReader externalMetalPrice;
 
     public double calculateRevolutProfit(double revolutPriceOunce, double priceMetalNowKg, MetalType metalType) throws BusinessException {
         CurrencyType currencyType = this.externalMetalPrice.getCurrencyType();
