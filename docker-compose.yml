@@ -6,6 +6,7 @@ networks:
 services:
 
   app:
+    image: nelucristian/metal-investment
     build:
       context: .
       dockerfile: Dockerfile
