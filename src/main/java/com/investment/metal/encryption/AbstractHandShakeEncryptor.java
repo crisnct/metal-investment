@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 public abstract class AbstractHandShakeEncryptor {
 
-    private static final String AES_KEY_HANDSHAKE = "metal$investment";
+    public static final String AES_KEY_HANDSHAKE = "metal$investment";
 
     protected final AESEncryptor aesEncryptor;
 
