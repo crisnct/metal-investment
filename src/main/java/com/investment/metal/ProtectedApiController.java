@@ -327,16 +327,18 @@ public class ProtectedApiController {
         dto.setMetalCurrencyType(this.metalPriceBean.getCurrencyType());
         for (MetalType metalType : MetalType.values()) {
             MetalPrice price = this.metalPriceService.getMetalPrice(metalType);
-            double revProfit = this.revolutService.getRevolutProfitFor(metalType);
             double price1kg = price.getPrice();
             double ozq = price1kg * Util.OUNCE;
+            double revProfit = this.revolutService.getRevolutProfitFor(metalType);
             double ozqRon = ozq * this.currencyService.findBySymbol(CurrencyType.USD).getRon();
+            double revPriceOz = ozqRon * (1 + revProfit);
             final MetalInfo mp = MetalInfo.builder()
                     .symbol(metalType.getSymbol())
                     .price1kg(price1kg)
                     .price1oz(ozq)
                     .price1ozRON(ozqRon)
                     .revolutPriceAdjustment(revProfit)
+                    .revolutPrice1oz(revPriceOz)
                     .build();
             dto.addMetalPrice(metalType, mp);
         }

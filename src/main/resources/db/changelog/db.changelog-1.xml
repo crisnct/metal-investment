@@ -122,6 +122,7 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
     </changeSet>
 
     <changeSet  id="1.5"  author="Cristian Tone">
+        <validCheckSum>8:f0a1dd88bc1538919a0d3b41080ee531</validCheckSum>
         <createTable tableName="revolutprofit">
             <column  name="id" type="int"
                      autoIncrement="true"
@@ -138,6 +139,9 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
             <column  name="time" type="datetime">
                 <constraints  nullable="false"/>
             </column>
+            <column  name="revolutPriceOz" type="float(20)"/>
+            <column  name="currencyToRonRate" type="float(20)"/>
+            <column  name="metalPriceOz" type="float(20)"/>
         </createTable>
     </changeSet>
 

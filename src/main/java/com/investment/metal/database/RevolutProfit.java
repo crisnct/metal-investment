@@ -18,4 +18,11 @@ public class RevolutProfit {
     private Double profit;
 
     private Timestamp time;
+
+    private Double revolutPriceOz;
+
+    private Double currencyToRonRate;
+
+    private Double metalPriceOz;
+
 }

@@ -33,13 +33,15 @@ public class RevolutService extends AbstractService {
         final Currency currency = currencyService.findBySymbol(currencyType);
         final double currencyToRonRate = currency.getRon();
 
-        double diffCostKg = revolutPriceOunce / (Util.OUNCE * currencyToRonRate) - priceMetalNowKg;
-        final double profit = diffCostKg / priceMetalNowKg;
+        double revPrice1KgUSD = revolutPriceOunce / (Util.OUNCE * currencyToRonRate);
+        final double profit = (revPrice1KgUSD - priceMetalNowKg) / priceMetalNowKg;
 
-        RevolutProfit revProfit = this.revolutRepository.findByMetalSymbol(metalType.getSymbol());
-        if (revProfit == null) {
-            revProfit = new RevolutProfit();
-        }
+        double metalPriceOzRON = priceMetalNowKg * Util.OUNCE;
+
+        RevolutProfit revProfit = new RevolutProfit();
+        revProfit.setCurrencyToRonRate(currencyToRonRate);
+        revProfit.setRevolutPriceOz(revolutPriceOunce / currencyToRonRate);
+        revProfit.setMetalPriceOz(metalPriceOzRON);
         revProfit.setMetalSymbol(metalType.getSymbol());
         revProfit.setProfit(profit);
         revProfit.setTime(new Timestamp(System.currentTimeMillis()));

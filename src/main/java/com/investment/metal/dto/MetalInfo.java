@@ -15,6 +15,8 @@ public class MetalInfo {
 
     private final double revolutPriceAdjustment;
 
+    private final double revolutPrice1oz;
+
     private String symbol;
 
 }
