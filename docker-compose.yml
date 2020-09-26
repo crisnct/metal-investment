@@ -3,14 +3,6 @@ version: "3.8"
 networks:
   test:
 
-sut:
-  build: .
-  command: run_tests.sh
-  environment:
-    - SOURCE_BRANCH
-  networks:
-    - test
-
 services:
   nginx:
     container_name: nginx-container
@@ -27,7 +19,7 @@ services:
       - test
 
   app:
-    image: nelucristian/metal-investment
+    image: nelucristian/metal-investment:latest
     build:
       context: .
       dockerfile: Dockerfile
