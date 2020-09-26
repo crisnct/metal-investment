@@ -3,7 +3,28 @@ version: "3.8"
 networks:
   test:
 
+sut:
+  build: .
+  command: run_tests.sh
+  environment:
+    - SOURCE_BRANCH
+  networks:
+    - test
+
 services:
+  nginx:
+    container_name: nginx-container
+    image: nginx:1.18
+    restart: always
+    ports:
+      - 81:81
+      - 443:443
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    depends_on:
+      - app
+    networks:
+      - test
 
   app:
     image: nelucristian/metal-investment
@@ -12,7 +33,7 @@ services:
       dockerfile: Dockerfile
     restart: always
     ports:
-      - "8080:8080"
+      - "8082:8082"
     environment:
       METAL_INVESTMENT_MAIL_FROM: $METAL_INVESTMENT_MAIL_FROM
       METAL_INVESTMENT_MAIL_PASSWORD: $METAL_INVESTMENT_MAIL_PASSWORD
