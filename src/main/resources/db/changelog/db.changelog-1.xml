@@ -251,4 +251,82 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         </createIndex>
     </changeSet>
 
+    <changeSet  id="1.11"  author="Cristian Tone">
+        <createTable tableName="expressionfunction">
+            <column  name="id" type="int"
+                     autoIncrement="true"
+                     startWith="0"
+                     incrementBy="1">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column  name="name" type="varchar(25)">
+                <constraints nullable="false"/>
+            </column>
+            <column  name="returned_type" type="varchar(25)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="1.12"  author="Cristian Tone">
+        <insert tableName="expressionfunction">
+            <column name="name" value="profit"/>
+            <column name="returned_type" value="void"/>
+        </insert>
+        <insert tableName="expressionfunction">
+            <column name="name" value="inc"/>
+            <column name="returned_type" value="boolean"/>
+        </insert>
+        <insert tableName="expressionfunction">
+            <column name="name" value="dec"/>
+            <column name="returned_type" value="boolean"/>
+        </insert>
+    </changeSet>
+
+    <changeSet  id="1.13"  author="Cristian Tone">
+        <createTable tableName="expressionfunctionparameters">
+            <column  name="id" type="int"
+                     autoIncrement="true"
+                     startWith="0"
+                     incrementBy="1">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column  name="expression_function_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="varchar(25)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="min" type="float(10)"/>
+            <column name="max" type="float(10)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="1.14"  author="Cristian Tone">
+        <insert tableName="expressionfunctionparameters">
+            <column name="expression_function_id" value="2"/>
+            <column name="name" value="days"/>
+            <column name="min" value="1"/>
+            <column name="max" value="14"/>
+        </insert>
+        <insert tableName="expressionfunctionparameters">
+            <column name="expression_function_id" value="2"/>
+            <column name="name" value="eps"/>
+            <column name="min" value="0.0"/>
+            <column name="max" value="10.0"/>
+        </insert>
+        <insert tableName="expressionfunctionparameters">
+            <column name="expression_function_id" value="3"/>
+            <column name="name" value="days"/>
+            <column name="min" value="1"/>
+            <column name="max" value="14"/>
+        </insert>
+        <insert tableName="expressionfunctionparameters">
+            <column name="expression_function_id" value="3"/>
+            <column name="name" value="eps"/>
+            <column name="min" value="0.0"/>
+            <column name="max" value="10.0"/>
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>

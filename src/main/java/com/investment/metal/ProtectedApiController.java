@@ -7,7 +7,11 @@ import com.investment.metal.exceptions.NoRollbackBusinessException;
 import com.investment.metal.price.ExternalMetalPriceReader;
 import com.investment.metal.service.*;
 import com.investment.metal.service.alerts.AlertService;
+import com.investment.metal.service.alerts.FunctionInfo;
+import com.investment.metal.service.alerts.FunctionParam;
 import com.investment.metal.service.exception.ExceptionService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.script.ScriptException;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Objects;
@@ -33,6 +36,8 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api")
 public class ProtectedApiController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProtectedApiController.class);
 
     @Autowired
     private AccountService accountService;
@@ -201,19 +206,8 @@ public class ProtectedApiController {
         this.exceptionService.check(alertFrequency == null, MessageKey.INVALID_REQUEST, "Invalid frequency header");
         MetalType metalType = MetalType.lookup(metalSymbol);
         this.exceptionService.check(metalType == null, MessageKey.INVALID_REQUEST, "metalSymbol header is invalid");
-        try {
-            if (this.alertService.evaluateExpression(expression, 0)) {
-                throw this.exceptionService
-                        .createBuilder(MessageKey.INVALID_REQUEST)
-                        .setArguments("The expression should be evaluated as FALSE for profit=0")
-                        .build();
-            }
-        } catch (ScriptException e) {
-            throw this.exceptionService
-                    .createBuilder(MessageKey.INVALID_REQUEST)
-                    .setArguments("Invalid expression")
-                    .build();
-        }
+        String expInvalidMessage = this.alertService.evaluateExpression(expression).isValid();
+        this.exceptionService.check(expInvalidMessage != null, MessageKey.INVALID_REQUEST, expInvalidMessage);
 
         Objects.requireNonNull(alertFrequency);
         Objects.requireNonNull(metalType);
@@ -264,6 +258,41 @@ public class ProtectedApiController {
         this.alertService.removeAlert(alertId);
         Customer user = this.accountService.findById(userId);
         SimpleMessageDto dto = new SimpleMessageDto("The alert %s was removed by user %s", alertId, user.getUsername());
+        return new ResponseEntity<>(dto, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/functions", method = RequestMethod.GET)
+    @Transactional(noRollbackFor = NoRollbackBusinessException.class)
+    public ResponseEntity<ExpressionHelperDto> functions() {
+        String token = Util.getTokenFromRequest(request);
+        final Login loginEntity = this.loginService.getLogin(token);
+        Objects.requireNonNull(loginEntity);
+
+        ExpressionHelperDto dto = new ExpressionHelperDto();
+        for (FunctionInfo function : this.alertService.getExpressionFunctions().values()) {
+            ExpressionFunctionDto funcDto = new ExpressionFunctionDto();
+            funcDto.setName(function.getName());
+            funcDto.setDescription(function.getDescription());
+            funcDto.setReturnedType(function.getReturnedType());
+
+            for (FunctionParam param : function.getParameters()) {
+                final ExpressionFunctionParameterDto paramDto;
+                if (param.getMin() == param.getMax()) {
+                    paramDto = new ExpressionFunctionParameterDto();
+                } else {
+                    ExpressionFunctionParameterMinMaxDto tempParamDto = new ExpressionFunctionParameterMinMaxDto();
+                    tempParamDto.setMin(param.getMin());
+                    tempParamDto.setMax(param.getMax());
+                    paramDto = tempParamDto;
+                }
+                paramDto.setName(param.getName());
+                paramDto.setDescription(param.getDescription());
+                funcDto.addParameter(paramDto);
+            }
+
+            dto.addFunction(funcDto);
+        }
+
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
@@ -332,7 +361,7 @@ public class ProtectedApiController {
             double revProfit = this.revolutService.getRevolutProfitFor(metalType);
             double ozqRon = ozq * this.currencyService.findBySymbol(CurrencyType.USD).getRon();
             double revPriceOz = ozqRon * (1 + revProfit);
-            final MetalInfo mp = MetalInfo.builder()
+            final MetalInfoDto mp = MetalInfoDto.builder()
                     .symbol(metalType.getSymbol())
                     .price1kg(price1kg)
                     .price1oz(ozq)

@@ -15,14 +15,14 @@ public class ProfitDto {
     private final Timestamp time;
 
     @Getter
-    private final List<UserMetalInfo> metalInfo = new ArrayList<>();
+    private final List<UserMetalInfoDto> metalInfo = new ArrayList<>();
 
     public ProfitDto(String username) {
         this.username = username;
         this.time = new Timestamp(System.currentTimeMillis());
     }
 
-    public void addInfo(UserMetalInfo info) {
+    public void addInfo(UserMetalInfoDto info) {
         this.metalInfo.add(info);
     }
 

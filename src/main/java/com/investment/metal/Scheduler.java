@@ -53,7 +53,7 @@ public class Scheduler {
     public void fetchMetalPrices() {
         final double metalPrice = this.metalPricesService.fetchMetalPrice(metalType);
         this.metalPricesService.save(metalType, metalPrice);
-        this.alertsTrigger.trigerAlerts(metalType);
+        this.alertsTrigger.triggerAlerts(metalType);
 
         int ord = (this.metalType.ordinal() + 1) % MetalType.values().length;
         this.metalType = MetalType.values()[ord];

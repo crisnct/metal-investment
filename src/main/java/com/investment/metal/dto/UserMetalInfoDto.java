@@ -4,7 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Builder
-public class UserMetalInfo {
+public class UserMetalInfoDto {
 
     @Getter
     private final String metalSymbol;

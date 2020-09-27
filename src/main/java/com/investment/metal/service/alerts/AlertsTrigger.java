@@ -3,22 +3,26 @@ package com.investment.metal.service.alerts;
 import com.investment.metal.common.MetalType;
 import com.investment.metal.database.Alert;
 import com.investment.metal.database.Customer;
+import com.investment.metal.database.MetalPrice;
 import com.investment.metal.database.Purchase;
-import com.investment.metal.dto.UserMetalInfo;
+import com.investment.metal.dto.UserMetalInfoDto;
 import com.investment.metal.service.*;
 import com.investment.metal.service.exception.ExceptionService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.script.ScriptException;
 import java.sql.Timestamp;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Component
 public class AlertsTrigger {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AlertsTrigger.class);
 
     @Autowired
     protected ExceptionService exceptionService;
@@ -38,26 +42,71 @@ public class AlertsTrigger {
     @Autowired
     private EmailService emailService;
 
-    public void trigerAlerts(MetalType metalType) {
+    public void triggerAlerts(MetalType metalType) {
         final Map<Long, UserProfit> usersProfit = this.calculateUsersProfit();
 
         final List<Alert> allAlerts = this.alertService.findAllByMetalSymbol(metalType.getSymbol());
         for (Alert alert : allAlerts) {
             if (this.isTimeToCheckAlert(alert)) {
+                final UserProfit userProfit = usersProfit.get(alert.getUserId());
+                this.triggerAlert(userProfit, alert);
                 alert.setLastTimeChecked(new Timestamp(System.currentTimeMillis()));
-                UserProfit userProfit = usersProfit.get(alert.getUserId());
-                double profit = userProfit.getProfit();
-                try {
-                    if (this.alertService.evaluateExpression(alert.getExpression(), profit)) {
-                        this.emailService.sendMailWithProfit(userProfit, alert);
-                    }
-                } catch (ScriptException e) {
-                    System.err.println("Invalid expression: " + alert.getExpression());
-                }
             }
         }
 
         this.alertService.saveAll(allAlerts);
+    }
+
+    private void triggerAlert(UserProfit userProfit, Alert alert) {
+        String expression = alert.getExpression();
+        final double profit = userProfit.getProfit();
+        try {
+            ExpressionEvaluator eval = this.alertService.evaluateExpression(expression)
+                    .setParameters((name, params) -> {
+                        switch (name) {
+                            case "profit":
+                                return profit;
+                            case "inc":
+                                int days = Integer.parseInt(params[0].toString());
+                                double eps = Double.parseDouble(params[1].toString());
+                                return getIncremental(alert.getMetalType(), days, eps);
+                            default:
+                                return null;
+                        }
+                    });
+
+            if (eval.evaluate()) {
+                this.emailService.sendMailWithProfit(userProfit, alert);
+            }
+        } catch (ScriptException e) {
+            LOGGER.error("Invalid expression: " + expression, e);
+        }
+    }
+
+    private boolean getIncremental(MetalType metalType, int days, double eps) {
+        Optional<List<MetalPrice>> pricesOp = this.metalPricesService.getMetalPriceAll(metalType);
+        boolean isInc = false;
+        if (pricesOp.isPresent()) {
+            final Timestamp ts = new Timestamp(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(days));
+            List<MetalPrice> prices = pricesOp.get()
+                    .stream()
+                    .filter(m -> m.getTime().after(ts))
+                    .sorted(Comparator.comparing(MetalPrice::getTime))
+                    .collect(Collectors.toList());
+            double prevPrice = -Double.MAX_VALUE;
+            if (prices.size() > 1) {
+                isInc = true;
+                for (MetalPrice price : prices) {
+                    double epsPrice = prevPrice * eps / 100.0d;
+                    if (price.getPrice() < prevPrice - epsPrice) {
+                        isInc = false;
+                        break;
+                    }
+                    prevPrice = price.getPrice();
+                }
+            }
+        }
+        return isInc;
     }
 
     private Map<Long, UserProfit> calculateUsersProfit() {
@@ -71,7 +120,7 @@ public class AlertsTrigger {
             double totalAmount = 0;
             if (!purchases.isEmpty()) {
                 for (Purchase purchase : purchases) {
-                    final UserMetalInfo info = this.metalPricesService.calculatesUserProfit(purchase);
+                    final UserMetalInfoDto info = this.metalPricesService.calculatesUserProfit(purchase);
                     totalProfit += info.getProfit();
                     totalCost += purchase.getCost();
                     totalAmount += purchase.getAmount();

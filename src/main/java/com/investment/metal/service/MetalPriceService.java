@@ -7,7 +7,7 @@ import com.investment.metal.database.Currency;
 import com.investment.metal.database.MetalPrice;
 import com.investment.metal.database.MetalPriceRepository;
 import com.investment.metal.database.Purchase;
-import com.investment.metal.dto.UserMetalInfo;
+import com.investment.metal.dto.UserMetalInfoDto;
 import com.investment.metal.exceptions.BusinessException;
 import com.investment.metal.price.ExternalMetalPriceReader;
 import org.slf4j.Logger;
@@ -25,9 +25,9 @@ import java.util.stream.Collectors;
 @Service
 public class MetalPriceService extends AbstractService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MetalPriceService.class);
+    public static final long THRESHOLD_TOO_OLD_ENTITIES = TimeUnit.DAYS.toMillis(14);
 
-    private static final long THRESHOLD_TOO_OLD_ENTITIES = TimeUnit.DAYS.toMillis(7);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MetalPriceService.class);
 
     @Autowired
     private MetalPriceRepository metalPriceRepository;
@@ -46,11 +46,15 @@ public class MetalPriceService extends AbstractService {
         return price.map(metalPrices -> metalPrices.get(0)).orElse(null);
     }
 
+    public Optional<List<MetalPrice>> getMetalPriceAll(MetalType metalType) throws BusinessException {
+        return this.metalPriceRepository.findByMetalSymbol(metalType.getSymbol());
+    }
+
     public double fetchMetalPrice(MetalType metalType) {
         return this.externalPriceService.fetchPrice(metalType);
     }
 
-    public UserMetalInfo calculatesUserProfit(Purchase purchase) {
+    public UserMetalInfoDto calculatesUserProfit(Purchase purchase) {
         CurrencyType currencyType = this.externalPriceService.getCurrencyType();
         final Currency currency = this.currencyService.findBySymbol(currencyType);
         final double currencyToRonRate = currency.getRon();
@@ -62,7 +66,7 @@ public class MetalPriceService extends AbstractService {
         double revolutGoldPriceOunce = revolutGoldPriceKg * Util.OUNCE;
         double costNowUser = revolutGoldPriceOunce * purchase.getAmount();
         double profitRevolut = Util.reduceDecimals(costNowUser - purchase.getCost(), 2);
-        return UserMetalInfo
+        return UserMetalInfoDto
                 .builder()
                 .metalSymbol(purchase.getMetalSymbol())
                 .amountPurchased(purchase.getAmount())

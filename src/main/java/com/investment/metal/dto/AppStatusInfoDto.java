@@ -18,9 +18,9 @@ public class AppStatusInfoDto {
     private CurrencyType metalCurrencyType;
 
     @Getter
-    private Map<MetalType, MetalInfo> metalPrices = new LinkedHashMap<>();
+    private Map<MetalType, MetalInfoDto> metalPrices = new LinkedHashMap<>();
 
-    public void addMetalPrice(MetalType type, MetalInfo info) {
+    public void addMetalPrice(MetalType type, MetalInfoDto info) {
         this.metalPrices.put(type, info);
     }
 

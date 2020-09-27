@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class MetalInfo {
+public class MetalInfoDto {
 
     private final double price1kg;
 

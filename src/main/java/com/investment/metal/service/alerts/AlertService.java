@@ -1,22 +1,24 @@
 package com.investment.metal.service.alerts;
 
+import com.google.common.collect.Maps;
 import com.investment.metal.MessageKey;
 import com.investment.metal.common.AlertFrequency;
 import com.investment.metal.common.MetalType;
-import com.investment.metal.database.Alert;
-import com.investment.metal.database.AlertRepository;
+import com.investment.metal.database.*;
 import com.investment.metal.exceptions.BusinessException;
 import com.investment.metal.service.AbstractService;
+import com.investment.metal.service.MessageService;
 import com.investment.metal.service.MetalPriceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -30,9 +32,48 @@ public class AlertService extends AbstractService {
     @Autowired
     private MetalPriceService metalPricesService;
 
+    @Autowired
+    private ExpressionFunctionRepository functionRepository;
+
+    @Autowired
+    private ExpressionParameterRepository parameterRepository;
+
+    @Autowired
+    protected MessageService messageService;
+
+    private final Map<String, FunctionInfo> expressionFunctions = Maps.newLinkedHashMap();
+
     public AlertService() {
         ScriptEngineManager mgr = new ScriptEngineManager();
         this.engine = mgr.getEngineByName("JavaScript");
+    }
+
+    @PostConstruct
+    public void init() {
+        for (ExpressionFunction func : functionRepository.findAll()) {
+            String functionName = func.getName();
+            FunctionInfo info = new FunctionInfo(functionName);
+            info.setDescription(messageService.getMessage("FUNCTION_" + functionName));
+            info.setReturnedType(func.getReturnedType());
+
+            Optional<List<ExpressionParameter>> paramsOp = parameterRepository.findByExpressionFunctionId(func.getId());
+            if (paramsOp.isPresent()) {
+                for (ExpressionParameter param : paramsOp.get()) {
+                    String paramName = param.getName();
+                    info.addParam(FunctionParam.builder()
+                            .name(paramName)
+                            .description(messageService.getMessage("FUNCTION_PARAM_" + functionName + "_" + paramName))
+                            .min(param.getMin())
+                            .max(param.getMax())
+                            .build());
+                }
+            }
+            expressionFunctions.put(functionName, info);
+        }
+    }
+
+    public Map<String, FunctionInfo> getExpressionFunctions() {
+        return expressionFunctions;
     }
 
     public void addAlert(Long userId, String expression, AlertFrequency frequency, MetalType metalType) throws BusinessException {
@@ -49,11 +90,8 @@ public class AlertService extends AbstractService {
         return this.alertRepository.findByMetalSymbol(metalSymbol).orElse(new ArrayList<>());
     }
 
-    public boolean evaluateExpression(String expression, double profit) throws ScriptException {
-        final String filledExpression = new FilledExpressionBuilder(expression)
-                .setProfit(profit)
-                .build();
-        return (Boolean) this.engine.eval(filledExpression);
+    public ExpressionEvaluator evaluateExpression(String expression) {
+        return new ExpressionEvaluator(expression, this.engine, getExpressionFunctions());
     }
 
     public void saveAll(List<Alert> allAlerts) {
