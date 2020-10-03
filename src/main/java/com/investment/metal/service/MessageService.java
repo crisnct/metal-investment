@@ -1,9 +1,8 @@
 package com.investment.metal.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -18,14 +17,16 @@ public class MessageService {
     @Value("${spring.user.country}")
     private String userCountry;
 
-    @Autowired
-    private MessageSource bundle;
+    private ReloadableResourceBundleMessageSource messageSource;
 
     private Locale locale;
 
     @PostConstruct
     public void init() {
         locale = new Locale(userLanguage, userCountry);
+        messageSource = new ReloadableResourceBundleMessageSource();
+        messageSource.setBasename("classpath:messages");
+        messageSource.setDefaultEncoding("UTF-8");
     }
 
     public String getMessage(String key) {
@@ -35,7 +36,7 @@ public class MessageService {
     public String getMessage(String key, Object... arguments) {
         String message;
         try {
-            message = this.bundle.getMessage(key, arguments, locale);
+            message = this.messageSource.getMessage(key, arguments, locale);
         } catch (NoSuchMessageException e) {
             message = "Undefined message for key " + key;
         }
