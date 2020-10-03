@@ -60,7 +60,7 @@ public class ExpressionEvaluator {
         final FunctionInfo funcInfo = this.functions.get(var);
         if (funcInfo == null) {
             errorMessage = "Undefined function: " + var;
-        } else {
+        } else if (params != null) {
             int i = 0;
             if (funcInfo.getParameters().size() != params.length) {
                 errorMessage = "Missing parameters for function: " + var;
