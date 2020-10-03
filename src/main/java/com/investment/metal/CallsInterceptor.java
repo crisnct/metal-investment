@@ -31,7 +31,7 @@ public class CallsInterceptor extends HandlerInterceptorAdapter {
     @SuppressWarnings("NullableProblems")
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         HandlerMethod hm = (HandlerMethod) handler;
-        LOGGER.info("Start request:" + hm.getShortLogMessage());
+        LOGGER.info("Start request: " + hm.getShortLogMessage());
 
         //Reject requests with empty headers or with headers which are too long
         Enumeration<String> headerNames = request.getHeaderNames();
