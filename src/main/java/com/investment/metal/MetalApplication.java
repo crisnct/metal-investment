@@ -2,8 +2,14 @@ package com.investment.metal;
 
 import com.investment.metal.common.PropertyFile;
 import com.investment.metal.common.Util;
+import kong.unirest.Unirest;
+import kong.unirest.apache.ApacheClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.logging.log4j.LogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +41,15 @@ public class MetalApplication {
 
         //This is disabled temporary because RSS FEED parser fails
         disableSSLCheck();
+
+        //This is to prevent warnings about invalid cookie
+        Unirest.config().httpClient(config -> {
+            CloseableHttpClient closeableClient = HttpClients.custom()
+                    .setDefaultRequestConfig(RequestConfig.custom()
+                            .setCookieSpec(CookieSpecs.STANDARD).build())
+                    .build();
+            return ApacheClient.builder(closeableClient).apply(config);
+        });
 
         //Starts the spring boot application
         SpringApplication.run(MetalApplication.class, args);
