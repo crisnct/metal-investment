@@ -76,6 +76,13 @@ public class MetalPriceService extends AbstractService {
                 .build();
     }
 
+    /**
+     * Calculate the revolut price per ounce for which the user would have the given profit
+     */
+    public double calculatesRevolutPrice(Purchase purchase, double profit) {
+        return (profit + purchase.getCost()) / purchase.getAmount();
+    }
+
     public void save(MetalType metalType, double price) {
         final Timestamp timeThreshold = new Timestamp(System.currentTimeMillis() - THRESHOLD_TOO_OLD_ENTITIES);
         final List<MetalPrice> tooOldEntities = this.metalPriceRepository

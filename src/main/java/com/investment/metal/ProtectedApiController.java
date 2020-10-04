@@ -261,6 +261,29 @@ public class ProtectedApiController {
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
+    @RequestMapping(value = "/revolutAlert", method = RequestMethod.GET)
+    @Transactional(noRollbackFor = NoRollbackBusinessException.class)
+    public ResponseEntity<SimpleMessageDto> revolutAlert(
+            @RequestHeader("profit") final double profit,
+            @RequestHeader("metalSymbol") final String metalSymbol
+    ) {
+        String token = Util.getTokenFromRequest(request);
+        final Login loginEntity = this.loginService.getLogin(token);
+        Objects.requireNonNull(loginEntity, "The user is not logged in");
+
+        MetalType metalType = MetalType.lookup(metalSymbol);
+        this.exceptionService.check(profit < 0, MessageKey.INVALID_REQUEST, "profit can not be negative");
+        this.exceptionService.check(metalType == null, MessageKey.INVALID_REQUEST, "metalSymbol header is invalid");
+        Purchase purchase = this.purchaseService.getPurchase(loginEntity.getUserId(), metalSymbol);
+        this.exceptionService.check(purchase == null, MessageKey.INVALID_REQUEST, "the user didn't purchase " + metalSymbol);
+
+        double revPrice = this.metalPriceService.calculatesRevolutPrice(purchase, profit);
+
+        SimpleMessageDto dto = new SimpleMessageDto("If you ant to be notified by Revolut when your profit is %.2f for %s then you would need to set an alert in your Revolut account for %.2f RON",
+                profit, metalSymbol, revPrice);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
+    }
+
     @RequestMapping(value = "/functions", method = RequestMethod.GET)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
     public ResponseEntity<ExpressionHelperDto> functions() {

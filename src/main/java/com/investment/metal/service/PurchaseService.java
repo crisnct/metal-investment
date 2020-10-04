@@ -54,8 +54,11 @@ public class PurchaseService extends AbstractService {
     }
 
     public List<Purchase> getAllPurchase(long userId) {
-        return this.purchaseRepo.findByUserId(userId)
-                .orElse(new ArrayList<>());
+        return this.purchaseRepo.findByUserId(userId).orElse(new ArrayList<>());
+    }
+
+    public Purchase getPurchase(long userId, String metalSymbol) {
+        return this.purchaseRepo.findByUserIdAndMetalSymbol(userId, metalSymbol).orElse(null);
     }
 
 }

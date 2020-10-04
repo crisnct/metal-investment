@@ -43,7 +43,7 @@ public class AlertsTrigger {
     private EmailService emailService;
 
     public void triggerAlerts(MetalType metalType) {
-        final Map<Long, UserProfit> usersProfit = this.calculateUsersProfit();
+        final Map<Long, UserProfit> usersProfit = this.calculateUsersProfit(metalType);
 
         final List<Alert> allAlerts = this.alertService.findAllByMetalSymbol(metalType.getSymbol());
         for (Alert alert : allAlerts) {
@@ -109,23 +109,21 @@ public class AlertsTrigger {
         return isInc;
     }
 
-    private Map<Long, UserProfit> calculateUsersProfit() {
+    private Map<Long, UserProfit> calculateUsersProfit(MetalType metalType) {
         final List<Customer> allUsers = this.accountService.findAll();
         final Map<Long, UserProfit> usersProfit = new HashMap<>();
         for (Customer user : allUsers) {
-            List<Purchase> purchases = this.purchaseService.getAllPurchase(user.getId());
+            Purchase purchase = this.purchaseService.getPurchase(user.getId(), metalType.getSymbol());
             double totalProfit = 0;
             double totalCost = 0;
             double totalCostNow = 0;
             double totalAmount = 0;
-            if (!purchases.isEmpty()) {
-                for (Purchase purchase : purchases) {
-                    final UserMetalInfoDto info = this.metalPricesService.calculatesUserProfit(purchase);
-                    totalProfit += info.getProfit();
-                    totalCost += purchase.getCost();
-                    totalAmount += purchase.getAmount();
-                    totalCostNow += info.getCostNow();
-                }
+            if (purchase != null) {
+                final UserMetalInfoDto info = this.metalPricesService.calculatesUserProfit(purchase);
+                totalProfit += info.getProfit();
+                totalCost += purchase.getCost();
+                totalAmount += purchase.getAmount();
+                totalCostNow += info.getCostNow();
             }
             final UserProfit info = UserProfit.builder()
                     .profit(totalProfit)
