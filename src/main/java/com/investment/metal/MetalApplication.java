@@ -44,9 +44,13 @@ public class MetalApplication {
 
         //This is to prevent warnings about invalid cookie
         Unirest.config().httpClient(config -> {
-            CloseableHttpClient closeableClient = HttpClients.custom()
-                    .setDefaultRequestConfig(RequestConfig.custom()
-                            .setCookieSpec(CookieSpecs.STANDARD).build())
+            RequestConfig requestConfig = RequestConfig
+                    .custom()
+                    .setCookieSpec(CookieSpecs.STANDARD)
+                    .build();
+            CloseableHttpClient closeableClient = HttpClients
+                    .custom()
+                    .setDefaultRequestConfig(requestConfig)
                     .build();
             return ApacheClient.builder(closeableClient).apply(config);
         });

@@ -82,6 +82,9 @@ public class ProtectedApiController {
     private ExternalMetalPriceReader metalPriceBean;
 
     @Autowired
+    protected MessageService messageService;
+
+    @Autowired
     private HttpServletRequest request;
 
     @RequestMapping(value = "/blockIp", method = RequestMethod.POST)
@@ -94,7 +97,8 @@ public class ProtectedApiController {
         final Login loginEntity = this.loginService.getLogin(token);
         this.blockedIpService.blockIPForever(loginEntity.getUserId(), ip, reason);
 
-        return new ResponseEntity<>(new SimpleMessageDto("The ip %s was blocked", ip), HttpStatus.OK);
+        SimpleMessageDto dto = new SimpleMessageDto(messageService.getMessage("IP_BLOCKED", ip));
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/unblockIp", method = RequestMethod.POST)
@@ -106,7 +110,8 @@ public class ProtectedApiController {
         final Login loginEntity = this.loginService.getLogin(token);
         this.blockedIpService.unblockIP(loginEntity.getUserId(), ip);
 
-        return new ResponseEntity<>(new SimpleMessageDto("The ip %s was unblocked", ip), HttpStatus.OK);
+        SimpleMessageDto dto = new SimpleMessageDto(messageService.getMessage("IP_UNBLOCKED", ip));
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/logout", method = RequestMethod.POST)
