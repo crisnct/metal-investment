@@ -30,7 +30,7 @@ class KeyGenerator {
     public static void main(String[] args) {
         KeyGenerator gen = new KeyGenerator(255);
         gen.generateKey(new File("metal-investment.key"));
-        System.out.println("key was created");
+        LOGGER.info("key was created");
     }
 
     public void generateKey(File file) {
