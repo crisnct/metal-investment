@@ -4,6 +4,8 @@ import com.investment.metal.encryption.AESEncryptor;
 import com.investment.metal.encryption.AbstractHandShakeEncryptor;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
@@ -13,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 public class Flooding {
 
     final static ExecutorService es = Executors.newFixedThreadPool(20);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Flooding.class);
 
     public static void main(String args[]) throws InterruptedException {
         Unirest.config()
@@ -33,10 +36,10 @@ public class Flooding {
                             .header("Authorization", "Bearer 4594ac0c-4fd2-471a-93c7-c89b95b3a555")
                             .asString()
                             .ifFailure(stringHttpResponse -> {
-                                System.err.println("Error " + stringHttpResponse.getBody());
+                                LOGGER.error("Error {}", stringHttpResponse.getBody());
                             });
                     hs = response.getHeaders().getFirst("hijack");
-                    System.out.println(response.getStatus());
+                    LOGGER.info(String.valueOf(response.getStatus()));
                 }
             });
         }
