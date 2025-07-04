@@ -51,6 +51,7 @@ public class RevolutService extends AbstractService {
     }
 
     public double getRevolutProfitFor(MetalType metalType) {
-        return revolutRepository.findByMetalSymbol(metalType.getSymbol()).getProfit();
+        RevolutProfit profit = revolutRepository.findByMetalSymbol(metalType.getSymbol());
+        return profit != null ? profit.getProfit() : 0d;
     }
 }
