@@ -4,7 +4,7 @@
 #ENTRYPOINT ["java", "-jar", "/app.jar"]
 #
 # Multi-stage build for Spring Boot application
-FROM maven:3.8.6-openjdk-8 AS build
+FROM maven:3.8.6-openjdk-22 AS build
 
 WORKDIR /app
 
