@@ -15,9 +15,9 @@
 	<name>metal</name>
 	<description>Investment in precious metals</description>
 
-        <properties>
-                <java.version>9</java.version>
-        </properties>
+  <properties>
+      <java.version>17</java.version>
+  </properties>
 
 	<dependencies>
 		<dependency>
