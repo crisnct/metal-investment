@@ -1,48 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+  <!-- This configuration will apply to all specified profiles -->
+  <springProfile name="default | prod | dev">
 
-    <springProfile name="default | prod | dev">
-        <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
-        <timestamp key="timestamp" datePattern="yyyy-MM-dd_HH-mm-ss"/>
-        <property name="defaultPattern"
-                  value="%d{yyyy-MM-dd} | %d{HH:mm:ss.SSS} | %5p | %thread | %lo{50} | %m%n" />
+    <!-- Define a consistent pattern for log messages -->
+    <property name="defaultPattern" value="%d{yyyy-MM-dd} | %d{HH:mm:ss.SSS} | %5p | %thread | %lo{50} | %m%n" />
 
-        <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-            <!-- encoders are assigned the type ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
-            <encoder>
-                <pattern>${defaultPattern}</pattern>
-                <charset>utf8</charset>
-            </encoder>
-        </appender>
+    <!--
+    CONSOLE Appender (STDOUT)
+    This is the only appender needed for Cloud Run. It prints logs to the standard output,
+    where Google Cloud's logging service can automatically collect them.
+    -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+      <encoder>
+        <pattern>${defaultPattern}</pattern>
+        <charset>utf8</charset>
+      </encoder>
+    </appender>
 
-        <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-            <file>metal-investment_${timestamp}.log</file>
-            <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-                <fileNamePattern>logs/archived/metal-investment_%d{yyyy-MM-dd}_%d{HH-mm-ss-SSS}.%i.log</fileNamePattern>
-                <!-- each archived file, size max 10MB -->
-                <maxFileSize>100MB</maxFileSize>
-                <!-- total size of all archive files, if total size > 20GB, it will delete old archived file -->
-                <totalSizeCap>20GB</totalSizeCap>
-                <!-- 60 days to keep -->
-                <maxHistory>60</maxHistory>
-            </rollingPolicy>
-            <encoder>
-                <pattern>${defaultPattern}</pattern>
-                <charset>utf8</charset>
-            </encoder>
-        </appender>
+    <!-- Set the log level for your application's packages -->
+    <logger name="com.investment" level="INFO"/>
 
-        <logger name="com.investment" level="INFO"/>
-        <logger name="org.springframework" level="INFO" additivity="false">
-            <appender-ref ref="FILE"/>
-            <appender-ref ref="STDOUT" />
-        </logger>
+    <!--
+    Configure the logger for the Spring Framework.
+    It will now ONLY send logs to the console.
+    'additivity="false"' prevents duplicate logs in the root logger.
+    -->
+    <logger name="org.springframework" level="INFO" additivity="false">
+      <appender-ref ref="STDOUT" />
+    </logger>
 
-        <root level="WARN">
-             <appender-ref ref="FILE"/>
-             <appender-ref ref="STDOUT" />
-        </root>
-    </springProfile>
+    <!--        Root Logger Configuration
+    This is the final logger that catches all other log messages.
+    It is now configured to ONLY send output to the console (STDOUT).
+    The reference to the file appender has been removed.
+    -->
+    <root level="INFO">
+      <appender-ref ref="STDOUT" />
+    </root>
+  </springProfile>
 
 </configuration>
