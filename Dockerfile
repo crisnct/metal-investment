@@ -1,10 +1,14 @@
-#FROM openjdk:8-jdk-alpine
+#FROM openjdk:9-jdk-slim
 #VOLUME /tmp
 #COPY /target/metal-investment-0.0.1.jar app.jar
 #ENTRYPOINT ["java", "-jar", "/app.jar"]
 #
 # Multi-stage build for Spring Boot application
-FROM maven:3.8.6-openjdk-8 AS build
+FROM openjdk:9-jdk-slim AS build
+
+RUN apt-get update \
+    && apt-get install --no-install-recommends -y maven \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -17,7 +21,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Runtime stage
-FROM openjdk:8-jre-slim
+FROM openjdk:9-jre-slim
 
 WORKDIR /app
 
