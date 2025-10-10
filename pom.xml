@@ -85,6 +85,13 @@
 			<artifactId>resteasy-jaxrs</artifactId>
 			<version>3.13.0.Final</version>
 		</dependency>
+    <!-- https://mvnrepository.com/artifact/com.google.cloud/spring-cloud-gcp-starter -->
+    <dependency>
+      <groupId>com.google.cloud</groupId>
+      <artifactId>spring-cloud-gcp-starter</artifactId>
+      <version>7.3.2</version>
+    </dependency>
+
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
