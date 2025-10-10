@@ -85,10 +85,17 @@
 			<artifactId>resteasy-jaxrs</artifactId>
 			<version>3.13.0.Final</version>
 		</dependency>
-    <!-- https://mvnrepository.com/artifact/com.google.cloud/spring-cloud-gcp-starter -->
+
     <dependency>
       <groupId>com.google.cloud</groupId>
       <artifactId>spring-cloud-gcp-starter-sql-mysql</artifactId>
+      <version>5.2.1</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.google.cloud</groupId>
+          <artifactId>spring-cloud-gcp-starter-sql-postgresql</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
 		<dependency>
@@ -158,7 +165,7 @@
       <dependency>
         <groupId>com.google.cloud</groupId>
         <artifactId>spring-cloud-gcp-dependencies</artifactId>
-        <!-- The latest public version -->
+        <!-- Versiunea 5.2.1 este compatibilă cu Spring Boot 2.3.x -->
         <version>5.2.1</version>
         <type>pom</type>
         <scope>import</scope>
