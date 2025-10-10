@@ -88,7 +88,7 @@
     <!-- https://mvnrepository.com/artifact/com.google.cloud/spring-cloud-gcp-starter -->
     <dependency>
       <groupId>com.google.cloud</groupId>
-      <artifactId>spring-cloud-gcp-starter</artifactId>
+      <artifactId>spring-cloud-gcp-starter-sql-mysql</artifactId>
       <version>7.3.2</version>
     </dependency>
 
@@ -179,5 +179,19 @@
 			</plugin>
 		</plugins>
 	</build>
+
+  <repositories>
+    <repository>
+      <id>google</id>
+      <name>Google Maven Repository</name>
+      <url>https://maven.google.com/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
 
 </project>
