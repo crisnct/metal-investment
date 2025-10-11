@@ -19,7 +19,7 @@ public class LiquibaseConfiguration {
     this.properties = properties;
   }
 
-  @Bean
+  @Bean(name = "liquibaseChangelog")
   public SpringLiquibase liquibase() {
     SpringLiquibase liquibase = new SpringLiquibase();
     liquibase.setDataSource(dataSource);
