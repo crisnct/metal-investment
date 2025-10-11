@@ -1,7 +1,7 @@
 package com.investment.metal.common;
 
 import com.google.common.base.Charsets;
-import org.apache.commons.io.IOUtils;
+import io.micrometer.core.instrument.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,14 +19,10 @@ public class MailParameterBuilder {
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         for (MailTemplates templateType : MailTemplates.values()) {
             final String template;
-            try {
-                template = IOUtils.toString(
-                        Objects.requireNonNull(contextClassLoader.getResourceAsStream("mail-templates/" + templateType.getFilename())),
-                        Charsets.UTF_8);
-                MailParameterBuilder.mailTemplates.put(templateType, template);
-            } catch (IOException e) {
-                LOGGER.error(e.getMessage(), e);
-            }
+            template = IOUtils.toString(
+                    Objects.requireNonNull(contextClassLoader.getResourceAsStream("mail-templates/" + templateType.getFilename())),
+                    Charsets.UTF_8);
+            MailParameterBuilder.mailTemplates.put(templateType, template);
         }
     }
 

@@ -2,7 +2,7 @@ package com.investment.metal.database;
 
 import lombok.Data;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "expressionfunction")

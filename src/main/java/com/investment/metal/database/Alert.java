@@ -4,7 +4,7 @@ import com.investment.metal.common.AlertFrequency;
 import com.investment.metal.common.MetalType;
 import lombok.Data;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.sql.Timestamp;
 
 @Entity
