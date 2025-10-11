@@ -25,6 +25,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -91,10 +95,38 @@ public class Config implements WebMvcConfigurer {
   }
 
   @Bean
+  @Primary
+  public LocalContainerEntityManagerFactoryBean entityManagerFactory(@Autowired DataSource dataSource) {
+    LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
+    em.setDataSource(dataSource);
+    em.setPackagesToScan("com.investment.metal.database");
+    
+    HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
+    vendorAdapter.setDatabasePlatform("org.hibernate.dialect.MySQL8Dialect");
+    vendorAdapter.setShowSql(false);
+    vendorAdapter.setGenerateDdl(false);
+    
+    em.setJpaVendorAdapter(vendorAdapter);
+    em.setPersistenceUnitName("default");
+    
+    return em;
+  }
+
+  @Bean
+  @Primary
+  public PlatformTransactionManager transactionManager(@Autowired LocalContainerEntityManagerFactoryBean entityManagerFactory) {
+    JpaTransactionManager transactionManager = new JpaTransactionManager();
+    transactionManager.setEntityManagerFactory(entityManagerFactory.getObject());
+    return transactionManager;
+  }
+
+  @Bean
   public SpringLiquibase liquibase(@Autowired DataSource dataSource) {
     SpringLiquibase liquibase = new SpringLiquibase();
     liquibase.setDataSource(dataSource);
     liquibase.setChangeLog(liquibaseChangeLog);
+    liquibase.setShouldRun(true);
+    liquibase.setDropFirst(false);
     return liquibase;
   }
 
