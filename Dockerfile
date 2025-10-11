@@ -42,6 +42,7 @@ RUN echo '#!/bin/bash' > /app/start.sh && \
     echo '  -Dspring.datasource.url=${DATABASE_URL} \' >> /app/start.sh && \
     echo '  -Dspring.datasource.username=${DB_USERNAME} \' >> /app/start.sh && \
     echo '  -Dspring.datasource.password=${DB_PASSWORD} \' >> /app/start.sh && \
+    echo '  -Dspring.cloud.gcp.sql.database-name=metals \' >> /app/start.sh && \
     echo '  -Dlogging.level.com.investment.metal=DEBUG \' >> /app/start.sh && \
     echo '  -Dlogging.level.org.springframework.boot=INFO \' >> /app/start.sh && \
     echo '  -Dlogging.level.org.springframework.web=INFO \' >> /app/start.sh && \
