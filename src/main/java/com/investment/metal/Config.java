@@ -60,20 +60,23 @@ import com.zaxxer.hikari.HikariDataSource;
 @ComponentScan(basePackages = "com.investment.metal")
 public class Config implements WebMvcConfigurer {
 
-  @Value("${spring.datasource.url}")
+  private static final String DEFAULT_H2_URL =
+      "jdbc:h2:mem:metals;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false";
+
+  @Value("${spring.datasource.url:jdbc:h2:mem:metals;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false}")
   private String dbUrl;
 
-  @Value("${spring.datasource.username}")
+  @Value("${spring.datasource.username:sa}")
   private String username;
 
-  @Value("${spring.datasource.password}")
+  @Value("${spring.datasource.password:}")
   private String password;
 
   private static final RequestMatcher PROTECTED_URLS = new OrRequestMatcher(
       new AntPathRequestMatcher("/api/**")
   );
 
-  @Value("${METAL_INVESTMENT_ENCODER_SECRETE}")
+  @Value("${METAL_INVESTMENT_ENCODER_SECRETE:change-me}")
   private String encoderSecrete;
 
 
@@ -143,10 +146,16 @@ public class Config implements WebMvcConfigurer {
   @Primary
   @ConditionalOnMissingBean
   public DataSource dataSource(HikariConfig hikariConfig) {
-    hikariConfig.setJdbcUrl(dbUrl);
+    String jdbcUrl = (dbUrl == null || dbUrl.isBlank()) ? DEFAULT_H2_URL : dbUrl;
+
+    hikariConfig.setJdbcUrl(jdbcUrl);
     hikariConfig.setUsername(username);
     hikariConfig.setPassword(password);
-    hikariConfig.setDriverClassName("com.mysql.cj.jdbc.Driver");
+    if (jdbcUrl.startsWith("jdbc:h2:")) {
+      hikariConfig.setDriverClassName("org.h2.Driver");
+    } else {
+      hikariConfig.setDriverClassName("com.mysql.cj.jdbc.Driver");
+    }
     hikariConfig.setAutoCommit(false);
     return new HikariDataSource(hikariConfig);
   }
