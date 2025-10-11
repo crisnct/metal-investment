@@ -6,6 +6,8 @@ import com.investment.metal.price.ExternalMetalPriceReader;
 import com.investment.metal.price.GalmarleyPriceReader;
 import com.investment.metal.security.AuthenticationFilter;
 import com.investment.metal.security.CustomAuthenticationProvider;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import io.github.resilience4j.bulkhead.BulkheadConfig;
 import io.github.resilience4j.bulkhead.BulkheadRegistry;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
@@ -48,10 +50,7 @@ import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 
 @Configuration
 @EnableWebMvc
@@ -212,15 +211,15 @@ public class Config implements WebMvcConfigurer {
   }
 
 
-  @Bean
-  public CallsInterceptor interceptor() {
-    return new CallsInterceptor();
-  }
-
-  @Override
-  public void addInterceptors(InterceptorRegistry registry) {
-    registry.addInterceptor(interceptor());
-  }
+//  @Bean
+//  public CallsInterceptor interceptor() {
+//    return new CallsInterceptor();
+//  }
+//
+//  @Override
+//  public void addInterceptors(InterceptorRegistry registry) {
+//    registry.addInterceptor(interceptor());
+//  }
 
   @Bean
   public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
