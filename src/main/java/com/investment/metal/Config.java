@@ -120,15 +120,16 @@ public class Config implements WebMvcConfigurer {
     return transactionManager;
   }
 
-  @Bean
-  public SpringLiquibase liquibase(@Autowired DataSource dataSource) {
-    SpringLiquibase liquibase = new SpringLiquibase();
-    liquibase.setDataSource(dataSource);
-    liquibase.setChangeLog(liquibaseChangeLog);
-    liquibase.setShouldRun(true);
-    liquibase.setDropFirst(false);
-    return liquibase;
-  }
+  // Temporarily disabled to fix circular dependency
+  // @Bean
+  // public SpringLiquibase liquibase(@Autowired DataSource dataSource) {
+  //   SpringLiquibase liquibase = new SpringLiquibase();
+  //   liquibase.setDataSource(dataSource);
+  //   liquibase.setChangeLog(liquibaseChangeLog);
+  //   liquibase.setShouldRun(true);
+  //   liquibase.setDropFirst(false);
+  //   return liquibase;
+  // }
 
   @Bean
   public CircuitBreakerRegistry circuitBreaker() {
