@@ -18,14 +18,14 @@ import java.util.Properties;
 import java.util.concurrent.TimeoutException;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.http.HttpStatus;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
@@ -50,6 +50,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 
 @Configuration
 @EnableWebMvc
@@ -132,14 +134,21 @@ public class Config implements WebMvcConfigurer {
 
   @Bean
   @Primary
+  @ConfigurationProperties(prefix = "spring.datasource.hikari")
+  public HikariConfig hikariConfig() {
+    return new HikariConfig();
+  }
+
+  @Bean
+  @Primary
   @ConditionalOnMissingBean
-  public DataSource dataSource() {
-    DriverManagerDataSource dataSource = new DriverManagerDataSource();
-    dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
-    dataSource.setUrl(dbUrl);
-    dataSource.setUsername(username);
-    dataSource.setPassword(password);
-    return dataSource;
+  public DataSource dataSource(HikariConfig hikariConfig) {
+    hikariConfig.setJdbcUrl(dbUrl);
+    hikariConfig.setUsername(username);
+    hikariConfig.setPassword(password);
+    hikariConfig.setDriverClassName("com.mysql.cj.jdbc.Driver");
+    hikariConfig.setAutoCommit(false);
+    return new HikariDataSource(hikariConfig);
   }
 
   // JPA and Liquibase configuration is handled by Spring Boot auto-configuration
