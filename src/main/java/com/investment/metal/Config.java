@@ -32,7 +32,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -217,21 +216,16 @@ public class Config implements WebMvcConfigurer {
 //  }
 
   @Bean
-  public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
-    return authConfig.getAuthenticationManager();
-  }
-
-  @Bean
   public WebSecurityCustomizer webSecurityCustomizer() {
     return (web) -> web.ignoring().requestMatchers("/token/**");
   }
 
   @Bean
-  public SecurityFilterChain filterChain(HttpSecurity http, AuthenticationManager authenticationManager, CustomAuthenticationProvider authenticationProvider) throws Exception {
+  public SecurityFilterChain filterChain(HttpSecurity http, CustomAuthenticationProvider authenticationProvider, AuthenticationFilter authenticationFilter) throws Exception {
     http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .exceptionHandling(exception -> exception.authenticationEntryPoint(forbiddenEntryPoint()))
         .authenticationProvider(authenticationProvider)
-        .addFilterBefore(authenticationFilter(authenticationManager), AnonymousAuthenticationFilter.class)
+        .addFilterBefore(authenticationFilter, AnonymousAuthenticationFilter.class)
         .authorizeHttpRequests(auth -> auth
             .requestMatchers(PROTECTED_URLS)
             .authenticated())
@@ -244,9 +238,9 @@ public class Config implements WebMvcConfigurer {
   }
 
   @Bean
-  public AuthenticationFilter authenticationFilter(AuthenticationManager authenticationManager) throws Exception {
+  public AuthenticationFilter authenticationFilter(AuthenticationConfiguration authenticationConfiguration) throws Exception {
     final AuthenticationFilter filter = new AuthenticationFilter(PROTECTED_URLS);
-    filter.setAuthenticationManager(authenticationManager);
+    filter.setAuthenticationManager(authenticationConfiguration.getAuthenticationManager());
     return filter;
   }
 
