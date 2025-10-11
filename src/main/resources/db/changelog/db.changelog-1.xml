@@ -8,8 +8,7 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         <createTable tableName="users">
             <column  name="id" type="int"
                      autoIncrement="true"
-                     startWith="0"
-                     incrementBy="1">
+                     startWith="0">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column  name="username" type="varchar(200)">
@@ -38,8 +37,7 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         <createTable tableName="login">
             <column  name="id" type="int"
                      autoIncrement="true"
-                     startWith="0"
-                     incrementBy="1">
+                     startWith="0">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column  name="user_id" type="int">
@@ -60,8 +58,7 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         <createTable tableName="bannedaccounts">
             <column  name="id" type="int"
                      autoIncrement="true"
-                     startWith="0"
-                     incrementBy="1">
+                     startWith="0">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column  name="user_id" type="int">
@@ -76,8 +73,7 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         <createTable tableName="purchases">
             <column  name="id" type="int"
                      autoIncrement="true"
-                     startWith="0"
-                     incrementBy="1">
+                     startWith="0">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column  name="user_id" type="int">
@@ -105,8 +101,7 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         <createTable tableName="metalprices">
             <column  name="id" type="int"
                      autoIncrement="true"
-                     startWith="0"
-                     incrementBy="1">
+                     startWith="0">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column  name="metal_symbol" type="varchar(20)">
@@ -126,8 +121,7 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         <createTable tableName="revolutprofit">
             <column  name="id" type="int"
                      autoIncrement="true"
-                     startWith="0"
-                     incrementBy="1">
+                     startWith="0">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column  name="metal_symbol" type="varchar(20)">
@@ -168,8 +162,7 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         <createTable tableName="currency">
             <column  name="id" type="int"
                      autoIncrement="true"
-                     startWith="0"
-                     incrementBy="1">
+                     startWith="0">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column  name="symbol" type="varchar(20)">
@@ -188,8 +181,7 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         <createTable tableName="alerts">
             <column  name="id" type="int"
                      autoIncrement="true"
-                     startWith="0"
-                     incrementBy="1">
+                     startWith="0">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column  name="user_id" type="int">
@@ -214,8 +206,7 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         <createTable tableName="banip">
             <column  name="id" type="int"
                      autoIncrement="true"
-                     startWith="0"
-                     incrementBy="1">
+                     startWith="0">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column  name="user_id" type="int">
@@ -234,8 +225,7 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         <createTable tableName="notifications">
             <column  name="id" type="int"
                      autoIncrement="true"
-                     startWith="0"
-                     incrementBy="1">
+                     startWith="0">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column  name="user_id" type="int">
@@ -255,8 +245,7 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         <createTable tableName="expressionfunction">
             <column  name="id" type="int"
                      autoIncrement="true"
-                     startWith="0"
-                     incrementBy="1">
+                     startWith="0">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column  name="name" type="varchar(25)">
@@ -287,8 +276,7 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         <createTable tableName="expressionfunctionparameters">
             <column  name="id" type="int"
                      autoIncrement="true"
-                     startWith="0"
-                     incrementBy="1">
+                     startWith="0">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column  name="expression_function_id" type="int">
