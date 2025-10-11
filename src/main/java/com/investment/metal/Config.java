@@ -14,23 +14,21 @@ import io.github.resilience4j.timelimiter.TimeLimiterConfig;
 import io.github.resilience4j.timelimiter.TimeLimiterRegistry;
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Properties;
 import java.util.concurrent.TimeoutException;
 import javax.sql.DataSource;
-import liquibase.integration.spring.SpringLiquibase;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.http.HttpStatus;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -48,25 +46,17 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableWebMvc
+@EnableJpaRepositories(basePackages = "com.investment.metal.database")
 @EnableWebSecurity
 @ComponentScan(basePackages = "com.investment.metal")
 public class Config implements WebMvcConfigurer {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(Config.class);
-
-  private static final RequestMatcher PROTECTED_URLS = new OrRequestMatcher(
-      new AntPathRequestMatcher("/api/**")
-  );
-
-  // Temporarily disabled - liquibase property removed
-  // @Value("${liquibase.change-log}")
-  // private String liquibaseChangeLog;
 
   @Value("${spring.datasource.url}")
   private String dbUrl;
@@ -77,15 +67,72 @@ public class Config implements WebMvcConfigurer {
   @Value("${spring.datasource.password}")
   private String password;
 
+  private static final RequestMatcher PROTECTED_URLS = new OrRequestMatcher(
+      new AntPathRequestMatcher("/api/**")
+  );
+
   @Value("${METAL_INVESTMENT_ENCODER_SECRETE}")
   private String encoderSecrete;
+
 
   @Value("${service.metal.price.host}")
   private PriceServiceType servicePriceType;
 
+  @Bean(name = "entityManagerFactory")
+  @Primary
+  public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
+    LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
+    em.setDataSource(dataSource);
+    em.setPackagesToScan("com.investment.metal.database");
+
+    HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
+    vendorAdapter.setDatabasePlatform("org.hibernate.dialect.MySQL8Dialect");
+    vendorAdapter.setShowSql(false);
+    vendorAdapter.setGenerateDdl(false);
+
+    em.setJpaVendorAdapter(vendorAdapter);
+    em.setPersistenceUnitName("default");
+
+    // Set Hibernate properties to completely disable XML mapping and JAXB
+    Properties jpaProperties = new Properties();
+    jpaProperties.setProperty("hibernate.hbm2ddl.auto", "update");
+    jpaProperties.setProperty("hibernate.connection.provider_disables_autocommit", "true");
+    jpaProperties.setProperty("hibernate.jdbc.time_zone", "UTC");
+    jpaProperties.setProperty("hibernate.format_sql", "false");
+    jpaProperties.setProperty("hibernate.show_sql", "false");
+    jpaProperties.setProperty("hibernate.use_sql_comments", "false");
+    jpaProperties.setProperty("hibernate.generate_statistics", "false");
+    jpaProperties.setProperty("hibernate.cache.use_second_level_cache", "false");
+    jpaProperties.setProperty("hibernate.cache.use_query_cache", "false");
+    
+    // Completely disable XML mapping and JAXB
+    jpaProperties.setProperty("hibernate.xml_mapping_enabled", "false");
+    jpaProperties.setProperty("hibernate.jaxb.enabled", "false");
+    jpaProperties.setProperty("hibernate.hbm2ddl.import_files", "");
+    jpaProperties.setProperty("hibernate.hbm2ddl.import_files_sql_extractor", "");
+    jpaProperties.setProperty("hibernate.hbm2ddl.import_files_sql_extractor", "");
+    jpaProperties.setProperty("hibernate.hbm2ddl.import_files_sql_extractor", "");
+    
+    // Force Hibernate to use annotation-based mapping only
+    jpaProperties.setProperty("hibernate.hbm2ddl.auto", "update");
+    jpaProperties.setProperty("hibernate.hbm2ddl.import_files", "");
+    jpaProperties.setProperty("hibernate.hbm2ddl.import_files_sql_extractor", "");
+    
+    em.setJpaProperties(jpaProperties);
+
+    return em;
+  }
+
+  @Bean
+  public PlatformTransactionManager transactionManager(LocalContainerEntityManagerFactoryBean entityManagerFactory) {
+    JpaTransactionManager transactionManager = new JpaTransactionManager();
+    transactionManager.setEntityManagerFactory(entityManagerFactory.getObject());
+    return transactionManager;
+  }
 
   @Bean
   @Primary
+  @ConditionalOnMissingBean
   public DataSource dataSource() {
     DriverManagerDataSource dataSource = new DriverManagerDataSource();
     dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
@@ -95,42 +142,7 @@ public class Config implements WebMvcConfigurer {
     return dataSource;
   }
 
-  @Bean
-  @Primary
-  public LocalContainerEntityManagerFactoryBean entityManagerFactory(@Autowired DataSource dataSource) {
-    LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
-    em.setDataSource(dataSource);
-    em.setPackagesToScan("com.investment.metal.database");
-    
-    HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
-    vendorAdapter.setDatabasePlatform("org.hibernate.dialect.MySQL8Dialect");
-    vendorAdapter.setShowSql(false);
-    vendorAdapter.setGenerateDdl(false);
-    
-    em.setJpaVendorAdapter(vendorAdapter);
-    em.setPersistenceUnitName("default");
-    
-    return em;
-  }
-
-  @Bean
-  @Primary
-  public PlatformTransactionManager transactionManager(@Autowired LocalContainerEntityManagerFactoryBean entityManagerFactory) {
-    JpaTransactionManager transactionManager = new JpaTransactionManager();
-    transactionManager.setEntityManagerFactory(entityManagerFactory.getObject());
-    return transactionManager;
-  }
-
-  // Temporarily disabled to fix circular dependency
-  // @Bean
-  // public SpringLiquibase liquibase(@Autowired DataSource dataSource) {
-  //   SpringLiquibase liquibase = new SpringLiquibase();
-  //   liquibase.setDataSource(dataSource);
-  //   liquibase.setChangeLog(liquibaseChangeLog);
-  //   liquibase.setShouldRun(true);
-  //   liquibase.setDropFirst(false);
-  //   return liquibase;
-  // }
+  // JPA and Liquibase configuration is handled by Spring Boot auto-configuration
 
   @Bean
   public CircuitBreakerRegistry circuitBreaker() {

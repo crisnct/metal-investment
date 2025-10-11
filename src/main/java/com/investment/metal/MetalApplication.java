@@ -39,6 +39,18 @@ public class MetalApplication {
             return;
         }
 
+        // Set JAXB system properties to fix JAXB dependency issues
+        System.setProperty("javax.xml.bind.JAXBContext", "jakarta.xml.bind.JAXBContext");
+        System.setProperty("javax.xml.bind.context.factory", "jakarta.xml.bind.JAXBContextFactory");
+        
+        // Completely disable Hibernate XML mapping and JAXB
+        System.setProperty("hibernate.xml_mapping_enabled", "false");
+        System.setProperty("hibernate.jaxb.enabled", "false");
+        System.setProperty("hibernate.hbm2ddl.import_files", "");
+        System.setProperty("hibernate.hbm2ddl.import_files_sql_extractor", "");
+        System.setProperty("hibernate.hbm2ddl.import_files_sql_extractor", "");
+        System.setProperty("hibernate.hbm2ddl.import_files_sql_extractor", "");
+
         //This is disabled temporary because RSS FEED parser fails
         disableSSLCheck();
 
