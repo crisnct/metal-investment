@@ -2,18 +2,17 @@ package com.investment.metal;
 
 import com.investment.metal.encryption.AbstractHandShakeEncryptor;
 import com.investment.metal.service.exception.ExceptionService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.util.Enumeration;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import org.springframework.web.servlet.HandlerInterceptor;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.Enumeration;
-
-public class CallsInterceptor extends HandlerInterceptorAdapter {
+public class CallsInterceptor implements HandlerInterceptor {
 
     public static final String HANDSHAKE_HEADER = "hs";
 
@@ -54,12 +53,11 @@ public class CallsInterceptor extends HandlerInterceptorAdapter {
         //Validate handshake token
         final String hs = request.getHeader(HANDSHAKE_HEADER);
         this.handShakeEncryptor.check(hs);
-        return super.preHandle(request, response, handler);
+        return true;
     }
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        super.afterCompletion(request, response, handler, ex);
         HandlerMethod hm = (HandlerMethod) handler;
         LOGGER.info("End request:" + hm.getShortLogMessage());
         if (ex != null) {

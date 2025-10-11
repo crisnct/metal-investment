@@ -3,7 +3,7 @@ package com.investment.metal.database;
 import com.investment.metal.common.MetalType;
 import lombok.Data;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.sql.Timestamp;
 
 @Entity

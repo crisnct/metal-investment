@@ -4,7 +4,7 @@ import com.investment.metal.MessageKey;
 import com.investment.metal.exceptions.BusinessException;
 import com.investment.metal.service.MessageService;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 import java.util.Objects;
 
 public class ExceptionBuilder {

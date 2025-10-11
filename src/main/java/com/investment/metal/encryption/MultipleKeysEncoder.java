@@ -1,7 +1,7 @@
 package com.investment.metal.encryption;
 
 import com.google.common.collect.Lists;
-import org.apache.commons.io.IOUtils;
+import io.micrometer.core.instrument.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -29,16 +29,11 @@ public class MultipleKeysEncoder implements ConsistentEncoder {
         this.aesEncryptor = new AESEncryptor(CHARSET);
         this.aesEncryptor.setKey(AES_KEY);
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            String key = IOUtils.toString(
-                    Objects.requireNonNull(contextClassLoader.getResourceAsStream("metal-investment.key")),
-                    CHARSET);
-            key = this.aesEncryptor.decrypt(key);
-            this.keys = Lists.newArrayList(key.split("\n"));
-        } catch (IOException e) {
-            LOGGER.error("Can not parse the key for " + MultipleKeysEncoder.class);
-            this.keys = null;
-        }
+        String key = IOUtils.toString(
+                Objects.requireNonNull(contextClassLoader.getResourceAsStream("metal-investment.key")),
+                CHARSET);
+        key = this.aesEncryptor.decrypt(key);
+        this.keys = Lists.newArrayList(key.split("\n"));
     }
 
     public String encrypt(String text) {
