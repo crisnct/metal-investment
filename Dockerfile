@@ -32,13 +32,20 @@ USER appuser
 EXPOSE 8080
 
 # Health check
-#HEALTHCHECK --interval=100s --timeout=300s --start-period=100s --retries=3 \
-#  CMD curl -f http://localhost:8080/actuator/health || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD curl -f http://localhost:${PORT:-8080}/actuator/health || exit 1
 
-# Run the application
+# Run the application with optimized JVM settings
 ENTRYPOINT ["java", \
   "-Djava.security.egd=file:/dev/./urandom", \
   "-Dserver.port=${PORT:8080}", \
   "-Dspring.profiles.active=${SPRING_PROFILES_ACTIVE:prod}", \
+  "-Xmx512m", \
+  "-Xms256m", \
+  "-XX:+UseG1GC", \
+  "-XX:MaxGCPauseMillis=200", \
+  "-Dspring.datasource.url=${DATABASE_URL}", \
+  "-Dspring.datasource.username=${DB_USERNAME}", \
+  "-Dspring.datasource.password=${DB_PASSWORD}", \
   "-jar", \
   "app.jar"]
