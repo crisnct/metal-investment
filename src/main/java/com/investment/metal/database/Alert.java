@@ -13,7 +13,7 @@ import java.sql.Timestamp;
 public class Alert {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     private Long userId;
 
