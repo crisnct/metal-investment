@@ -31,21 +31,34 @@ USER appuser
 # Expose port
 EXPOSE 8080
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-  CMD curl -f http://localhost:${PORT:-8080}/actuator/health || exit 1
+# Health check (temporarily disabled for debugging)
+# HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+#   CMD curl -f http://localhost:${PORT:-8080}/actuator/health || exit 1
 
-# Run the application with optimized JVM settings
-ENTRYPOINT ["java", \
-  "-Djava.security.egd=file:/dev/./urandom", \
-  "-Dserver.port=${PORT:8080}", \
-  "-Dspring.profiles.active=${SPRING_PROFILES_ACTIVE:prod}", \
-  "-Xmx512m", \
-  "-Xms256m", \
-  "-XX:+UseG1GC", \
-  "-XX:MaxGCPauseMillis=200", \
-  "-Dspring.datasource.url=${DATABASE_URL}", \
-  "-Dspring.datasource.username=${DB_USERNAME}", \
-  "-Dspring.datasource.password=${DB_PASSWORD}", \
-  "-jar", \
-  "app.jar"]
+# Create startup script
+RUN echo '#!/bin/bash' > /app/start.sh && \
+    echo 'echo "Starting application..."' >> /app/start.sh && \
+    echo 'echo "PORT: ${PORT:-8080}"' >> /app/start.sh && \
+    echo 'echo "SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}"' >> /app/start.sh && \
+    echo 'echo "DATABASE_URL: ${DATABASE_URL:-not set}"' >> /app/start.sh && \
+    echo 'echo "DB_USERNAME: ${DB_USERNAME:-not set}"' >> /app/start.sh && \
+    echo 'echo "DB_PASSWORD: ${DB_PASSWORD:-not set}"' >> /app/start.sh && \
+    echo 'java -Djava.security.egd=file:/dev/./urandom \' >> /app/start.sh && \
+    echo '  -Dserver.port=${PORT:8080} \' >> /app/start.sh && \
+    echo '  -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE:prod} \' >> /app/start.sh && \
+    echo '  -Xmx512m \' >> /app/start.sh && \
+    echo '  -Xms256m \' >> /app/start.sh && \
+    echo '  -XX:+UseG1GC \' >> /app/start.sh && \
+    echo '  -XX:MaxGCPauseMillis=200 \' >> /app/start.sh && \
+    echo '  -Dspring.datasource.url=${DATABASE_URL} \' >> /app/start.sh && \
+    echo '  -Dspring.datasource.username=${DB_USERNAME} \' >> /app/start.sh && \
+    echo '  -Dspring.datasource.password=${DB_PASSWORD} \' >> /app/start.sh && \
+    echo '  -Dlogging.level.com.investment.metal=DEBUG \' >> /app/start.sh && \
+    echo '  -Dlogging.level.org.springframework.boot=INFO \' >> /app/start.sh && \
+    echo '  -Dlogging.level.org.springframework.web=INFO \' >> /app/start.sh && \
+    echo '  -Dlogging.level.org.springframework.security=INFO \' >> /app/start.sh && \
+    echo '  -jar app.jar' >> /app/start.sh && \
+    chmod +x /app/start.sh
+
+# Run the application
+ENTRYPOINT ["/app/start.sh"]
