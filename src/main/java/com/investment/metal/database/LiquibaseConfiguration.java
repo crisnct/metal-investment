@@ -27,10 +27,10 @@ public class LiquibaseConfiguration {
     liquibase.setDefaultSchema(properties.getDefaultSchema());
     liquibase.setLiquibaseSchema(properties.getLiquibaseSchema());
     liquibase.setLiquibaseTablespace(properties.getLiquibaseTablespace());
-    liquibase.setContexts(properties.getContexts());
+    //liquibase.setContexts(properties.getContexts());
     liquibase.setDropFirst(properties.isDropFirst());
     liquibase.setShouldRun(properties.isEnabled());
-    liquibase.setLabels(properties.getLabels());
+    //liquibase.setLabels(properties.getLabels());
     liquibase.setChangeLogParameters(properties.getParameters());
     liquibase.setDatabaseChangeLogTable(properties.getDatabaseChangeLogTable());
     liquibase.setDatabaseChangeLogLockTable(properties.getDatabaseChangeLogLockTable());

@@ -107,7 +107,7 @@ public class Config implements WebMvcConfigurer {
     jpaProperties.setProperty("hibernate.generate_statistics", "false");
     jpaProperties.setProperty("hibernate.cache.use_second_level_cache", "false");
     jpaProperties.setProperty("hibernate.cache.use_query_cache", "false");
-    
+
     // Completely disable XML mapping and JAXB
     jpaProperties.setProperty("hibernate.xml_mapping_enabled", "false");
     jpaProperties.setProperty("hibernate.jaxb.enabled", "false");
