@@ -25,6 +25,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.http.HttpStatus;
@@ -80,6 +81,7 @@ public class Config implements WebMvcConfigurer {
   private PriceServiceType servicePriceType;
 
   @Bean(name = "entityManagerFactory")
+  @DependsOn("liquibaseChangelog")
   @Primary
   public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
     LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
@@ -96,7 +98,7 @@ public class Config implements WebMvcConfigurer {
 
     // Set Hibernate properties to completely disable XML mapping and JAXB
     Properties jpaProperties = new Properties();
-    jpaProperties.setProperty("hibernate.hbm2ddl.auto", "update");
+    jpaProperties.setProperty("hibernate.hbm2ddl.auto", "validate");
     jpaProperties.setProperty("hibernate.connection.provider_disables_autocommit", "true");
     jpaProperties.setProperty("hibernate.jdbc.time_zone", "UTC");
     jpaProperties.setProperty("hibernate.format_sql", "false");
@@ -105,20 +107,13 @@ public class Config implements WebMvcConfigurer {
     jpaProperties.setProperty("hibernate.generate_statistics", "false");
     jpaProperties.setProperty("hibernate.cache.use_second_level_cache", "false");
     jpaProperties.setProperty("hibernate.cache.use_query_cache", "false");
-    
+
     // Completely disable XML mapping and JAXB
     jpaProperties.setProperty("hibernate.xml_mapping_enabled", "false");
     jpaProperties.setProperty("hibernate.jaxb.enabled", "false");
     jpaProperties.setProperty("hibernate.hbm2ddl.import_files", "");
     jpaProperties.setProperty("hibernate.hbm2ddl.import_files_sql_extractor", "");
-    jpaProperties.setProperty("hibernate.hbm2ddl.import_files_sql_extractor", "");
-    jpaProperties.setProperty("hibernate.hbm2ddl.import_files_sql_extractor", "");
-    
-    // Force Hibernate to use annotation-based mapping only
-    jpaProperties.setProperty("hibernate.hbm2ddl.auto", "update");
-    jpaProperties.setProperty("hibernate.hbm2ddl.import_files", "");
-    jpaProperties.setProperty("hibernate.hbm2ddl.import_files_sql_extractor", "");
-    
+
     em.setJpaProperties(jpaProperties);
 
     return em;
