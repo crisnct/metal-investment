@@ -105,7 +105,7 @@ public class AlertService extends AbstractService {
     }
 
     public void removeAlert(long alertId) throws BusinessException {
-        Optional<Alert> alert = this.alertRepository.findById(alertId);
+        Optional<Alert> alert = this.alertRepository.findById((int) alertId);
         if (alert.isPresent()) {
             this.alertRepository.delete(alert.get());
         } else
