@@ -96,7 +96,7 @@ public class Config implements WebMvcConfigurer {
 
     // Set Hibernate properties to completely disable XML mapping and JAXB
     Properties jpaProperties = new Properties();
-    jpaProperties.setProperty("hibernate.hbm2ddl.auto", "update");
+    jpaProperties.setProperty("hibernate.hbm2ddl.auto", "validate");
     jpaProperties.setProperty("hibernate.connection.provider_disables_autocommit", "true");
     jpaProperties.setProperty("hibernate.jdbc.time_zone", "UTC");
     jpaProperties.setProperty("hibernate.format_sql", "false");
@@ -111,14 +111,7 @@ public class Config implements WebMvcConfigurer {
     jpaProperties.setProperty("hibernate.jaxb.enabled", "false");
     jpaProperties.setProperty("hibernate.hbm2ddl.import_files", "");
     jpaProperties.setProperty("hibernate.hbm2ddl.import_files_sql_extractor", "");
-    jpaProperties.setProperty("hibernate.hbm2ddl.import_files_sql_extractor", "");
-    jpaProperties.setProperty("hibernate.hbm2ddl.import_files_sql_extractor", "");
-    
-    // Force Hibernate to use annotation-based mapping only
-    jpaProperties.setProperty("hibernate.hbm2ddl.auto", "update");
-    jpaProperties.setProperty("hibernate.hbm2ddl.import_files", "");
-    jpaProperties.setProperty("hibernate.hbm2ddl.import_files_sql_extractor", "");
-    
+
     em.setJpaProperties(jpaProperties);
 
     return em;
