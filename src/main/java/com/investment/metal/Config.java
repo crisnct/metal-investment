@@ -64,8 +64,9 @@ public class Config implements WebMvcConfigurer {
       new AntPathRequestMatcher("/api/**")
   );
 
-  @Value("${liquibase.change-log}")
-  private String liquibaseChangeLog;
+  // Temporarily disabled - liquibase property removed
+  // @Value("${liquibase.change-log}")
+  // private String liquibaseChangeLog;
 
   @Value("${spring.datasource.url}")
   private String dbUrl;
