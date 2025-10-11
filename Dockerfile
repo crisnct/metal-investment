@@ -24,18 +24,7 @@ WORKDIR /app
 # Copy the built artifact from build stage
 COPY --from=build /app/target/*.jar app.jar
 
-# Create non-root user for security
-RUN useradd -r -u 1001 -g root appuser
-USER appuser
-
-# Expose port
-EXPOSE 8080
-
-# Health check (temporarily disabled for debugging)
-# HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-#   CMD curl -f http://localhost:${PORT:-8080}/actuator/health || exit 1
-
-# Create startup script
+# Create startup script before switching users
 RUN echo '#!/bin/bash' > /app/start.sh && \
     echo 'echo "Starting application..."' >> /app/start.sh && \
     echo 'echo "PORT: ${PORT:-8080}"' >> /app/start.sh && \
@@ -59,6 +48,17 @@ RUN echo '#!/bin/bash' > /app/start.sh && \
     echo '  -Dlogging.level.org.springframework.security=INFO \' >> /app/start.sh && \
     echo '  -jar app.jar' >> /app/start.sh && \
     chmod +x /app/start.sh
+
+# Create non-root user for security
+RUN useradd -r -u 1001 -g root appuser
+USER appuser
+
+# Expose port
+EXPOSE 8080
+
+# Health check (temporarily disabled for debugging)
+# HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+#   CMD curl -f http://localhost:${PORT:-8080}/actuator/health || exit 1
 
 # Run the application
 ENTRYPOINT ["/app/start.sh"]
