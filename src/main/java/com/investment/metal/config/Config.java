@@ -245,6 +245,8 @@ public class Config implements WebMvcConfigurer {
                 "/api-docs/**",
                 "/v3/api-docs",
                 "/v3/api-docs/**",
+                "/v3/api-docs.yaml",
+                "/v3/api-docs.yaml/**",
                 "/swagger-resources",
                 "/swagger-resources/**",
                 "/webjars/**",
@@ -259,7 +261,8 @@ public class Config implements WebMvcConfigurer {
                 "/test-static",
                 "/test",
                 "/swagger-test",
-                "/debug-swagger"
+                "/debug-swagger",
+                "/check-openapi"
                 ).permitAll()
             .requestMatchers(PROTECTED_URLS).authenticated()
         )

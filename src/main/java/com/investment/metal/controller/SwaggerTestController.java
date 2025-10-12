@@ -47,4 +47,18 @@ public class SwaggerTestController {
         response.put("timestamp", System.currentTimeMillis());
         return response;
     }
+
+    @GetMapping("/check-openapi")
+    @Operation(summary = "Check OpenAPI", description = "Check if OpenAPI endpoints are accessible")
+    public Map<String, Object> checkOpenAPI() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "OpenAPI check endpoint");
+        response.put("expected_endpoints", new String[]{
+            "/v3/api-docs",
+            "/v3/api-docs.yaml",
+            "/swagger-ui.html"
+        });
+        response.put("timestamp", System.currentTimeMillis());
+        return response;
+    }
 }
