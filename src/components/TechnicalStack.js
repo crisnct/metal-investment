@@ -46,9 +46,15 @@ const TechnicalStack = () => {
     },
     {
       name: 'External APIs',
-      description: 'For fetching real-time precious metal prices.',
+      description: 'Bloomberg and Galmarley APIs for fetching real-time precious metal prices with market data integration.',
       icon: Globe,
       color: '#ea580c'
+    },
+    {
+      name: 'Google Cloud Platform',
+      description: 'Cloud deployment platform with Cloud Run, Cloud SQL, and scalable infrastructure.',
+      icon: Cloud,
+      color: '#4285f4'
     },
     {
       name: 'Hibernate/Ehcache',
@@ -91,27 +97,6 @@ const TechnicalStack = () => {
                 <p className="tech-description">{tech.description}</p>
               </div>
             ))}
-          </div>
-          
-          <div className="deployment-info">
-            <div className="deployment-card">
-              <Cloud className="deployment-icon" />
-              <div className="deployment-content">
-                <h3>Google Cloud Platform (GCP)</h3>
-                <p>The application was deployed to Google Cloud (GCP) but SQL service is stopped for cost reasons.</p>
-                <div className="deployment-links">
-                  <a 
-                    href="https://metal-investment-635786220311.europe-west1.run.app/swagger-ui.html" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="health-link"
-                  >
-                    <CheckCircle className="link-icon" />
-                    Swagger UI - API Documentation
-                  </a>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>

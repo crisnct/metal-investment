@@ -13,6 +13,18 @@ const Footer = () => {
               Monitor precious metals prices and track your investments with real-time data 
               from Bloomberg and Galmarley.
             </p>
+            <div className="github-link">
+              <a 
+                href="https://github.com/crisnct/metal-investment" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="github-repo-link"
+              >
+                <Github className="github-icon" />
+                View on GitHub
+                <ExternalLink className="external-icon" />
+              </a>
+            </div>
           </div>
           
           <div className="footer-section">
@@ -21,8 +33,20 @@ const Footer = () => {
               <li><a href="#home">Home</a></li>
               <li><a href="#features">Features</a></li>
               <li><a href="#tech">Technology</a></li>
-              <li><a href="https://metal-investment-635786220311.europe-west1.run.app/swagger-ui.html" target="_blank" rel="noopener noreferrer">Swagger UI - API Documentation</a></li>
+              <li><a href="https://metal-investment-635786220311.europe-west1.run.app/swagger-ui.html" target="_blank" rel="noopener noreferrer">Swagger UI</a></li>
             </ul>
+          </div>
+          
+          <div className="footer-section">
+            <h4 className="footer-subtitle">Contact</h4>
+            <div className="contact-info">
+              <p><strong>Cristian Țone</strong></p>
+              <p>
+                <a href="mailto:nelucristian2005@gmail.com" className="contact-link">
+                  nelucristian2005@gmail.com
+                </a>
+              </p>
+            </div>
           </div>
           
         </div>

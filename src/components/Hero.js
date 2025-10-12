@@ -18,24 +18,7 @@ const Hero = () => {
               so your profit would match a logical expression that you provided, then the application would 
               notify you by email. Also the users could check whenever they want their profit by calling an API.
             </p>
-            <div className="hero-features">
-              <div className="feature">
-                <Shield className="feature-icon" />
-                <span>Secure Investment Tracking</span>
-              </div>
-              <div className="feature">
-                <Mail className="feature-icon" />
-                <span>Email Notifications</span>
-              </div>
-              <div className="feature">
-                <BarChart3 className="feature-icon" />
-                <span>Real-time Price Monitoring</span>
-              </div>
-              <div className="feature">
-                <Globe className="feature-icon" />
-                <span>Global Market Data</span>
-              </div>
-            </div>
+
             <div className="hero-cta">
               <a 
                 href="https://metal-investment-635786220311.europe-west1.run.app/swagger-ui.html" 
@@ -43,7 +26,7 @@ const Hero = () => {
                 rel="noopener noreferrer"
                 className="cta-button"
               >
-                Swagger UI - API Documentation
+                Swagger UI
               </a>
             </div>
           </div>

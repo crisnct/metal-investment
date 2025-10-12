@@ -6,6 +6,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "build:deploy": "powershell -ExecutionPolicy Bypass -File build-and-deploy.ps1",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

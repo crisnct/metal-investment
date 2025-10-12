@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import Header from './components/Header';
 import Hero from './components/Hero';
+import Features from './components/Features';
 import TechnicalStack from './components/TechnicalStack';
 import Footer from './components/Footer';
 import ApiService from './services/api';
@@ -62,6 +63,7 @@ function App() {
         profitData={profitData}
       />
       <Hero />
+      <Features />
       <TechnicalStack />
       <Footer />
     </div>

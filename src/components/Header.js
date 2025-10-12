@@ -36,7 +36,6 @@ const Header = ({ isLoggedIn, onLogin, onLogout, onLoadProfit, profitData }) => 
             <a href="#home" className="nav-link">Home</a>
             <a href="#features" className="nav-link">Features</a>
             <a href="#tech" className="nav-link">Technology</a>
-            <a href="#contact" className="nav-link">Contact</a>
           </nav>
 
           <div className="header-actions">
