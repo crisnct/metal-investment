@@ -6,6 +6,7 @@ import com.investment.metal.dto.ResetPasswordDto;
 import com.investment.metal.dto.SimpleMessageDto;
 import com.investment.metal.dto.UserLoginDto;
 import com.investment.metal.exceptions.NoRollbackBusinessException;
+import com.investment.metal.MessageKey;
 import com.investment.metal.service.AccountService;
 import com.investment.metal.service.BannedAccountsService;
 import com.investment.metal.service.BlockedIpService;
@@ -50,14 +51,19 @@ public class PublicApiController {
             @RequestHeader("password") String password,
             @RequestHeader("email") String email
     ) {
-        this.exceptionService.check(!Util.isValidEmailAddress(email), MessageKey.INVALID_REQUEST, "Invalid email address!");
-        this.blockedIpService.checkBlockedIPGlobal();
-        Customer user = this.accountService.registerNewUser(username, this.passwordEncoder.encode(password), email);
-        this.bannedAccountsService.checkBanned(user.getId());
-        this.loginService.validateAccount(user, false);
+        try {
+            this.exceptionService.check(!Util.isValidEmailAddress(email), MessageKey.INVALID_REQUEST, "Invalid email address!");
+            this.blockedIpService.checkBlockedIPGlobal();
+            Customer user = this.accountService.registerNewUser(username, this.passwordEncoder.encode(password), email);
+            this.bannedAccountsService.checkBanned(user.getId());
+            this.loginService.validateAccount(user, false);
 
-        SimpleMessageDto dto = new SimpleMessageDto("An email was sent to %s with a code. Call validation request with that code", email);
-        return new ResponseEntity<>(dto, HttpStatus.OK);
+            SimpleMessageDto dto = new SimpleMessageDto("An email was sent to %s with a code. Call validation request with that code", email);
+            return new ResponseEntity<>(dto, HttpStatus.OK);
+        } catch (Exception e) {
+            SimpleMessageDto dto = new SimpleMessageDto("Error: " + e.getMessage());
+            return new ResponseEntity<>(dto, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @RequestMapping(value = "/validateAccount", method = RequestMethod.POST)

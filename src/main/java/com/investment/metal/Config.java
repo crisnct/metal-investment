@@ -188,7 +188,7 @@ public class Config implements WebMvcConfigurer {
 
   @Bean
   public PasswordEncoder encoder() {
-    Pbkdf2PasswordEncoder encoder = new Pbkdf2PasswordEncoder(encoderSecrete, 300, 255, SecretKeyFactoryAlgorithm.PBKDF2WithHmacSHA256);
+    Pbkdf2PasswordEncoder encoder = new Pbkdf2PasswordEncoder(encoderSecrete, 16, 255, SecretKeyFactoryAlgorithm.PBKDF2WithHmacSHA256);
     encoder.setEncodeHashAsBase64(true);
     encoder.setAlgorithm(Pbkdf2PasswordEncoder.SecretKeyFactoryAlgorithm.PBKDF2WithHmacSHA256);
     return encoder;
