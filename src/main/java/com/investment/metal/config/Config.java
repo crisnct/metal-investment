@@ -276,7 +276,9 @@ public class Config implements WebMvcConfigurer {
                 "/changePassword",
                 "/health",
                 "/test-static",
-                "/test"
+                "/test",
+                "/swagger.html",
+                "/v3/api-docs"
                 ).permitAll()
             .requestMatchers(PROTECTED_URLS).authenticated()
         )
