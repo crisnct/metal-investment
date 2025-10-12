@@ -52,12 +52,16 @@ public class Scheduler {
   @Transactional
   @Scheduled(fixedDelay = 3600 * 1000)
   public void fetchMetalPrices() {
-    final double metalPrice = this.metalPricesService.fetchMetalPrice(metalType);
-    this.metalPricesService.save(metalType, metalPrice);
-    this.alertsTrigger.triggerAlerts(metalType);
+    try {
+      final double metalPrice = this.metalPricesService.fetchMetalPrice(metalType);
+      this.metalPricesService.save(metalType, metalPrice);
+      this.alertsTrigger.triggerAlerts(metalType);
 
-    int ord = (this.metalType.ordinal() + 1) % MetalType.values().length;
-    this.metalType = MetalType.values()[ord];
+      int ord = (this.metalType.ordinal() + 1) % MetalType.values().length;
+      this.metalType = MetalType.values()[ord];
+    }catch(Exception e){
+      LOGGER.error("Fail to read metal prices", e);
+    }
   }
 
   @Transactional
