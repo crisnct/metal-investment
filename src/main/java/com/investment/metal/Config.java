@@ -230,13 +230,10 @@ public class Config implements WebMvcConfigurer {
         .csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(auth -> auth
             .requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/info").permitAll()
-            .anyRequest().authenticated()
+            .requestMatchers(PROTECTED_URLS).authenticated()
         )
         .exceptionHandling(exception -> exception.authenticationEntryPoint(forbiddenEntryPoint()))
         .addFilterBefore(authenticationFilter, AnonymousAuthenticationFilter.class)
-        .authorizeHttpRequests(auth -> auth
-            .requestMatchers(PROTECTED_URLS)
-            .authenticated())
         .authenticationProvider(authenticationProvider)
         .formLogin(AbstractHttpConfigurer::disable)
         .httpBasic(AbstractHttpConfigurer::disable)
