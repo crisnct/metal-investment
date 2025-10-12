@@ -18,16 +18,14 @@ public class StaticResourceConfig implements WebMvcConfigurer {
                 .addResourceLocations("classpath:/META-INF/resources/webjars/")
                 .setCachePeriod(0);
 
-        // React UI static files
+        // React UI static files (JS, CSS, etc.)
         registry.addResourceHandler("/static/**")
                 .addResourceLocations("classpath:/static/static/")
                 .setCachePeriod(0);
 
-        // General static resources
-        registry.addResourceHandler("/**")
-                .addResourceLocations(
-                        "classpath:/META-INF/resources/",
-                        "classpath:/static/")
+        // General static resources (favicon, manifest, etc.)
+        registry.addResourceHandler("/favicon.ico", "/asset-manifest.json")
+                .addResourceLocations("classpath:/static/")
                 .setCachePeriod(0);
     }
 }
