@@ -230,16 +230,24 @@ public class Config implements WebMvcConfigurer {
         .csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(auth -> auth
             .requestMatchers(
+                "/",
+                "/static/**",
+                "/favicon.ico",
                 "/actuator/health",
                 "/actuator/health/**",
                 "/actuator/info",
                 "/actuator/**",
                 "/swagger-ui",
+                "/swagger-ui/**",
+                "/api-docs",
+                "/api-docs/**",
                 "/userRegistration",
                 "/validateAccount",
                 "/login",
                 "/resetPassword",
-                "/changePassword"
+                "/changePassword",
+                "/health",
+                "/test-static"
                 ).permitAll()
             .requestMatchers(PROTECTED_URLS).authenticated()
         )
