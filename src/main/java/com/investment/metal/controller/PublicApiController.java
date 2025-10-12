@@ -1,4 +1,4 @@
-package com.investment.metal;
+package com.investment.metal.controller;
 
 import com.investment.metal.common.Util;
 import com.investment.metal.database.Customer;

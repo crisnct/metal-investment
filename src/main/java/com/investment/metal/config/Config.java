@@ -1,4 +1,4 @@
-package com.investment.metal;
+package com.investment.metal.config;
 
 import com.investment.metal.common.PriceServiceType;
 import com.investment.metal.price.BloombergPriceReader;

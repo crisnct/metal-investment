@@ -1,5 +1,6 @@
-package com.investment.metal;
+package com.investment.metal.controller;
 
+import com.investment.metal.MessageKey;
 import com.investment.metal.common.*;
 import com.investment.metal.database.*;
 import com.investment.metal.dto.*;

@@ -1,4 +1,4 @@
-package com.investment.metal;
+package com.investment.metal.controller;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
