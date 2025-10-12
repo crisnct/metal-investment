@@ -101,13 +101,13 @@ const TechnicalStack = () => {
                 <p>The application was deployed to Google Cloud (GCP) but SQL service is stopped for cost reasons.</p>
                 <div className="deployment-links">
                   <a 
-                    href="https://metal-investment-635786220311.europe-west1.run.app/actuator/health" 
+                    href="https://metal-investment-635786220311.europe-west1.run.app/swagger-ui.html" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="health-link"
                   >
                     <CheckCircle className="link-icon" />
-                    API Health Check
+                    Swagger UI - API Documentation
                   </a>
                 </div>
               </div>

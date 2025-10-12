@@ -38,12 +38,12 @@ const Hero = () => {
             </div>
             <div className="hero-cta">
               <a 
-                href="https://metal-investment-635786220311.europe-west1.run.app/actuator/health" 
+                href="https://metal-investment-635786220311.europe-west1.run.app/swagger-ui.html" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="cta-button"
               >
-                Check API Health
+                Swagger UI - API Documentation
               </a>
             </div>
           </div>

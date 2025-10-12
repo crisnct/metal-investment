@@ -21,18 +21,10 @@ const Footer = () => {
               <li><a href="#home">Home</a></li>
               <li><a href="#features">Features</a></li>
               <li><a href="#tech">Technology</a></li>
-              <li><a href="https://metal-investment-635786220311.europe-west1.run.app/actuator/health" target="_blank" rel="noopener noreferrer">API Health</a></li>
+              <li><a href="https://metal-investment-635786220311.europe-west1.run.app/swagger-ui.html" target="_blank" rel="noopener noreferrer">Swagger UI - API Documentation</a></li>
             </ul>
           </div>
           
-          <div className="footer-section">
-            <h4 className="footer-subtitle">API Endpoints</h4>
-            <ul className="footer-links">
-              <li><a href="https://metal-investment-635786220311.europe-west1.run.app/userRegistration" target="_blank" rel="noopener noreferrer">User Registration</a></li>
-              <li><a href="https://metal-investment-635786220311.europe-west1.run.app/login" target="_blank" rel="noopener noreferrer">Login</a></li>
-              <li><a href="https://metal-investment-635786220311.europe-west1.run.app/validateAccount" target="_blank" rel="noopener noreferrer">Validate Account</a></li>
-            </ul>
-          </div>
         </div>
         
         <div className="footer-bottom">
