@@ -219,27 +219,33 @@ public class Config implements WebMvcConfigurer {
 //    registry.addInterceptor(interceptor());
 //  }
 
-  @Bean
-  public WebSecurityCustomizer webSecurityCustomizer() {
-    return (web) -> web.ignoring().requestMatchers(
-        "/token/**",
-        "/swagger-ui",
-        "/swagger-ui/**",
-        "/swagger-ui.html",
-        "/swagger-ui.html/**",
-        "/swagger-ui/index.html",
-        "/swagger-ui/index.html/**",
-        "/swagger-resources",
-        "/swagger-resources/**",
-        "/v3/api-docs",
-        "/v3/api-docs/**",
-        "/v3/api-docs.yaml",
-        "/v3/api-docs.yaml/**",
-        "/api-docs",
-        "/api-docs/**",
-        "/webjars/**"
-    );
-  }
+//   @Bean
+//   public WebSecurityCustomizer webSecurityCustomizer() {
+//     return (web) -> web.ignoring().requestMatchers(
+//         "/token/**",
+//         "/swagger-ui",
+//         "/swagger-ui/**",
+//         "/swagger-ui.html",
+//         "/swagger-ui.html/**",
+//         "/swagger-ui/index.html",
+//         "/swagger-ui/index.html/**",
+//         "/swagger-resources",
+//         "/swagger-resources/**",
+//         "/v3/api-docs",
+//         "/v3/api-docs/**",
+//         "/v3/api-docs.yaml",
+//         "/v3/api-docs.yaml/**",
+//         "/api-docs",
+//         "/api-docs/**",
+//         "/webjars/**",
+//         "/debug/api-docs",
+//         "/debug/swagger-config",
+//         "/swagger-manual.html",
+//         "/swagger",
+//         "/swagger-ui",
+//         "/v3/api-docs"
+//     );
+//   }
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http, CustomAuthenticationProvider authenticationProvider, AuthenticationFilter authenticationFilter) throws Exception {
@@ -277,7 +283,11 @@ public class Config implements WebMvcConfigurer {
                 "/health",
                 "/test-static",
                 "/test",
-                "/swagger.html",
+                "/debug/api-docs",
+                "/debug/swagger-config",
+                "/swagger-manual.html",
+                "/swagger",
+                "/swagger-ui",
                 "/v3/api-docs"
                 ).permitAll()
             .requestMatchers(PROTECTED_URLS).authenticated()

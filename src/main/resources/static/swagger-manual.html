@@ -40,8 +40,10 @@
                 layout: "StandaloneLayout",
                 tryItOutEnabled: true,
                 requestInterceptor: function(request) {
-                    // Add any custom headers if needed
                     return request;
+                },
+                responseInterceptor: function(response) {
+                    return response;
                 }
             });
         };
