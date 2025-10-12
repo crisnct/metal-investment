@@ -234,6 +234,7 @@ public class Config implements WebMvcConfigurer {
                 "/actuator/health/**",
                 "/actuator/info",
                 "/actuator/**",
+                "/swagger-ui",
                 "/userRegistration",
                 "/validateAccount",
                 "/login",
