@@ -60,12 +60,4 @@ public class SpringDocConfig {
                 .build();
     }
 
-    @Bean
-    public GroupedOpenApi allApis() {
-        return GroupedOpenApi.builder()
-                .group("all")
-                .pathsToMatch("/**")
-                .packagesToScan("com.investment.metal.controller")
-                .build();
-    }
 }

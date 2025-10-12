@@ -209,41 +209,16 @@ public class Config implements WebMvcConfigurer {
   }
 
 
-//  @Bean
-//  public CallsInterceptor interceptor() {
-//    return new CallsInterceptor();
-//  }
-//
-//  @Override
-//  public void addInterceptors(InterceptorRegistry registry) {
-//    registry.addInterceptor(interceptor());
-//  }
 
    @Bean
    public WebSecurityCustomizer webSecurityCustomizer() {
      return (web) -> web.ignoring().requestMatchers(
          "/token/**",
-         "/swagger-ui",
-         "/swagger-ui/**",
          "/swagger-ui.html",
-         "/swagger-ui.html/**",
-         "/swagger-ui/index.html",
-         "/swagger-ui/index.html/**",
-         "/swagger-resources",
-         "/swagger-resources/**",
+         "/swagger-ui/**",
          "/v3/api-docs",
          "/v3/api-docs/**",
-         "/v3/api-docs.yaml",
-         "/v3/api-docs.yaml/**",
-         "/api-docs",
-         "/api-docs/**",
-         "/webjars/**",
-         "/debug/api-docs",
-         "/debug/swagger-config",
-         "/swagger-manual.html",
-         "/swagger",
-         "/swagger-ui",
-         "/v3/api-docs"
+         "/webjars/**"
      );
    }
 
@@ -270,7 +245,6 @@ public class Config implements WebMvcConfigurer {
                 "/login",
                 "/resetPassword",
                 "/changePassword",
-                "/test-api",
                 "/health"
                 ).permitAll()
             .requestMatchers(PROTECTED_URLS).authenticated()
