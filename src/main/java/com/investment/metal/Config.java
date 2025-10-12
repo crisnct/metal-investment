@@ -227,13 +227,17 @@ public class Config implements WebMvcConfigurer {
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http, CustomAuthenticationProvider authenticationProvider, AuthenticationFilter authenticationFilter) throws Exception {
     http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .csrf(AbstractHttpConfigurer::disable)
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/info").permitAll()
+            .anyRequest().authenticated()
+        )
         .exceptionHandling(exception -> exception.authenticationEntryPoint(forbiddenEntryPoint()))
-        .authenticationProvider(authenticationProvider)
         .addFilterBefore(authenticationFilter, AnonymousAuthenticationFilter.class)
         .authorizeHttpRequests(auth -> auth
             .requestMatchers(PROTECTED_URLS)
             .authenticated())
-        .csrf(AbstractHttpConfigurer::disable)
+        .authenticationProvider(authenticationProvider)
         .formLogin(AbstractHttpConfigurer::disable)
         .httpBasic(AbstractHttpConfigurer::disable)
         .logout(AbstractHttpConfigurer::disable);
