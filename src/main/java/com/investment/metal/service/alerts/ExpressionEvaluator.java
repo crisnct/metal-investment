@@ -95,10 +95,14 @@ public class ExpressionEvaluator {
                 filledExpression = filledExpression.replace(var, value.toString());
             } else {
                 int start = filledExpression.indexOf(var);
-                int endPos = start + var.length();
-                int endBracket = filledExpression.indexOf(')', endPos);
-                String varWithParams = filledExpression.substring(start, endBracket + 1);
-                filledExpression = filledExpression.replace(varWithParams, value.toString());
+                if (start >= 0) {
+                    int endPos = start + var.length();
+                    int endBracket = filledExpression.indexOf(')', endPos);
+                    if (endBracket > start && endBracket < filledExpression.length()) {
+                        String varWithParams = filledExpression.substring(start, endBracket + 1);
+                        filledExpression = filledExpression.replace(varWithParams, value.toString());
+                    }
+                }
             }
         }
         return (Boolean) this.engine.eval(filledExpression);
@@ -110,16 +114,23 @@ public class ExpressionEvaluator {
         String exp = this.expression;
         while (matcher.find()) {
             String var = matcher.group();
-            int endPos = exp.indexOf(var) + var.length();
-            String[] params = null;
-            if (exp.charAt(endPos) == '(') {
-                int endBracket = exp.indexOf(')', endPos);
-                params = exp.substring(endPos + 1, endBracket).split(",");
-                exp = exp.substring(endBracket);
-            } else {
-                exp = exp.substring(endPos);
+            int varIndex = exp.indexOf(var);
+            if (varIndex >= 0) {
+                int endPos = varIndex + var.length();
+                String[] params = null;
+                if (endPos < exp.length() && exp.charAt(endPos) == '(') {
+                    int endBracket = exp.indexOf(')', endPos);
+                    if (endBracket > endPos && endBracket < exp.length()) {
+                        params = exp.substring(endPos + 1, endBracket).split(",");
+                        exp = exp.substring(endBracket + 1);
+                    } else {
+                        exp = exp.substring(endPos);
+                    }
+                } else {
+                    exp = exp.substring(endPos);
+                }
+                vars.put(var, params);
             }
-            vars.put(var, params);
         }
         return vars;
     }

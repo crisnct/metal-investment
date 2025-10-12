@@ -26,9 +26,13 @@ public class GalmarleyPriceReader implements ExternalMetalPriceReader {
         String content = response.getBody();
         int p1 = content.indexOf("(");
         int p2 = content.lastIndexOf(")");
-        String jsonContent = content.substring(p1 + 1, p2);
-        final JsonNode node = new JsonNode(jsonContent);
-        return node.getObject().getJSONObject("latestPrice").getDouble("price");
+        if (p1 >= 0 && p2 > p1 && p2 < content.length()) {
+            String jsonContent = content.substring(p1 + 1, p2);
+            final JsonNode node = new JsonNode(jsonContent);
+            return node.getObject().getJSONObject("latestPrice").getDouble("price");
+        } else {
+            throw new RuntimeException("Invalid response format from Galmarley API");
+        }
     }
 
     @Override
