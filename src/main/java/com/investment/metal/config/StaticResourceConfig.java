@@ -35,5 +35,11 @@ public class StaticResourceConfig implements WebMvcConfigurer {
     registry.addResourceHandler("/swagger-ui/**")
         .addResourceLocations("classpath:/META-INF/resources/webjars/")
         .setCachePeriod(0);
+
+    // Serve React static files
+    registry.addResourceHandler("/static/**")
+        .addResourceLocations("classpath:/static/static/")
+        .setCachePeriod(0);
+
   }
 }
