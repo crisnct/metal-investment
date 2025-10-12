@@ -247,7 +247,9 @@ public class Config implements WebMvcConfigurer {
                 "/resetPassword",
                 "/changePassword",
                 "/health",
-                "/test-static"
+                "/test-static",
+                "/test",
+                "/swagger-test"
                 ).permitAll()
             .requestMatchers(PROTECTED_URLS).authenticated()
         )
