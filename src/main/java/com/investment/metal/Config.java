@@ -229,14 +229,17 @@ public class Config implements WebMvcConfigurer {
     http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/info").permitAll()
             .requestMatchers(
+                "/actuator/health",
+                "/actuator/health/**",
+                "/actuator/info",
+                "/actuator/**",
                 "/userRegistration",
                 "/validateAccount",
                 "/login",
                 "/resetPassword",
                 "/changePassword"
-            ).permitAll()
+                ).permitAll()
             .requestMatchers(PROTECTED_URLS).authenticated()
         )
         .exceptionHandling(exception -> exception.authenticationEntryPoint(forbiddenEntryPoint()))
