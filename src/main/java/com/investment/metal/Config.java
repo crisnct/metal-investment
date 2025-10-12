@@ -113,6 +113,10 @@ public class Config implements WebMvcConfigurer {
     jpaProperties.setProperty("hibernate.hbm2ddl.import_files", "");
     jpaProperties.setProperty("hibernate.hbm2ddl.import_files_sql_extractor", "");
 
+    // Configure naming strategies for camelCase to snake_case conversion
+    jpaProperties.setProperty("hibernate.physical_naming_strategy", "org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy");
+    jpaProperties.setProperty("hibernate.implicit_naming_strategy", "org.hibernate.boot.model.naming.ImplicitNamingStrategyJpaCompliantImpl");
+
     em.setJpaProperties(jpaProperties);
 
     return em;

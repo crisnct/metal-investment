@@ -43,7 +43,7 @@ public class AlertsTrigger {
     private EmailService emailService;
 
     public void triggerAlerts(MetalType metalType) {
-        final Map<Long, UserProfit> usersProfit = this.calculateUsersProfit(metalType);
+        final Map<Integer, UserProfit> usersProfit = this.calculateUsersProfit(metalType);
 
         final List<Alert> allAlerts = this.alertService.findAllByMetalSymbol(metalType.getSymbol());
         for (Alert alert : allAlerts) {
@@ -109,9 +109,9 @@ public class AlertsTrigger {
         return isInc;
     }
 
-    private Map<Long, UserProfit> calculateUsersProfit(MetalType metalType) {
+    private Map<Integer, UserProfit> calculateUsersProfit(MetalType metalType) {
         final List<Customer> allUsers = this.accountService.findAll();
-        final Map<Long, UserProfit> usersProfit = new HashMap<>();
+        final Map<Integer, UserProfit> usersProfit = new HashMap<>();
         for (Customer user : allUsers) {
             Purchase purchase = this.purchaseService.getPurchase(user.getId(), metalType.getSymbol());
             double totalProfit = 0;

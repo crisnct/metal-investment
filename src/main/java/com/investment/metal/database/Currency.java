@@ -11,7 +11,7 @@ import java.sql.Timestamp;
 public class Currency {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     private String symbol;
 

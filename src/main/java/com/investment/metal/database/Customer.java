@@ -10,7 +10,7 @@ import jakarta.persistence.*;
 public class Customer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     private String username;
 

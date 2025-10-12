@@ -116,7 +116,7 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         </createTable>
     </changeSet>
 
-    <changeSet  id="1.5"  author="Cristian Tone">
+    <changeSet  id="1.51"  author="Cristian Tone">
         <validCheckSum>8:f0a1dd88bc1538919a0d3b41080ee531</validCheckSum>
         <createTable tableName="revolutprofit">
             <column  name="id" type="int"
@@ -133,9 +133,9 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
             <column  name="time" type="datetime">
                 <constraints  nullable="false"/>
             </column>
-            <column  name="revolutPriceOz" type="float(20)"/>
-            <column  name="currencyToRonRate" type="float(20)"/>
-            <column  name="metalPriceOz" type="float(20)"/>
+            <column  name="revolut_price_oz" type="float(20)"/>
+            <column  name="currency_to_ron_rate" type="float(20)"/>
+            <column  name="metal_price_oz" type="float(20)"/>
         </createTable>
     </changeSet>
 

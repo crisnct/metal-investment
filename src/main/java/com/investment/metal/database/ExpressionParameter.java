@@ -10,9 +10,9 @@ import jakarta.persistence.*;
 public class ExpressionParameter {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
-    private Long expressionFunctionId;
+    private Integer expressionFunctionId;
 
     private String name;
 

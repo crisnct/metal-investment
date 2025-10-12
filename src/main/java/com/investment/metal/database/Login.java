@@ -12,9 +12,9 @@ import java.sql.Timestamp;
 public class Login {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
-    private Long userId;
+    private Integer userId;
 
     private Timestamp time;
 
@@ -24,9 +24,9 @@ public class Login {
 
     private int validationCode;
 
-    private Boolean validated;
+    private Integer validated;
 
-    private Boolean loggedIn;
+    private Integer loggedIn;
 
     private int failedAttempts;
 

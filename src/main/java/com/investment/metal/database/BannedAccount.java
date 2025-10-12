@@ -11,9 +11,9 @@ import java.sql.Timestamp;
 public class BannedAccount {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
-    private Long userId;
+    private Integer userId;
 
     private Timestamp bannedUntil;
 

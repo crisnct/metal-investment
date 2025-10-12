@@ -15,7 +15,7 @@ public class Alert {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    private Long userId;
+    private Integer userId;
 
     private String metalSymbol;
 

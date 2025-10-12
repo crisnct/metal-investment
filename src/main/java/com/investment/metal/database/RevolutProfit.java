@@ -11,7 +11,7 @@ import java.sql.Timestamp;
 public class RevolutProfit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     private String metalSymbol;
 
@@ -21,8 +21,9 @@ public class RevolutProfit {
 
     private Double revolutPriceOz;
 
+    private Double metalPriceOz;
+
     private Double currencyToRonRate;
 
-    private Double metalPriceOz;
 
 }

@@ -9,9 +9,9 @@ import java.util.Optional;
 @Repository
 public interface AlertRepository extends JpaRepository<Alert, Integer> {
 
-    Optional<List<Alert>> findByUserId(long userId);
+    Optional<List<Alert>> findByUserId(Integer userId);
 
-    Optional<List<Alert>> findByUserIdAndMetalSymbol(long userId, String metalSymbol);
+    Optional<List<Alert>> findByUserIdAndMetalSymbol(Integer userId, String metalSymbol);
 
     Optional<List<Alert>> findByMetalSymbol(String metalSymbol);
 

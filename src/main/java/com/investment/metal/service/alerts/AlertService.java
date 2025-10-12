@@ -78,7 +78,7 @@ public class AlertService extends AbstractService {
         return expressionFunctions;
     }
 
-    public void addAlert(Long userId, String expression, AlertFrequency frequency, MetalType metalType) throws BusinessException {
+    public void addAlert(Integer userId, String expression, AlertFrequency frequency, MetalType metalType) throws BusinessException {
         Alert alert = new Alert();
         alert.setUserId(userId);
         alert.setMetalSymbol(metalType.getSymbol());
@@ -100,12 +100,12 @@ public class AlertService extends AbstractService {
         this.alertRepository.saveAll(allAlerts);
     }
 
-    public List<Alert> findAllByUserId(Long userId) {
+    public List<Alert> findAllByUserId(Integer userId) {
         return this.alertRepository.findByUserId(userId).orElse(new ArrayList<>());
     }
 
-    public void removeAlert(long alertId) throws BusinessException {
-        Optional<Alert> alert = this.alertRepository.findById((int) alertId);
+    public void removeAlert(Integer alertId) throws BusinessException {
+        Optional<Alert> alert = this.alertRepository.findById(alertId);
         if (alert.isPresent()) {
             this.alertRepository.delete(alert.get());
         } else

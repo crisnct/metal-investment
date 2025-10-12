@@ -68,9 +68,9 @@ public class AccountService extends AbstractService {
         return this.customerRepository.findAll();
     }
 
-    public Customer findById(Long id) throws BusinessException {
+    public Customer findById(Integer id) throws BusinessException {
         return this.customerRepository
-                .findById(id)
+                .findById((long)id)
                 .orElseThrow(() -> this.exceptionService
                         .createBuilder(MessageKey.INEXISTING_USER_ID)
                         .setArguments(id)

@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface PurchaseRepository extends JpaRepository<Purchase, Long> {
+public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
 
-    Optional<List<Purchase>> findByUserId(long userId);
+    Optional<List<Purchase>> findByUserId(Integer userId);
 
-    Optional<Purchase> findByUserIdAndMetalSymbol(long userId, String metalSymbol) throws BusinessException;
+    Optional<Purchase> findByUserIdAndMetalSymbol(Integer userId, String metalSymbol) throws BusinessException;
 
 }

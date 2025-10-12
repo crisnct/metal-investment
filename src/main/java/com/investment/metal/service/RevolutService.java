@@ -36,12 +36,8 @@ public class RevolutService extends AbstractService {
         double revPrice1KgUSD = revolutPriceOunce / (Util.OUNCE * currencyToRonRate);
         final double profit = (revPrice1KgUSD - priceMetalNowKg) / priceMetalNowKg;
 
-        double metalPriceOzRON = priceMetalNowKg * Util.OUNCE;
-
         RevolutProfit revProfit = new RevolutProfit();
-        revProfit.setCurrencyToRonRate(currencyToRonRate);
         revProfit.setRevolutPriceOz(revolutPriceOunce / currencyToRonRate);
-        revProfit.setMetalPriceOz(metalPriceOzRON);
         revProfit.setMetalSymbol(metalType.getSymbol());
         revProfit.setProfit(profit);
         revProfit.setTime(new Timestamp(System.currentTimeMillis()));

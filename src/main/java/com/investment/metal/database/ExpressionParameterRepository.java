@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ExpressionParameterRepository extends JpaRepository<ExpressionParameter, Long> {
+public interface ExpressionParameterRepository extends JpaRepository<ExpressionParameter, Integer> {
 
-    Optional<List<ExpressionParameter>> findByExpressionFunctionId(long id);
+    Optional<List<ExpressionParameter>> findByExpressionFunctionId(Integer id);
 
 }

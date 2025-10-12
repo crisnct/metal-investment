@@ -16,7 +16,7 @@ public class BannedAccountsService extends AbstractService {
     @Autowired
     private BannedRepository bannedRepository;
 
-    public void banUser(long userId, long amountTime, String reason) {
+    public void banUser(Integer userId, long amountTime, String reason) {
         BannedAccount entity = new BannedAccount();
         entity.setUserId(userId);
         entity.setBannedUntil(new Timestamp(System.currentTimeMillis() + amountTime));
@@ -24,7 +24,7 @@ public class BannedAccountsService extends AbstractService {
         this.bannedRepository.save(entity);
     }
 
-    public void checkBanned(long userId) throws BusinessException {
+    public void checkBanned(Integer userId) throws BusinessException {
         Optional<BannedAccount> bannedInfo = getBanAccountInfo(userId);
         if (bannedInfo.isPresent()) {
             BannedAccount entity = bannedInfo.get();
@@ -37,7 +37,7 @@ public class BannedAccountsService extends AbstractService {
         }
     }
 
-    private Optional<BannedAccount> getBanAccountInfo(long userId) {
+    private Optional<BannedAccount> getBanAccountInfo(Integer userId) {
         Optional<BannedAccount> op = this.bannedRepository.findByUserId(userId);
         if (op.isPresent()) {
             BannedAccount entity = op.get();

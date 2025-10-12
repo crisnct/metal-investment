@@ -6,9 +6,9 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface LoginRepository extends JpaRepository<Login, Long> {
+public interface LoginRepository extends JpaRepository<Login, Integer> {
 
     Optional<Login> findByLoginToken(String token);
 
-    Optional<Login> findByUserId(Long id);
+    Optional<Login> findByUserId(Integer id);
 }

@@ -44,13 +44,13 @@ public class LoginService extends AbstractService {
     @Autowired
     private ConsistentEncoder consistentEncoder;
 
-    public void saveAttempt(final long userId, final int validationCode) throws BusinessException {
+    public void saveAttempt(final Integer userId, final int validationCode) throws BusinessException {
         final Login loginEntity = this.loginRepository.findByUserId(userId).orElse(new Login());
         loginEntity.setTime(new Timestamp(System.currentTimeMillis()));
         loginEntity.setUserId(userId);
         loginEntity.setValidationCode(validationCode);
-        loginEntity.setValidated(false);
-        loginEntity.setLoggedIn(false);
+        loginEntity.setValidated(0);
+        loginEntity.setLoggedIn(0);
         this.loginRepository.save(loginEntity);
     }
 
@@ -69,13 +69,13 @@ public class LoginService extends AbstractService {
         this.saveAttempt(user.getId(), codeGenerated);
     }
 
-    public void verifyCodeAndToken(long userId, int code, String rawToken) throws BusinessException {
+    public void verifyCodeAndToken(Integer userId, int code, String rawToken) throws BusinessException {
         Optional<Login> loginOp = this.loginRepository.findByUserId(userId);
         if (loginOp.isPresent()) {
             Login login = loginOp.get();
             String encryptedToken = consistentEncoder.encrypt(rawToken);
             if (login.getValidationCode() == code && StringUtils.equals(login.getResetPasswordToken(), encryptedToken)) {
-                login.setValidated(true);
+                login.setValidated(1);
                 login.setFailedAttempts(0);
                 this.loginRepository.save(login);
             } else {
@@ -86,12 +86,12 @@ public class LoginService extends AbstractService {
         }
     }
 
-    public void verifyCode(long userId, int code) throws BusinessException {
+    public void verifyCode(Integer userId, int code) throws BusinessException {
         Optional<Login> loginOp = this.loginRepository.findByUserId(userId);
         if (loginOp.isPresent()) {
             Login login = loginOp.get();
             if (login.getValidationCode() == code) {
-                login.setValidated(true);
+                login.setValidated(1);
                 login.setFailedAttempts(0);
                 this.loginRepository.save(login);
             } else {
@@ -107,7 +107,7 @@ public class LoginService extends AbstractService {
         final String token;
         if (loginOp.isPresent()) {
             Login login = loginOp.get();
-            if (!login.getValidated()) {
+            if (login.getValidated() == null || login.getValidated() == 0) {
                 throw exceptionService.createException(MessageKey.NEEDS_VALIDATION);
             }
             token = generateToken();
@@ -115,7 +115,7 @@ public class LoginService extends AbstractService {
             login.setTime(new Timestamp(System.currentTimeMillis()));
             login.setTokenExpireTime(new Timestamp(System.currentTimeMillis() + TOKEN_EXPIRE_TIME));
             login.setFailedAttempts(0);
-            login.setLoggedIn(true);
+            login.setLoggedIn(1);
             this.loginRepository.save(login);
         } else {
             throw exceptionService.createException(MessageKey.USER_NOT_REGISTERED);
@@ -137,7 +137,7 @@ public class LoginService extends AbstractService {
         return token;
     }
 
-    public void markLoginFailed(long userId) throws BusinessException {
+    public void markLoginFailed(Integer userId) throws BusinessException {
         Optional<Login> loginOp = this.loginRepository.findByUserId(userId);
         if (loginOp.isPresent()) {
             Login login = loginOp.get();
@@ -164,7 +164,7 @@ public class LoginService extends AbstractService {
     public void logout(Login login) {
         login.setLoginToken("");
         login.setResetPasswordToken("");
-        login.setLoggedIn(false);
+        login.setLoggedIn(0);
         this.loginRepository.save(login);
     }
 
@@ -172,21 +172,21 @@ public class LoginService extends AbstractService {
         Optional<Login> loginOp = this.findByToken(token);
         if (loginOp.isPresent()) {
             Login login = loginOp.get();
-            Long userId = login.getUserId();
+            Integer userId = login.getUserId();
             this.bannedAccountsService.checkBanned(userId);
             this.blockedIpService.checkBlockedIP(userId);
 
-            if (!login.getValidated()) {
+            if (login.getValidated() == null || login.getValidated() == 0) {
                 throw exceptionService.createException(MessageKey.NEEDS_VALIDATION);
             }
-            if (!login.getLoggedIn()) {
+            if (login.getLoggedIn() == null || login.getLoggedIn() == 0) {
                 throw exceptionService.createException(MessageKey.USER_NOT_LOGIN);
             }
             Timestamp currentTime = new Timestamp(System.currentTimeMillis());
             if (login.getTokenExpireTime().before(currentTime)) {
                 login.setFailedAttempts(0);
-                login.setLoggedIn(false);
-                login.setValidated(false);
+                login.setLoggedIn(0);
+                login.setValidated(0);
                 this.loginRepository.save(login);
                 throw exceptionService.createException(MessageKey.EXPIRED_TOKEN);
             }

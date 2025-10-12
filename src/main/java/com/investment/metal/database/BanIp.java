@@ -11,9 +11,9 @@ import java.sql.Timestamp;
 public class BanIp {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
-    private Long userId;
+    private Integer userId;
 
     private String ip;
 

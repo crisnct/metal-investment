@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class BlockedIpService extends AbstractService {
 
-    public static final Long ID_GLOBAL_USER = -1L;
+    public static final Integer ID_GLOBAL_USER = -1;
 
     private static final long YEARS_100_IP_BLOCKED = TimeUnit.DAYS.toMillis(365 * 100);
 
@@ -26,11 +26,11 @@ public class BlockedIpService extends AbstractService {
     @Autowired
     private HttpServletRequest request;
 
-    public void blockIPForever(long userId, String ip, String reason) throws BusinessException {
+    public void blockIPForever(Integer userId, String ip, String reason) throws BusinessException {
         this.blockIP(userId, ip, YEARS_100_IP_BLOCKED, reason);
     }
 
-    public void blockIP(long userId, String ip, long amountTime, String reason) throws BusinessException {
+    public void blockIP(Integer userId, String ip, long amountTime, String reason) throws BusinessException {
         Optional<BanIp> op = this.banIpRepository.findByUserIdAndIp(userId, ip);
         if (op.isPresent()) {
             throw this.exceptionService
@@ -47,12 +47,12 @@ public class BlockedIpService extends AbstractService {
         }
     }
 
-    public void unblockIP(Long userId, String ip) {
+    public void unblockIP(Integer userId, String ip) {
         this.banIpRepository.findByUserIdAndIp(userId, ip)
                 .ifPresent(banIp -> banIpRepository.delete(banIp));
     }
 
-    public void checkBlockedIP(long userId) throws BusinessException {
+    public void checkBlockedIP(Integer userId) throws BusinessException {
         final String ip = Util.getClientIpAddress(this.request);
         final BanIp banIp = this.getBanIp(userId, ip);
         if (banIp != null) {
@@ -75,7 +75,7 @@ public class BlockedIpService extends AbstractService {
         }
     }
 
-    private BanIp getBanIp(long userId, String ip) {
+    private BanIp getBanIp(Integer userId, String ip) {
         Optional<BanIp> banIpOp = this.banIpRepository.findByUserIdAndIp(userId, ip);
         BanIp banIp = null;
         if (banIpOp.isPresent()) {

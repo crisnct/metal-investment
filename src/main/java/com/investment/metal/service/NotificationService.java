@@ -42,7 +42,7 @@ public class NotificationService extends AbstractService {
     @Autowired
     private NotificationRepository notificationRepository;
 
-    public void save(Long userId, int period) {
+    public void save(Integer userId, int period) {
         Notification entity = this.notificationRepository
                 .findByUserId(userId)
                 .orElse(new Notification());
@@ -52,7 +52,7 @@ public class NotificationService extends AbstractService {
         this.notificationRepository.save(entity);
     }
 
-    public void notifyUser(long userId) {
+    public void notifyUser(Integer userId) {
         Customer user = this.accountService.findById(userId);
         this.notifyUser(user);
     }
@@ -96,7 +96,7 @@ public class NotificationService extends AbstractService {
         }
     }
 
-    public int getNotificationFrequency(Long userId) {
+    public int getNotificationFrequency(Integer userId) {
         final Notification notification = this.notificationRepository
                 .findByUserId(userId)
                 .orElseGet(() -> {

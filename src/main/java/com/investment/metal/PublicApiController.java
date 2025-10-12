@@ -120,7 +120,7 @@ public class PublicApiController {
         this.blockedIpService.checkBlockedIPGlobal();
         this.exceptionService.check(!Util.isValidEmailAddress(email), MessageKey.INVALID_REQUEST, "Invalid email address!");
         final Customer user = this.accountService.findByEmail(email);
-        Long userId = user.getId();
+        Integer userId = user.getId();
         this.bannedAccountsService.checkBanned(userId);
 
         this.loginService.verifyCodeAndToken(userId, code, token);

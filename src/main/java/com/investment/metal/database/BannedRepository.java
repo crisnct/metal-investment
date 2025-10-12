@@ -6,8 +6,8 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface BannedRepository extends JpaRepository<BannedAccount, Long> {
+public interface BannedRepository extends JpaRepository<BannedAccount, Integer> {
 
-    Optional<BannedAccount> findByUserId(long userId);
+    Optional<BannedAccount> findByUserId(Integer userId);
 
 }

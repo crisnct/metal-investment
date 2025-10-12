@@ -244,11 +244,11 @@ public class ProtectedApiController {
     @RequestMapping(value = "/removeAlert", method = RequestMethod.DELETE)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
     public ResponseEntity<SimpleMessageDto> removeAlert(
-            @RequestHeader("alertId") final long alertId
+            @RequestHeader("alertId") final Integer alertId
     ) {
         String token = Util.getTokenFromRequest(request);
         final Login loginEntity = this.loginService.getLogin(token);
-        Long userId = loginEntity.getUserId();
+        Integer userId = loginEntity.getUserId();
 
         final boolean matchingUser = this.alertService.findAllByUserId(userId)
                 .stream()

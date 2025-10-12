@@ -19,7 +19,7 @@ public class PurchaseService extends AbstractService {
     @Autowired
     private PurchaseRepository purchaseRepo;
 
-    public void purchase(long userId, double metalAmount, MetalType metalType, double cost) {
+    public void purchase(Integer userId, double metalAmount, MetalType metalType, double cost) {
         Optional<Purchase> purchaseOp = this.purchaseRepo.findByUserIdAndMetalSymbol(userId, metalType.getSymbol());
         final Purchase purchase;
         if (purchaseOp.isPresent()) {
@@ -37,7 +37,7 @@ public class PurchaseService extends AbstractService {
         this.purchaseRepo.save(purchase);
     }
 
-    public void sell(Long userId, double metalAmount, MetalType metalType, double price) throws BusinessException {
+    public void sell(Integer userId, double metalAmount, MetalType metalType, double price) throws BusinessException {
         @SuppressWarnings("OptionalGetWithoutIsPresent") final Purchase purchase = this.purchaseRepo.findByUserIdAndMetalSymbol(userId, metalType.getSymbol()).get();
         this.exceptionService.check(metalAmount > purchase.getAmount(), MessageKey.SELL_MORE_THAN_YOU_HAVE, metalType.getSymbol(), purchase.getAmount());
 
@@ -53,11 +53,11 @@ public class PurchaseService extends AbstractService {
         this.purchaseRepo.save(purchase);
     }
 
-    public List<Purchase> getAllPurchase(long userId) {
+    public List<Purchase> getAllPurchase(Integer userId) {
         return this.purchaseRepo.findByUserId(userId).orElse(new ArrayList<>());
     }
 
-    public Purchase getPurchase(long userId, String metalSymbol) {
+    public Purchase getPurchase(Integer userId, String metalSymbol) {
         return this.purchaseRepo.findByUserIdAndMetalSymbol(userId, metalSymbol).orElse(null);
     }
 
