@@ -221,7 +221,24 @@ public class Config implements WebMvcConfigurer {
 
   @Bean
   public WebSecurityCustomizer webSecurityCustomizer() {
-    return (web) -> web.ignoring().requestMatchers("/token/**");
+    return (web) -> web.ignoring().requestMatchers(
+        "/token/**",
+        "/swagger-ui",
+        "/swagger-ui/**",
+        "/swagger-ui.html",
+        "/swagger-ui.html/**",
+        "/swagger-ui/index.html",
+        "/swagger-ui/index.html/**",
+        "/swagger-resources",
+        "/swagger-resources/**",
+        "/v3/api-docs",
+        "/v3/api-docs/**",
+        "/v3/api-docs.yaml",
+        "/v3/api-docs.yaml/**",
+        "/api-docs",
+        "/api-docs/**",
+        "/webjars/**"
+    );
   }
 
   @Bean
