@@ -239,8 +239,17 @@ public class Config implements WebMvcConfigurer {
                 "/actuator/**",
                 "/swagger-ui",
                 "/swagger-ui/**",
+                "/swagger-ui.html",
+                "/swagger-ui.html/**",
                 "/api-docs",
                 "/api-docs/**",
+                "/v3/api-docs",
+                "/v3/api-docs/**",
+                "/swagger-resources",
+                "/swagger-resources/**",
+                "/webjars/**",
+                "/swagger-ui/index.html",
+                "/swagger-ui/index.html/**",
                 "/userRegistration",
                 "/validateAccount",
                 "/login",
@@ -249,7 +258,8 @@ public class Config implements WebMvcConfigurer {
                 "/health",
                 "/test-static",
                 "/test",
-                "/swagger-test"
+                "/swagger-test",
+                "/debug-swagger"
                 ).permitAll()
             .requestMatchers(PROTECTED_URLS).authenticated()
         )

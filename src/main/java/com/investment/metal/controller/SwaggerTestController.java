@@ -32,4 +32,19 @@ public class SwaggerTestController {
         response.put("timestamp", System.currentTimeMillis());
         return response;
     }
+
+    @GetMapping("/debug-swagger")
+    @Operation(summary = "Debug Swagger", description = "Debug endpoint to check Swagger configuration")
+    public Map<String, Object> debugSwagger() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Debug endpoint is accessible");
+        response.put("swagger_paths", new String[]{
+            "/swagger-ui.html",
+            "/api-docs",
+            "/v3/api-docs",
+            "/swagger-resources"
+        });
+        response.put("timestamp", System.currentTimeMillis());
+        return response;
+    }
 }
