@@ -21,6 +21,14 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -35,6 +43,8 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/api")
+@Tag(name = "Protected API", description = "Protected endpoints requiring JWT authentication")
+@SecurityRequirement(name = "bearerAuth")
 public class ProtectedApiController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProtectedApiController.class);
@@ -89,8 +99,20 @@ public class ProtectedApiController {
 
     @RequestMapping(value = "/blockIp", method = RequestMethod.POST)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
+    @Operation(
+            summary = "Block IP address",
+            description = "Blocks an IP address permanently with an optional reason"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "IP blocked successfully",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - invalid token",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
+    })
     public ResponseEntity<SimpleMessageDto> blockIp(
+            @Parameter(description = "IP address to block", required = true)
             @RequestHeader("ip") final String ip,
+            @Parameter(description = "Reason for blocking the IP", required = false)
             @RequestHeader(value = "reason", defaultValue = "unknown reason") final String reason
     ) {
         String token = Util.getTokenFromRequest(request);
@@ -128,9 +150,24 @@ public class ProtectedApiController {
 
     @RequestMapping(value = "/purchase", method = RequestMethod.POST)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
+    @Operation(
+            summary = "Record metal purchase",
+            description = "Records a metal purchase transaction for the authenticated user"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Purchase recorded successfully",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid metal symbol or parameters",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - invalid token",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
+    })
     public ResponseEntity<SimpleMessageDto> purchase(
+            @Parameter(description = "Amount of metal purchased", required = true)
             @RequestHeader("metalAmount") final double metalAmount,
+            @Parameter(description = "Symbol of the metal (e.g., GOLD, SILVER)", required = true)
             @RequestHeader("metalSymbol") final String metalSymbol,
+            @Parameter(description = "Total cost of the purchase", required = true)
             @RequestHeader("cost") final double cost
     ) {
         MetalType metalType = MetalType.lookup(metalSymbol);
@@ -165,6 +202,16 @@ public class ProtectedApiController {
 
     @RequestMapping(value = "/profit", method = RequestMethod.GET)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
+    @Operation(
+            summary = "Get user profit information",
+            description = "Retrieves profit information for all metals owned by the authenticated user"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Profit information retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = ProfitDto.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - invalid token",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
+    })
     public ResponseEntity<ProfitDto> getProfit() {
         String token = Util.getTokenFromRequest(request);
         final Login loginEntity = this.loginService.getLogin(token);
