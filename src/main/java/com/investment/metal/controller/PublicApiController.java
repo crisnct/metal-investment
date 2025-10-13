@@ -13,16 +13,23 @@ import com.investment.metal.service.BannedAccountsService;
 import com.investment.metal.service.BlockedIpService;
 import com.investment.metal.service.LoginService;
 import com.investment.metal.service.exception.ExceptionService;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.HashMap;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@Tag(name = "Public API", description = "Public endpoints with no authentication")
 public class PublicApiController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PublicApiController.class);
@@ -203,4 +210,34 @@ public class PublicApiController {
         }
     }
 
+    @GetMapping("/")
+    public ResponseEntity<Resource> serveReactApp() {
+      try {
+        Resource resource = new ClassPathResource("static/index.html");
+        return ResponseEntity.ok()
+            .contentType(MediaType.TEXT_HTML)
+            .body(resource);
+      } catch (Exception e) {
+        return ResponseEntity.notFound().build();
+      }
+    }
+
+    @GetMapping("/health")
+    public Map<String, String> health() {
+      Map<String, String> response = new HashMap<>();
+      response.put("status", "UP");
+      response.put("service", "Metal Investment API");
+      response.put("version", "1.0.0");
+      return response;
+    }
+
+    @GetMapping("/api/health")
+    public Map<String, String> apiHealth() {
+      Map<String, String> response = new HashMap<>();
+      response.put("status", "UP");
+      response.put("api", "Metal Investment API");
+      response.put("swagger", "/swagger-ui.html");
+      response.put("docs", "/api-docs");
+      return response;
+    }
 }

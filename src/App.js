@@ -4,13 +4,13 @@ import Header from './components/Header';
 import Hero from './components/Hero';
 import Features from './components/Features';
 import TechnicalStack from './components/TechnicalStack';
+import Profile from './components/Profile';
 import Footer from './components/Footer';
 import ApiService from './services/api';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userToken, setUserToken] = useState(null);
-  const [profitData, setProfitData] = useState(null);
 
   useEffect(() => {
     // Check if user is logged in (check localStorage for token)
@@ -39,19 +39,8 @@ function App() {
     localStorage.removeItem('userToken');
     setUserToken(null);
     setIsLoggedIn(false);
-    setProfitData(null);
   };
 
-  const loadProfitData = async () => {
-    if (userToken) {
-      try {
-        const data = await ApiService.getProfit(userToken);
-        setProfitData(data);
-      } catch (error) {
-        console.error('Failed to load profit data:', error);
-      }
-    }
-  };
 
   return (
     <div className="App">
@@ -59,10 +48,9 @@ function App() {
         isLoggedIn={isLoggedIn} 
         onLogin={handleLogin} 
         onLogout={handleLogout}
-        onLoadProfit={loadProfitData}
-        profitData={profitData}
       />
       <Hero />
+      {isLoggedIn && <Profile />}
       <Features />
       <TechnicalStack />
       <Footer />

@@ -3,7 +3,7 @@ import { TrendingUp, Menu, X, User, LogIn, LogOut } from 'lucide-react';
 import './Header.css';
 import ApiService from '../services/api';
 
-const Header = ({ isLoggedIn, onLogin, onLogout, onLoadProfit, profitData }) => {
+const Header = ({ isLoggedIn, onLogin, onLogout }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showLoginForm, setShowLoginForm] = useState(false);
   const [showSignupForm, setShowSignupForm] = useState(false);
@@ -327,9 +327,9 @@ const Header = ({ isLoggedIn, onLogin, onLogout, onLoadProfit, profitData }) => 
           <div className="header-actions">
             {isLoggedIn ? (
               <>
-                <button className="btn-secondary" onClick={onLoadProfit}>
-                  <TrendingUp className="icon" />
-                  View Profit
+                <button className="btn-secondary" onClick={() => document.getElementById('profile-section')?.scrollIntoView({ behavior: 'smooth' })}>
+                  <User className="icon" />
+                  Profile
                 </button>
                 <button className="btn-primary" onClick={handleLogout}>
                   <LogOut className="icon" />
@@ -598,27 +598,7 @@ const Header = ({ isLoggedIn, onLogin, onLogout, onLoadProfit, profitData }) => 
         </div>
       )}
 
-      {/* Profit Data Display */}
-      {profitData && (
-        <div className="profit-display">
-          <h3>Your Profit Information</h3>
-          <p>Username: {profitData.username}</p>
-          <p>Last Updated: {new Date(profitData.time).toLocaleString()}</p>
-          {profitData.metalInfo && profitData.metalInfo.length > 0 ? (
-            <div className="metal-info">
-              {profitData.metalInfo.map((metal, index) => (
-                <div key={index} className="metal-item">
-                  <strong>{metal.metalSymbol}</strong>: {metal.amount} units
-                  <br />
-                  Profit: {metal.profit} ({metal.profitPercentage}%)
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p>No metal investments recorded yet.</p>
-          )}
-        </div>
-      )}
+
     </header>
   );
 };
