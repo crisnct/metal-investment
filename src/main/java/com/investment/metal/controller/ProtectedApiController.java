@@ -413,8 +413,7 @@ public class ProtectedApiController {
         final Login loginEntity = this.loginService.getLogin(token);
 
         final int freq = this.notificationService.getNotificationFrequency(loginEntity.getUserId());
-
-        SimpleMessageDto dto = new SimpleMessageDto("The notification period is %d days", freq);
+        SimpleMessageDto dto = new SimpleMessageDto("The notification period is %d days", TimeUnit.MILLISECONDS.toDays(freq));
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
