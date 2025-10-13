@@ -10,7 +10,7 @@ const Header = ({ isLoggedIn, onLogin, onLogout, onLoadProfit, profitData }) => 
   const [showValidationForm, setShowValidationForm] = useState(false);
   const [loginData, setLoginData] = useState({ username: '', password: '' });
   const [signupData, setSignupData] = useState({ username: '', password: '', email: '' });
-  const [validationData, setValidationData] = useState({ username: '', code: '' });
+  const [validationData, setValidationData] = useState({ email: '', username: '', code: '' });
   const [loginMessage, setLoginMessage] = useState('');
   const [signupMessage, setSignupMessage] = useState('');
   const [validationMessage, setValidationMessage] = useState('');
@@ -18,6 +18,7 @@ const Header = ({ isLoggedIn, onLogin, onLogout, onLoadProfit, profitData }) => 
   const [validationErrors, setValidationErrors] = useState({});
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const [errorDialogMessage, setErrorDialogMessage] = useState('');
+  const [emailSent, setEmailSent] = useState(false);
 
   // Handle escape key to close modals
   useEffect(() => {
@@ -79,10 +80,19 @@ const Header = ({ isLoggedIn, onLogin, onLogout, onLoadProfit, profitData }) => 
   const validateValidationForm = () => {
     const errors = {};
     
+    // Email validation
+    if (!validationData.email) {
+      errors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(validationData.email)) {
+      errors.email = 'Please enter a valid email address';
+    }
+    
+    // Username validation
     if (!validationData.username.trim()) {
       errors.username = 'Username is required';
     }
     
+    // Code validation
     if (!validationData.code) {
       errors.code = 'Verification code is required';
     } else if (!/^\d{6,9}$/.test(validationData.code)) {
@@ -169,15 +179,16 @@ const Header = ({ isLoggedIn, onLogin, onLogout, onLoadProfit, profitData }) => 
     
     try {
       const response = await ApiService.validateAccount(validationData.username, parseInt(validationData.code));
-      setValidationMessage(response.message || 'Account validated successfully!');
+      setValidationMessage('Account validated successfully! You can now login.');
       
-      // Auto-login after successful validation
-      const loginResult = await onLogin(validationData.username, signupData.password);
-      if (loginResult.success) {
+      // Close validation form and redirect to login
+      setTimeout(() => {
         setShowValidationForm(false);
-        setValidationData({ username: '', code: '' });
-        setSignupData({ username: '', password: '', email: '' });
-      }
+        setValidationData({ email: '', username: '', code: '' });
+        setEmailSent(false);
+        setShowLoginForm(true);
+      }, 2000);
+      
     } catch (error) {
       console.error('Validation error:', error); // Debug log
       console.error('Error data:', error.data); // Debug log for backend response
@@ -238,9 +249,10 @@ const Header = ({ isLoggedIn, onLogin, onLogout, onLoadProfit, profitData }) => 
 
   const closeValidationForm = () => {
     setShowValidationForm(false);
-    setValidationData({ username: '', code: '' });
+    setValidationData({ email: '', username: '', code: '' });
     setValidationErrors({});
     setValidationMessage('');
+    setEmailSent(false);
   };
 
   const closeErrorDialog = () => {
@@ -248,15 +260,51 @@ const Header = ({ isLoggedIn, onLogin, onLogout, onLoadProfit, profitData }) => 
     setErrorDialogMessage('');
   };
 
-  const testBackendResponse = async () => {
+
+  const handleResendEmail = async () => {
+    // Validate email and username before sending
+    const errors = {};
+    if (!validationData.email) {
+      errors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(validationData.email)) {
+      errors.email = 'Please enter a valid email address';
+    }
+    if (!validationData.username) {
+      errors.username = 'Username is required';
+    }
+    
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+
     try {
-      const result = await ApiService.testBackendResponse();
-      console.log('Backend test result:', result);
-      setErrorDialogMessage(`Backend Test Result:\nStatus: ${result.status}\nResponse: ${result.text}\nOK: ${result.ok}`);
-      setShowErrorDialog(true);
+      // First check if user exists and is pending validation
+      await ApiService.checkUserPendingValidation(validationData.username, validationData.email);
+      
+      // If check passes, resend validation email
+      await ApiService.resendValidationEmail(validationData.username, validationData.email);
+      
+      setEmailSent(true);
+      setValidationErrors({});
+      setValidationMessage('Validation email sent successfully! Please check your inbox.');
     } catch (error) {
-      console.error('Backend test failed:', error);
-      setErrorDialogMessage(`Backend Test Failed: ${error.message}`);
+      console.error('Resend email error:', error);
+      let errorMessage = 'Failed to send validation email. Please try again.';
+      
+      if (error.isNetworkError) {
+        errorMessage = 'Network error: Unable to connect to the server. Please check your internet connection and try again.';
+      } else if (error.data) {
+        if (error.data.message) {
+          errorMessage = error.data.message;
+        } else if (error.data.error) {
+          errorMessage = error.data.error;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      setErrorDialogMessage(errorMessage);
       setShowErrorDialog(true);
     }
   };
@@ -300,10 +348,6 @@ const Header = ({ isLoggedIn, onLogin, onLogout, onLoadProfit, profitData }) => 
                 </button>
               </>
             )}
-            {/* Debug button - remove in production */}
-            <button className="btn-secondary" onClick={testBackendResponse} style={{fontSize: '0.8rem', padding: '0.25rem 0.5rem'}}>
-              Test Backend
-            </button>
           </div>
           
           <button 
@@ -353,12 +397,19 @@ const Header = ({ isLoggedIn, onLogin, onLogout, onLoadProfit, profitData }) => 
                 </div>
               )}
               <div className="form-actions">
-                <button type="button" className="btn-secondary" onClick={closeLoginForm}>
-                  Cancel
-                </button>
-                <button type="submit" className="btn-primary">
-                  Login
-                </button>
+                <div className="form-actions-left">
+                  <a href="#" onClick={(e) => { e.preventDefault(); setShowValidationForm(true); closeLoginForm(); }} className="link">
+                    Validate account
+                  </a>
+                </div>
+                <div className="form-actions-right">
+                  <button type="button" className="btn-secondary" onClick={closeLoginForm}>
+                    Cancel
+                  </button>
+                  <button type="submit" className="btn-primary">
+                    Login
+                  </button>
+                </div>
               </div>
             </form>
           </div>
@@ -454,6 +505,22 @@ const Header = ({ isLoggedIn, onLogin, onLogout, onLoadProfit, profitData }) => 
             </div>
             <form onSubmit={handleValidationSubmit} className="login-form">
               <div className="form-group">
+                <label htmlFor="validation-email">Email *</label>
+                <input
+                  type="email"
+                  id="validation-email"
+                  name="email"
+                  value={validationData.email}
+                  onChange={(e) => setValidationData({ ...validationData, email: e.target.value })}
+                  className={validationErrors.email ? 'error' : ''}
+                  placeholder="Enter your email address"
+                  required
+                />
+                {validationErrors.email && (
+                  <div className="error-message">{validationErrors.email}</div>
+                )}
+              </div>
+              <div className="form-group">
                 <label htmlFor="validation-username">Username *</label>
                 <input
                   type="text"
@@ -491,12 +558,19 @@ const Header = ({ isLoggedIn, onLogin, onLogout, onLoadProfit, profitData }) => 
                 </div>
               )}
               <div className="form-actions">
-                <button type="button" className="btn-secondary" onClick={closeValidationForm}>
-                  Cancel
-                </button>
-                <button type="submit" className="btn-primary">
-                  Validate Account
-                </button>
+                <div className="form-actions-left">
+                  <a href="#" onClick={(e) => { e.preventDefault(); handleResendEmail(); }} className="link" style={{ pointerEvents: emailSent ? 'none' : 'auto', opacity: emailSent ? 0.6 : 1 }}>
+                    {emailSent ? 'Email sent! Check your inbox.' : 'Send email with code'}
+                  </a>
+                </div>
+                <div className="form-actions-right">
+                  <button type="button" className="btn-secondary" onClick={closeValidationForm}>
+                    Cancel
+                  </button>
+                  <button type="submit" className="btn-primary">
+                    Validate Account
+                  </button>
+                </div>
               </div>
             </form>
           </div>

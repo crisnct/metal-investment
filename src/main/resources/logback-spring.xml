@@ -1,44 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <include resource="org/springframework/boot/logging/logback/defaults.xml" />
-  <!-- This configuration will apply to all specified profiles -->
-  <springProfile name="default | prod | dev">
-
-    <!-- Define a consistent pattern for log messages -->
-    <property name="defaultPattern" value="%d{yyyy-MM-dd} | %d{HH:mm:ss.SSS} | %5p | %thread | %lo{50} | %m%n" />
-
-    <!--
-    CONSOLE Appender (STDOUT)
-    This is the only appender needed for Cloud Run. It prints logs to the standard output,
-    where Google Cloud's logging service can automatically collect them.
-    -->
-    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-      <encoder>
-        <pattern>${defaultPattern}</pattern>
-        <charset>utf8</charset>
-      </encoder>
+    <!-- Console appender -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
     </appender>
 
-    <!-- Set the log level for your application's packages -->
-    <logger name="com.investment" level="INFO"/>
+    <!-- File appender -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/metal-investment.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/metal-investment.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
 
-    <!--
-    Configure the logger for the Spring Framework.
-    It will now ONLY send logs to the console.
-    'additivity="false"' prevents duplicate logs in the root logger.
-    -->
-    <logger name="org.springframework" level="INFO" additivity="false">
-      <appender-ref ref="STDOUT" />
-    </logger>
-
-    <!--        Root Logger Configuration
-    This is the final logger that catches all other log messages.
-    It is now configured to ONLY send output to the console (STDOUT).
-    The reference to the file appender has been removed.
-    -->
+    <!-- Root logger -->
     <root level="INFO">
-      <appender-ref ref="STDOUT" />
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="FILE" />
     </root>
-  </springProfile>
 
+    <!-- Application specific loggers -->
+    <logger name="com.investment.metal" level="DEBUG" />
+    <logger name="org.springframework.boot" level="INFO" />
+    <logger name="org.springframework.web" level="INFO" />
+    <logger name="org.springframework.security" level="INFO" />
+    <logger name="org.springframework.cache" level="INFO" />
+    
+    <!-- Hibernate and JBoss Logging -->
+    <logger name="org.hibernate" level="WARN" />
+    <logger name="org.hibernate.SQL" level="WARN" />
+    <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="WARN" />
+    <logger name="org.jboss.logging" level="WARN" />
+    
+    <!-- Disable commons-logging -->
+    <logger name="org.apache.commons.logging" level="OFF" />
+    <logger name="commons.logging" level="OFF" />
 </configuration>

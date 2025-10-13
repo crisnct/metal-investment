@@ -8,7 +8,7 @@
   <h2 class="text-2xl font-bold text-[#073B4C] mb-4">Technical Stack</h2>
   <ul class="list-disc list-inside text-gray-700 space-y-2">
     <li><span class="font-bold">JDK 22:</span> Core programming language for the application logic.</li>
-    <li><span class="font-bold">Spring Boot:</span> Framework for backend of a webapp with typical starters: web, data‑JPA, security, mail, actuator.</li>
+    <li><span class="font-bold">Spring Boot v3.5.6:</span> Framework for backend of a webapp with typical starters: web, data‑JPA, security, mail, actuator.</li>
     <li><span class="font-bold">Liquibase:</span> Library for tracking, managing and applying database schema changes.</li>
     <li><span class="font-bold">Resilience4j:</span> Lightweight fault tolerance library that implements resilience patterns, like circuit breakers, rate limiters, and retries, to make applications more robust and able to handle failures gracefully</li>
     <li><span class="font-bold">Unirest:</span> HTTP client library for making API calls to fetch real-time metal prices.</li>

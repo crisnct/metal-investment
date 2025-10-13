@@ -21,7 +21,7 @@ const TechnicalStack = () => {
       color: '#e11d48'
     },
     {
-      name: 'Spring Boot',
+      name: 'Spring Boot 3.5.6',
       description: 'Framework for backend of a webapp with typical starters: web, data‑JPA, security, mail, actuator.',
       icon: Shield,
       color: '#65a30d'

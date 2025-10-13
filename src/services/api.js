@@ -16,37 +16,6 @@ class ApiService {
     };
   }
 
-  // Debug method to test backend response
-  async testBackendResponse() {
-    try {
-      const response = await fetch(`${this.baseURL}/userRegistration`, {
-        method: 'POST',
-        headers: {
-          'username': 'test',
-          'password': 'test',
-          'email': 'test@test.com'
-        }
-      });
-      
-      console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
-      
-      const text = await response.text();
-      console.log('Raw response text:', text);
-      
-      try {
-        const json = JSON.parse(text);
-        console.log('Parsed JSON:', json);
-      } catch (e) {
-        console.log('Not valid JSON');
-      }
-      
-      return { status: response.status, text, ok: response.ok };
-    } catch (error) {
-      console.error('Test request failed:', error);
-      return { error: error.message };
-    }
-  }
 
   // Public API methods
   async registerUser(username, password, email) {
@@ -233,6 +202,116 @@ class ApiService {
     }
   }
 
+  async checkUserPendingValidation(username, email) {
+    try {
+      const response = await fetch(`${this.baseURL}/checkUserPendingValidation`, {
+        method: 'POST',
+        headers: {
+          'username': username,
+          'email': email,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        mode: 'cors',
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        let errorData = null;
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        
+        try {
+          errorData = await response.json();
+          if (errorData.message) {
+            errorMessage = errorData.message;
+          } else if (errorData.error) {
+            errorMessage = errorData.error;
+          }
+        } catch (jsonError) {
+          try {
+            const textResponse = await response.text();
+            errorMessage = textResponse || errorMessage;
+            errorData = { message: textResponse };
+          } catch (textError) {
+            console.error('Failed to parse error response:', textError);
+          }
+        }
+        
+        const error = new Error(errorMessage);
+        error.response = response;
+        error.data = errorData;
+        error.status = response.status;
+        throw error;
+      }
+      
+      return await response.json();
+    } catch (error) {
+      if (error.response) {
+        throw error;
+      }
+      
+      const customError = new Error(error.message || 'Network error occurred');
+      customError.originalError = error;
+      customError.isNetworkError = true;
+      throw customError;
+    }
+  }
+
+  async resendValidationEmail(username, email) {
+    try {
+      const response = await fetch(`${this.baseURL}/resendValidationEmail`, {
+        method: 'POST',
+        headers: {
+          'username': username,
+          'email': email,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        mode: 'cors',
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        let errorData = null;
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        
+        try {
+          errorData = await response.json();
+          if (errorData.message) {
+            errorMessage = errorData.message;
+          } else if (errorData.error) {
+            errorMessage = errorData.error;
+          }
+        } catch (jsonError) {
+          try {
+            const textResponse = await response.text();
+            errorMessage = textResponse || errorMessage;
+            errorData = { message: textResponse };
+          } catch (textError) {
+            console.error('Failed to parse error response:', textError);
+          }
+        }
+        
+        const error = new Error(errorMessage);
+        error.response = response;
+        error.data = errorData;
+        error.status = response.status;
+        throw error;
+      }
+      
+      return await response.json();
+    } catch (error) {
+      if (error.response) {
+        throw error;
+      }
+      
+      const customError = new Error(error.message || 'Network error occurred');
+      customError.originalError = error;
+      customError.isNetworkError = true;
+      throw customError;
+    }
+  }
+
   // Protected API methods
   async getProfit(token) {
     const response = await fetch(`${this.baseURL}/api/profit`, {
@@ -278,10 +357,5 @@ class ApiService {
 }
 
 const apiService = new ApiService();
-
-// Make test function available globally for debugging
-if (typeof window !== 'undefined') {
-  window.testBackend = () => apiService.testBackendResponse();
-}
 
 export default apiService;

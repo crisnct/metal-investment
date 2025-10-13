@@ -250,6 +250,8 @@ public class Config implements WebMvcConfigurer {
                 "/login",
                 "/resetPassword",
                 "/changePassword",
+                "/checkUserPendingValidation",
+                "/resendValidationEmail",
                 "/health"
                 ).permitAll()
             .requestMatchers(PROTECTED_URLS).authenticated()

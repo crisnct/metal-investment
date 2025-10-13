@@ -204,4 +204,8 @@ public class LoginService extends AbstractService {
         return this.loginRepository.findByLoginToken(consistentEncoder.encrypt(rawToken));
     }
 
+    public Login findByUserId(Integer userId) {
+        return this.loginRepository.findByUserId(userId).orElse(null);
+    }
+
 }

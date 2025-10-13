@@ -2,6 +2,7 @@ package com.investment.metal.controller;
 
 import com.investment.metal.common.Util;
 import com.investment.metal.database.Customer;
+import com.investment.metal.database.Login;
 import com.investment.metal.dto.ResetPasswordDto;
 import com.investment.metal.dto.SimpleMessageDto;
 import com.investment.metal.dto.UserLoginDto;
@@ -20,16 +21,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 
 @RestController
-@Tag(name = "Public API", description = "Public endpoints for user registration, login, and account management")
 public class PublicApiController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PublicApiController.class);
@@ -54,24 +47,9 @@ public class PublicApiController {
 
     @RequestMapping(value = "/userRegistration", method = RequestMethod.POST)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
-    @Operation(
-            summary = "Register a new user",
-            description = "Creates a new user account and sends a validation email with a code"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "User registered successfully",
-                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class))),
-            @ApiResponse(responseCode = "400", description = "Invalid request parameters",
-                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class))),
-            @ApiResponse(responseCode = "409", description = "User already exists",
-                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
-    })
     public ResponseEntity<SimpleMessageDto> userRegistration(
-            @Parameter(description = "Username for the new account", required = true)
             @RequestHeader("username") String username,
-            @Parameter(description = "Password for the new account", required = true)
             @RequestHeader("password") String password,
-            @Parameter(description = "Email address for the new account", required = true)
             @RequestHeader("email") String email
     ) {
         try {
@@ -91,22 +69,8 @@ public class PublicApiController {
 
     @RequestMapping(value = "/validateAccount", method = RequestMethod.POST)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
-    @Operation(
-            summary = "Validate user account",
-            description = "Validates a user account using the verification code sent via email"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Account validated successfully",
-                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class))),
-            @ApiResponse(responseCode = "400", description = "Invalid verification code",
-                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class))),
-            @ApiResponse(responseCode = "404", description = "User not found",
-                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
-    })
     public ResponseEntity<SimpleMessageDto> validateAccount(
-            @Parameter(description = "Username of the account to validate", required = true)
             @RequestHeader("username") final String username,
-            @Parameter(description = "Verification code sent via email", required = true)
             @RequestHeader("code") final int code
     ) {
         this.blockedIpService.checkBlockedIPGlobal();
@@ -120,22 +84,8 @@ public class PublicApiController {
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
-    @Operation(
-            summary = "User login",
-            description = "Authenticates a user and returns a JWT token for API access"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Login successful",
-                    content = @Content(schema = @Schema(implementation = UserLoginDto.class))),
-            @ApiResponse(responseCode = "401", description = "Invalid credentials",
-                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class))),
-            @ApiResponse(responseCode = "403", description = "Account not validated or banned",
-                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
-    })
     public ResponseEntity<UserLoginDto> login(
-            @Parameter(description = "Username for login", required = true)
             @RequestHeader("username") final String username,
-            @Parameter(description = "Password for login", required = true)
             @RequestHeader("password") final String password
     ) {
         this.blockedIpService.checkBlockedIPGlobal();
@@ -152,18 +102,7 @@ public class PublicApiController {
 
     @RequestMapping(value = "/resetPassword", method = RequestMethod.POST)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
-    @Operation(
-            summary = "Reset password",
-            description = "Sends a password reset email to the user"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Password reset email sent",
-                    content = @Content(schema = @Schema(implementation = ResetPasswordDto.class))),
-            @ApiResponse(responseCode = "404", description = "User not found",
-                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
-    })
     public ResponseEntity<ResetPasswordDto> resetPassword(
-            @Parameter(description = "Email address of the account to reset password for", required = true)
             @RequestHeader("email") final String email
     ) {
         this.exceptionService.check(!Util.isValidEmailAddress(email), MessageKey.INVALID_REQUEST, "Invalid email address!");
@@ -179,24 +118,10 @@ public class PublicApiController {
 
     @RequestMapping(value = "/changePassword", method = RequestMethod.PUT)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
-    @Operation(
-            summary = "Change password",
-            description = "Changes user password using a reset token and verification code"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Password changed successfully",
-                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class))),
-            @ApiResponse(responseCode = "400", description = "Invalid or expired token/code",
-                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
-    })
     public ResponseEntity<SimpleMessageDto> changePassword(
-            @Parameter(description = "Verification code sent via email", required = true)
             @RequestHeader("code") final int code,
-            @Parameter(description = "New password", required = true)
             @RequestHeader("newPassword") final String newPassword,
-            @Parameter(description = "Email address of the account", required = true)
             @RequestHeader("email") final String email,
-            @Parameter(description = "Password reset token", required = true)
             @RequestHeader("token") final String token
     ) {
         this.blockedIpService.checkBlockedIPGlobal();
@@ -209,6 +134,73 @@ public class PublicApiController {
         this.accountService.updatePassword(user, this.passwordEncoder.encode(newPassword));
 
         return new ResponseEntity<>(new SimpleMessageDto("Password was changed successfully!"), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/checkUserPendingValidation", method = RequestMethod.POST)
+    @Transactional(noRollbackFor = NoRollbackBusinessException.class)
+    public ResponseEntity<SimpleMessageDto> checkUserPendingValidation(
+            @RequestHeader("username") String username,
+            @RequestHeader("email") String email
+    ) {
+        try {
+            this.exceptionService.check(!Util.isValidEmailAddress(email), MessageKey.INVALID_REQUEST, "Invalid email address!");
+            this.blockedIpService.checkBlockedIPGlobal();
+            
+            Customer user = this.accountService.findByUsername(username);
+            this.bannedAccountsService.checkBanned(user.getId());
+            
+            // Check if user exists and email matches
+            if (user == null) {
+                return new ResponseEntity<>(new SimpleMessageDto("User does not exist"), HttpStatus.BAD_REQUEST);
+            }
+            
+            if (!user.getEmail().equals(email)) {
+                return new ResponseEntity<>(new SimpleMessageDto("User does not exist"), HttpStatus.BAD_REQUEST);
+            }
+            
+            // Check if user is already validated by checking the Login entity
+            Login loginRecord = this.loginService.findByUserId(user.getId());
+            if (loginRecord != null && loginRecord.getValidated() != null && loginRecord.getValidated() == 1) {
+                return new ResponseEntity<>(new SimpleMessageDto("User already validated"), HttpStatus.BAD_REQUEST);
+            }
+            
+            return new ResponseEntity<>(new SimpleMessageDto("User exists and is pending validation"), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new SimpleMessageDto("User does not exist or already validated"), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @RequestMapping(value = "/resendValidationEmail", method = RequestMethod.POST)
+    @Transactional(noRollbackFor = NoRollbackBusinessException.class)
+    public ResponseEntity<SimpleMessageDto> resendValidationEmail(
+            @RequestHeader("username") String username,
+            @RequestHeader("email") String email
+    ) {
+        try {
+            this.exceptionService.check(!Util.isValidEmailAddress(email), MessageKey.INVALID_REQUEST, "Invalid email address!");
+            this.blockedIpService.checkBlockedIPGlobal();
+            
+            Customer user = this.accountService.findByUsername(username);
+            this.bannedAccountsService.checkBanned(user.getId());
+            
+            // Check if user exists and email matches
+            if (user == null || !user.getEmail().equals(email)) {
+                return new ResponseEntity<>(new SimpleMessageDto("User not found"), HttpStatus.NOT_FOUND);
+            }
+            
+            // Check if user is already validated by checking the Login entity
+            Login loginRecord = this.loginService.findByUserId(user.getId());
+            if (loginRecord != null && loginRecord.getValidated() != null && loginRecord.getValidated() == 1) {
+                return new ResponseEntity<>(new SimpleMessageDto("User already validated"), HttpStatus.BAD_REQUEST);
+            }
+            
+            // Resend validation email
+            this.loginService.validateAccount(user, false);
+            
+            return new ResponseEntity<>(new SimpleMessageDto("Validation email sent successfully"), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new SimpleMessageDto("Error: " + e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
 }

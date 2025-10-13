@@ -283,7 +283,17 @@
   display: flex;
   gap: 1rem;
   margin-top: 1.5rem;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.form-actions-left {
+  flex: 1;
+}
+
+.form-actions-right {
+  display: flex;
+  gap: 1rem;
 }
 
 .form-actions .btn-primary,
@@ -296,6 +306,23 @@
 .form-actions .btn-primary:hover,
 .form-actions .btn-secondary:hover {
   transform: translateY(-1px);
+}
+
+.form-links {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.form-links .link {
+  color: #007bff;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.2s ease;
+}
+
+.form-links .link:hover {
+  color: #0056b3;
+  text-decoration: underline;
 }
 
 /* Error Dialog Styles */
@@ -409,6 +436,17 @@
   }
   
   .form-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .form-actions-left {
+    order: 2;
+    text-align: center;
+  }
+  
+  .form-actions-right {
+    order: 1;
     flex-direction: column;
     gap: 0.75rem;
   }
