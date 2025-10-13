@@ -8,12 +8,19 @@ import {
   GitBranch, 
   Cloud,
   CheckCircle,
-  AlertTriangle
+  AlertTriangle,
+  Code
 } from 'lucide-react';
 import './TechnicalStack.css';
 
 const TechnicalStack = () => {
   const technologies = [
+    {
+      name: 'React 18.2.0',
+      description: 'Frontend library for building user interfaces with component-based architecture.',
+      icon: Code,
+      color: '#61dafb'
+    },
     {
       name: 'JDK 22',
       description: 'Core programming language for the application logic.',

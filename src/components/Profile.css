@@ -303,7 +303,10 @@
 /* Purchase Section */
 .purchase-section {
   margin-top: 1rem;
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
 }
 
 .btn-purchase {
@@ -323,6 +326,42 @@
   background: linear-gradient(135deg, #2980b9, #1f5f8b);
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-purchase {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-sell {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
+  border: none;
+  padding: 0.8rem 2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 1rem;
+}
+
+.btn-sell:hover {
+  background: linear-gradient(135deg, #c0392b, #a93226);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.purchase-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
 }
 
 /* Purchase Dialog Styles */
@@ -446,9 +485,144 @@
   color: #495057;
 }
 
+/* Sell Dialog Styles */
+.sell-popup {
+  max-width: 500px;
+  width: 90%;
+}
+
+.sell-form {
+  padding: 1.5rem;
+}
+
+.sell-form .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.sell-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.sell-form select,
+.sell-form input {
+  width: 100%;
+  padding: 0.8rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.sell-form select:focus,
+.sell-form input:focus {
+  outline: none;
+  border-color: #e74c3c;
+}
+
+.sell-form select.error,
+.sell-form input.error {
+  border-color: #e74c3c;
+}
+
+.sell-form .error-message {
+  color: #e74c3c;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.sell-form .message {
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.sell-form .message.success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.sell-form .message.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.sell-form .form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 1.5rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.sell-form .form-actions-right {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.sell-form .btn-primary {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
+  border: none;
+  padding: 0.8rem 2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sell-form .btn-primary:hover {
+  background: linear-gradient(135deg, #c0392b, #a93226);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.sell-form .btn-secondary {
+  background: #f8f9fa;
+  color: #6c757d;
+  border: 2px solid #e0e0e0;
+  padding: 0.8rem 2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.sell-form .btn-secondary:hover {
+  background: #e9ecef;
+  border-color: #d0d7de;
+  color: #495057;
+}
+
 @media (max-width: 768px) {
-  .purchase-popup {
+  .purchase-popup,
+  .sell-popup {
     width: 95%;
     max-width: none;
+  }
+  
+  .purchase-section {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .btn-sell {
+    margin-right: 0;
+    margin-bottom: 0.5rem;
   }
 }

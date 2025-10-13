@@ -533,6 +533,39 @@ class ApiService {
       throw customError;
     }
   }
+
+  async sellMetal(amount, symbol, price) {
+    const authHeaders = this.getAuthHeadersFromStorage();
+    console.log('Sell API - Auth headers:', authHeaders);
+    console.log('Sell API - Token from storage:', this.getToken());
+    
+    const response = await fetch(`${this.baseURL}/api/sell`, {
+      method: 'POST',
+      headers: {
+        ...this.getAuthHeadersFromStorage(),
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        amount: amount,
+        symbol: symbol,
+        price: price
+      }),
+      mode: 'cors',
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      const errorData = await this.parseJsonSafely(response);
+      const errorMessage = this.getFriendlyErrorMessage(response.status, errorData);
+      const error = new Error(errorMessage);
+      error.response = response;
+      error.data = errorData;
+      error.status = response.status;
+      throw error;
+    }
+
+    return await this.parseJsonSafely(response);
+  }
 }
 
 const apiService = new ApiService();
