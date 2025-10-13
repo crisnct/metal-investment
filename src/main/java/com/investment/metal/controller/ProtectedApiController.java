@@ -11,6 +11,7 @@ import com.investment.metal.service.alerts.AlertService;
 import com.investment.metal.service.alerts.FunctionInfo;
 import com.investment.metal.service.alerts.FunctionParam;
 import com.investment.metal.service.exception.ExceptionService;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -396,7 +397,7 @@ public class ProtectedApiController {
         String token = Util.getTokenFromRequest(request);
         final Login loginEntity = this.loginService.getLogin(token);
 
-        int millis = period * 1000;
+        int millis = (int)TimeUnit.DAYS.toMillis(period);
         this.exceptionService.check(millis < NotificationService.MIN_NOTIFICATION_PERIOD && period != 0,
                 MessageKey.INVALID_REQUEST, "Invalid period");
         this.notificationService.save(loginEntity.getUserId(), millis);

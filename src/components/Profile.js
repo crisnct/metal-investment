@@ -74,8 +74,12 @@ const Profile = () => {
       try {
         setNotificationLoading(true);
         const data = await ApiService.getNotificationPeriod();
-        if (data && data.seconds) {
-          setNotificationPeriod(data.seconds.toString());
+        if (data && data.message) {
+          // Extract number from message like "The notification period is 60 seconds"
+          const match = data.message.match(/(\d+)/);
+          if (match) {
+            setNotificationPeriod(match[1]);
+          }
         }
       } catch (error) {
         console.error('Failed to load notification period:', error);
@@ -225,8 +229,8 @@ const Profile = () => {
   };
 
   const handleSetNotification = async () => {
-    if (!notificationPeriod || isNaN(notificationPeriod) || parseInt(notificationPeriod) <= 0) {
-      setNotificationMessage('Please enter a valid number of seconds');
+    if (!notificationPeriod || isNaN(notificationPeriod) || parseInt(notificationPeriod) < 0) {
+      setNotificationMessage('Please enter a valid number of days');
       return;
     }
 
@@ -270,13 +274,13 @@ const Profile = () => {
               </div>
               
               <div className="info-item notification-item">
-                <span className="info-label">Notification:</span>
+                <span className="info-label">Notification interval:</span>
                 <div className="notification-controls">
                   <input
                     type="number"
                     className="notification-input"
-                    placeholder="Enter seconds"
-                    min="1"
+                    placeholder="Enter days"
+                    min="0"
                     value={notificationPeriod}
                     onChange={(e) => setNotificationPeriod(e.target.value)}
                     disabled={notificationLoading}

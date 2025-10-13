@@ -46,6 +46,11 @@ const Footer = () => {
                   nelucristian2005@gmail.com
                 </a>
               </p>
+              <p>
+                <a href="https://www.cristiantone.me" target="_blank" rel="noopener noreferrer" className="contact-link">
+                  www.cristiantone.me
+                </a>
+              </p>
             </div>
           </div>
           

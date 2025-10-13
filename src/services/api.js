@@ -568,10 +568,14 @@ class ApiService {
   }
 
   async getNotificationPeriod() {
-    const response = await fetch(`${this.baseURL}/api/notificationPeriod`, {
+    const authHeaders = this.getAuthHeadersFromStorage();
+    console.log('Get Notification API - Auth headers:', authHeaders);
+    console.log('Get Notification API - Token from storage:', this.getToken());
+    
+    const response = await fetch(`${this.baseURL}/api/getNotificationPeriod`, {
       method: 'GET',
       headers: {
-        ...this.getAuthHeadersFromStorage(),
+        ...authHeaders,
         'Accept': 'application/json'
       },
       mode: 'cors',
@@ -596,12 +600,9 @@ class ApiService {
       method: 'PUT',
       headers: {
         ...this.getAuthHeadersFromStorage(),
-        'Content-Type': 'application/json',
+        'period': seconds.toString(),
         'Accept': 'application/json'
       },
-      body: JSON.stringify({
-        seconds: seconds
-      }),
       mode: 'cors',
       credentials: 'include'
     });

@@ -9,20 +9,15 @@ import {
   Cloud,
   CheckCircle,
   AlertTriangle,
-  Code
+  Code,
+  FileText
 } from 'lucide-react';
 import './TechnicalStack.css';
 
 const TechnicalStack = () => {
   const technologies = [
     {
-      name: 'React 18.2.0',
-      description: 'Frontend library for building user interfaces with component-based architecture.',
-      icon: Code,
-      color: '#61dafb'
-    },
-    {
-      name: 'JDK 22',
+      name: 'Java 22',
       description: 'Core programming language for the application logic.',
       icon: Coffee,
       color: '#e11d48'
@@ -32,6 +27,30 @@ const TechnicalStack = () => {
       description: 'Framework for backend of a webapp with typical starters: web, data‑JPA, security, mail, actuator.',
       icon: Shield,
       color: '#65a30d'
+    },
+    {
+      name: 'React 18.2.0',
+      description: 'Frontend library for building user interfaces with component-based architecture.',
+      icon: Code,
+      color: '#61dafb'
+    },
+    {
+      name: 'Swagger 2.8.13',
+      description: 'API documentation and testing interface using SpringDoc OpenAPI for interactive API exploration.',
+      icon: FileText,
+      color: '#85ea2d'
+    },
+    {
+      name: 'Google Cloud Platform',
+      description: 'Cloud deployment platform with Cloud Run, Cloud SQL, and scalable infrastructure.',
+      icon: Cloud,
+      color: '#4285f4'
+    },
+    {
+      name: 'MySQL',
+      description: 'Database.',
+      icon: Database,
+      color: '#0ea5e9'
     },
     {
       name: 'Liquibase',
@@ -58,22 +77,10 @@ const TechnicalStack = () => {
       color: '#ea580c'
     },
     {
-      name: 'Google Cloud Platform',
-      description: 'Cloud deployment platform with Cloud Run, Cloud SQL, and scalable infrastructure.',
-      icon: Cloud,
-      color: '#4285f4'
-    },
-    {
       name: 'Hibernate/Ehcache',
       description: 'Caching integration for database.',
       icon: Database,
       color: '#059669'
-    },
-    {
-      name: 'MySQL',
-      description: 'Database.',
-      icon: Database,
-      color: '#0ea5e9'
     },
     {
       name: 'Maven',
