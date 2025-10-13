@@ -75,10 +75,13 @@ const Profile = () => {
         setNotificationLoading(true);
         const data = await ApiService.getNotificationPeriod();
         if (data && data.message) {
-          // Extract number from message like "The notification period is 60 seconds"
+          // Extract number from message like "The notification period is 7 days"
           const match = data.message.match(/(\d+)/);
           if (match) {
-            setNotificationPeriod(match[1]);
+            // Convert days to seconds for display (1 day = 86400 seconds)
+            const days = parseInt(match[1]);
+            const seconds = days * 86400;
+            setNotificationPeriod(seconds.toString());
           }
         }
       } catch (error) {
@@ -238,7 +241,9 @@ const Profile = () => {
       setNotificationLoading(true);
       setNotificationMessage('');
       
-      await ApiService.setNotificationPeriod(parseInt(notificationPeriod));
+      // Convert seconds to days for backend (1 day = 86400 seconds)
+      const days = Math.round(parseInt(notificationPeriod) / 86400);
+      await ApiService.setNotificationPeriod(days);
       setNotificationMessage('Notification period updated successfully!');
       
       // Clear message after 3 seconds
@@ -279,7 +284,7 @@ const Profile = () => {
                   <input
                     type="number"
                     className="notification-input"
-                    placeholder="Enter days"
+                    placeholder="Enter seconds (e.g., 86400 = 1 day)"
                     min="0"
                     value={notificationPeriod}
                     onChange={(e) => setNotificationPeriod(e.target.value)}

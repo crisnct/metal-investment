@@ -10,7 +10,8 @@ import {
   CheckCircle,
   AlertTriangle,
   Code,
-  FileText
+  FileText,
+  Wrench
 } from 'lucide-react';
 import './TechnicalStack.css';
 
@@ -39,6 +40,12 @@ const TechnicalStack = () => {
       description: 'API documentation and testing interface using SpringDoc OpenAPI for interactive API exploration.',
       icon: FileText,
       color: '#85ea2d'
+    },
+    {
+      name: 'Lombok',
+      description: 'Java library that automatically generates boilerplate code like getters, setters, constructors, and equals methods.',
+      icon: Wrench,
+      color: '#ff6b35'
     },
     {
       name: 'Google Cloud Platform',
