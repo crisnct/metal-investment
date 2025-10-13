@@ -117,6 +117,44 @@
   font-size: 1rem;
 }
 
+.profit-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 1rem;
+}
+
+.profit-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.profit-table thead th {
+  background: #e9f3fb;
+  color: #2c3e50;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  font-weight: 700;
+  border-bottom: 2px solid #d7e6f3;
+}
+
+.profit-table tbody td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #f0f2f5;
+  color: #34495e;
+}
+
+.profit-table tbody tr:nth-child(even) {
+  background: #fafcff;
+}
+
+.loading {
+  color: #6c757d;
+  font-style: italic;
+}
+
 .alerts-content {
   margin-top: 1rem;
 }
@@ -188,5 +226,229 @@
   .profile-investment-section h3,
   .profile-alerts-section h3 {
     font-size: 1.3rem;
+  }
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+/* Purchase Section */
+.purchase-section {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.btn-purchase {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  border: none;
+  padding: 0.8rem 2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-purchase:hover {
+  background: linear-gradient(135deg, #2980b9, #1f5f8b);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Purchase Dialog Styles */
+.purchase-popup {
+  max-width: 500px;
+  width: 90%;
+}
+
+.purchase-form {
+  padding: 1.5rem 1.5rem 0 1.5rem;
+}
+
+.purchase-form .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.purchase-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.purchase-form select,
+.purchase-form input {
+  width: 100%;
+  padding: 0.8rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.purchase-form select:focus,
+.purchase-form input:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+.purchase-form select.error,
+.purchase-form input.error {
+  border-color: #e74c3c;
+}
+
+.purchase-form .error-message {
+  color: #e74c3c;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.purchase-form .message {
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.purchase-form .message.success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.purchase-form .message.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.purchase-form .form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 1.5rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.purchase-form .form-actions-right {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.purchase-form .btn-primary {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  border: none;
+  padding: 0.8rem 2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.purchase-form .btn-primary:hover {
+  background: linear-gradient(135deg, #2980b9, #1f5f8b);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.purchase-form .btn-secondary {
+  background: #f8f9fa;
+  color: #6c757d;
+  border: 2px solid #e0e0e0;
+  padding: 0.8rem 2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.purchase-form .btn-secondary:hover {
+  background: #e9ecef;
+  border-color: #d0d7de;
+  color: #495057;
+}
+
+@media (max-width: 768px) {
+  .purchase-popup {
+    width: 95%;
+    max-width: none;
   }
 }

@@ -65,13 +65,13 @@ public class MetalPriceService extends AbstractService {
         double revolutGoldPriceKg = metalPriceNowKg * (revolutProfitPercentages + 1) * currencyToRonRate;
         double revolutGoldPriceOunce = revolutGoldPriceKg * Util.OUNCE;
         double costNowUser = revolutGoldPriceOunce * purchase.getAmount();
-        double profitRevolut = Util.reduceDecimals(costNowUser - purchase.getCost(), 2);
+        double profitRevolut = costNowUser - purchase.getCost();
         return UserMetalInfoDto
                 .builder()
                 .metalSymbol(purchase.getMetalSymbol())
                 .amountPurchased(purchase.getAmount())
-                .costPurchased(Util.reduceDecimals(purchase.getCost(), 2))
-                .costNow(Util.reduceDecimals(costNowUser, 2))
+                .costPurchased(purchase.getCost())
+                .costNow(costNowUser)
                 .profit(profitRevolut)
                 .build();
     }

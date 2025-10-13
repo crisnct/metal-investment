@@ -16,6 +16,32 @@ class ApiService {
     };
   }
 
+  // Helper method to get token from sessionStorage
+  getToken() {
+    return localStorage.getItem('userToken');
+  }
+
+  // Helper method to get auth headers with token from storage
+  getAuthHeadersFromStorage() {
+    const token = this.getToken();
+    return token ? this.getAuthHeaders(token) : {};
+  }
+
+  // Safely parse JSON; returns null for empty body, or { message: text } for non-JSON text
+  async parseJsonSafely(response) {
+    try {
+      const text = await response.text();
+      if (!text) return null;
+      try {
+        return JSON.parse(text);
+      } catch (_) {
+        return { message: text };
+      }
+    } catch (_) {
+      return null;
+    }
+  }
+
 
   // Public API methods
   async registerUser(username, password, email) {
@@ -69,7 +95,7 @@ class ApiService {
         throw error;
       }
       
-      return await response.json();
+      return await this.parseJsonSafely(response);
     } catch (error) {
       // If it's already our custom error, re-throw it
       if (error.response) {
@@ -128,7 +154,7 @@ class ApiService {
         throw error;
       }
       
-      return await response.json();
+      return await this.parseJsonSafely(response);
     } catch (error) {
       // If it's already our custom error, re-throw it
       if (error.response) {
@@ -187,7 +213,7 @@ class ApiService {
         throw error;
       }
       
-      return await response.json();
+      return await this.parseJsonSafely(response);
     } catch (error) {
       // If it's already our custom error, re-throw it
       if (error.response) {
@@ -244,7 +270,7 @@ class ApiService {
         throw error;
       }
       
-      return await response.json();
+      return await this.parseJsonSafely(response);
     } catch (error) {
       if (error.response) {
         throw error;
@@ -313,46 +339,199 @@ class ApiService {
   }
 
   // Protected API methods
-  async getProfit(token) {
+  async getProfit() {
     const response = await fetch(`${this.baseURL}/api/profit`, {
       method: 'GET',
-      headers: this.getAuthHeaders(token)
+      headers: {
+        ...this.getAuthHeadersFromStorage(),
+        'Accept': 'application/json'
+      },
+      mode: 'cors',
+      credentials: 'include'
     });
-    return response.json();
+    if (!response.ok) {
+      const rawText = await response.text();
+      let message = rawText;
+      try {
+        if (rawText) {
+          const json = JSON.parse(rawText);
+          message = json?.message || json?.error || rawText;
+        }
+      } catch (_) {
+        // keep message as text
+      }
+      if (response.status === 401 || response.status === 403) {
+        message = 'Please log in to continue.';
+      }
+      const error = new Error(message || 'Request failed');
+      error.status = response.status;
+      throw error;
+    }
+    return await this.parseJsonSafely(response);
   }
 
-  async addAlert(token, metalSymbol, expression, frequency) {
+  async addAlert(metalSymbol, expression, frequency) {
     const response = await fetch(`${this.baseURL}/api/addAlert`, {
       method: 'POST',
       headers: {
-        ...this.getAuthHeaders(token),
+        ...this.getAuthHeadersFromStorage(),
         'metalSymbol': metalSymbol,
         'expression': expression,
-        'frequency': frequency
-      }
+        'frequency': frequency,
+        'Accept': 'application/json'
+      },
+      mode: 'cors',
+      credentials: 'include'
     });
-    return response.json();
+    if (!response.ok) {
+      const rawText = await response.text();
+      let message = rawText;
+      try {
+        if (rawText) {
+          const json = JSON.parse(rawText);
+          message = json?.message || json?.error || rawText;
+        }
+      } catch (_) {}
+      if (response.status === 401 || response.status === 403) {
+        message = 'Please log in to continue.';
+      }
+      const error = new Error(message || 'Request failed');
+      error.status = response.status;
+      throw error;
+    }
+    return await this.parseJsonSafely(response);
   }
 
-  async getAlerts(token) {
+  async getAlerts() {
     const response = await fetch(`${this.baseURL}/api/getAlerts`, {
       method: 'GET',
-      headers: this.getAuthHeaders(token)
+      headers: {
+        ...this.getAuthHeadersFromStorage(),
+        'Accept': 'application/json'
+      },
+      mode: 'cors',
+      credentials: 'include'
     });
-    return response.json();
+    if (!response.ok) {
+      const rawText = await response.text();
+      let message = rawText;
+      try {
+        if (rawText) {
+          const json = JSON.parse(rawText);
+          message = json?.message || json?.error || rawText;
+        }
+      } catch (_) {}
+      if (response.status === 401 || response.status === 403) {
+        message = 'Please log in to continue.';
+      }
+      const error = new Error(message || 'Request failed');
+      error.status = response.status;
+      throw error;
+    }
+    return await this.parseJsonSafely(response);
   }
 
-  async recordPurchase(token, metalAmount, metalSymbol, cost) {
+  async recordPurchase(metalAmount, metalSymbol, cost) {
     const response = await fetch(`${this.baseURL}/api/purchase`, {
       method: 'POST',
       headers: {
-        ...this.getAuthHeaders(token),
+        ...this.getAuthHeadersFromStorage(),
         'metalAmount': metalAmount.toString(),
         'metalSymbol': metalSymbol,
-        'cost': cost.toString()
-      }
+        'cost': cost.toString(),
+        'Accept': 'application/json'
+      },
+      mode: 'cors',
+      credentials: 'include'
     });
-    return response.json();
+    if (!response.ok) {
+      const rawText = await response.text();
+      let message = rawText;
+      try {
+        if (rawText) {
+          const json = JSON.parse(rawText);
+          message = json?.message || json?.error || rawText;
+        }
+      } catch (_) {}
+      if (response.status === 401 || response.status === 403) {
+        message = 'Please log in to continue.';
+      }
+      const error = new Error(message || 'Request failed');
+      error.status = response.status;
+      throw error;
+    }
+    return await this.parseJsonSafely(response);
+  }
+
+  async resetPassword(email) {
+    try {
+      const response = await fetch(`${this.baseURL}/resetPassword`, {
+        method: 'POST',
+        headers: {
+          'email': email,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        mode: 'cors',
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch {
+          errorData = { message: await response.text() };
+        }
+        const customError = new Error(errorData.message || 'Failed to reset password');
+        customError.data = errorData;
+        throw customError;
+      }
+
+      return await this.parseJsonSafely(response);
+    } catch (error) {
+      console.error('Reset password error:', error);
+      const customError = new Error(error.message || 'Network error occurred');
+      customError.data = error.data || { message: 'Failed to reset password' };
+      throw customError;
+    }
+  }
+
+  async changePassword(token, code, newPassword, email) {
+    try {
+      const response = await fetch(`${this.baseURL}/changePassword`, {
+        method: 'PUT',
+        headers: {
+          'token': token,
+          'code': code,
+          'newPassword': newPassword,
+          'email': email,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        mode: 'cors',
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch {
+          errorData = { message: await response.text() };
+        }
+        const customError = new Error(errorData.message || 'Failed to change password');
+        customError.data = errorData;
+        throw customError;
+      }
+
+      return await this.parseJsonSafely(response);
+    } catch (error) {
+      console.error('Change password error:', error);
+      const customError = new Error(error.message || 'Network error occurred');
+      customError.data = error.data || { message: 'Failed to change password' };
+      throw customError;
+    }
   }
 }
 

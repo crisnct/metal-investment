@@ -19,6 +19,13 @@ const Header = ({ isLoggedIn, onLogin, onLogout }) => {
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const [errorDialogMessage, setErrorDialogMessage] = useState('');
   const [emailSent, setEmailSent] = useState(false);
+  const [showResetPasswordDialog, setShowResetPasswordDialog] = useState(false);
+  const [showResetPasswordEmailDialog, setShowResetPasswordEmailDialog] = useState(false);
+  const [resetPasswordData, setResetPasswordData] = useState({ email: '', code: '', newPassword: '' });
+  const [resetPasswordErrors, setResetPasswordErrors] = useState({});
+  const [resetPasswordMessage, setResetPasswordMessage] = useState('');
+  const [resetPasswordToken, setResetPasswordToken] = useState(null);
+  const [resetPasswordEmail, setResetPasswordEmail] = useState('');
 
   // Handle escape key to close modals
   useEffect(() => {
@@ -27,6 +34,20 @@ const Header = ({ isLoggedIn, onLogin, onLogout }) => {
         if (showErrorDialog) {
           setShowErrorDialog(false);
           setErrorDialogMessage('');
+        } else if (showResetPasswordDialog) {
+          setShowResetPasswordDialog(false);
+          setResetPasswordData({ email: '', code: '', newPassword: '' });
+          setResetPasswordErrors({});
+          setResetPasswordMessage('');
+          setResetPasswordToken(null);
+          setResetPasswordEmail('');
+        } else if (showResetPasswordEmailDialog) {
+          setShowResetPasswordEmailDialog(false);
+          setResetPasswordData({ email: '', code: '', newPassword: '' });
+          setResetPasswordErrors({});
+          setResetPasswordMessage('');
+          setResetPasswordToken(null);
+          setResetPasswordEmail('');
         } else if (showValidationForm) {
           setShowValidationForm(false);
           setValidationData({ username: '', code: '' });
@@ -44,7 +65,7 @@ const Header = ({ isLoggedIn, onLogin, onLogout }) => {
 
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
-  }, [showLoginForm, showSignupForm, showValidationForm, showErrorDialog]);
+  }, [showLoginForm, showSignupForm, showValidationForm, showErrorDialog, showResetPasswordDialog, showResetPasswordEmailDialog]);
 
   // Validation functions
   const validateSignupForm = () => {
@@ -260,6 +281,115 @@ const Header = ({ isLoggedIn, onLogin, onLogout }) => {
     setErrorDialogMessage('');
   };
 
+  const handleResetPassword = () => {
+    setShowResetPasswordEmailDialog(true);
+    closeLoginForm();
+  };
+
+  const validateResetPasswordEmailForm = () => {
+    const errors = {};
+    
+    if (!resetPasswordData.email.trim()) {
+      errors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(resetPasswordData.email)) {
+      errors.email = 'Please enter a valid email address';
+    }
+    
+    return errors;
+  };
+
+  const validateResetPasswordForm = () => {
+    const errors = {};
+    
+    if (!resetPasswordData.code.trim()) {
+      errors.code = 'Code is required';
+    }
+    
+    if (!resetPasswordData.newPassword.trim()) {
+      errors.newPassword = 'New password is required';
+    } else if (resetPasswordData.newPassword.length < 6) {
+      errors.newPassword = 'Password must be at least 6 characters long';
+    }
+    
+    return errors;
+  };
+
+  const handleResetPasswordEmailSubmit = async (e) => {
+    e.preventDefault();
+    
+    const errors = validateResetPasswordEmailForm();
+    if (Object.keys(errors).length > 0) {
+      setResetPasswordErrors(errors);
+      return;
+    }
+    
+    setResetPasswordErrors({});
+    setResetPasswordMessage('');
+    
+    try {
+      const response = await ApiService.resetPassword(resetPasswordData.email);
+      setResetPasswordToken(response.token);
+      setResetPasswordEmail(resetPasswordData.email);
+      setShowResetPasswordEmailDialog(false);
+      setShowResetPasswordDialog(true);
+    } catch (error) {
+      setResetPasswordMessage(error.data?.message || error.message || 'Failed to reset password');
+    }
+  };
+
+  const handleResetPasswordSubmit = async (e) => {
+    e.preventDefault();
+    
+    const errors = validateResetPasswordForm();
+    if (Object.keys(errors).length > 0) {
+      setResetPasswordErrors(errors);
+      return;
+    }
+    
+    setResetPasswordErrors({});
+    setResetPasswordMessage('');
+    
+    try {
+      const response = await ApiService.changePassword(
+        resetPasswordToken,
+        resetPasswordData.code,
+        resetPasswordData.newPassword,
+        resetPasswordEmail
+      );
+      
+      setResetPasswordMessage('Password changed successfully! You can now login with your new password.');
+      setResetPasswordData({ code: '', newPassword: '' });
+      
+      // Close dialog after 2 seconds
+      setTimeout(() => {
+        setShowResetPasswordDialog(false);
+        setResetPasswordMessage('');
+        setResetPasswordToken(null);
+      }, 2000);
+      
+    } catch (error) {
+      setResetPasswordMessage(error.data?.message || error.message || 'Failed to change password');
+    }
+  };
+
+  const closeResetPasswordDialog = () => {
+    setShowResetPasswordDialog(false);
+    setResetPasswordData({ email: '', code: '', newPassword: '' });
+    setResetPasswordErrors({});
+    setResetPasswordMessage('');
+    setResetPasswordToken(null);
+    setResetPasswordEmail('');
+  };
+
+  const closeResetPasswordEmailDialog = () => {
+    setShowResetPasswordEmailDialog(false);
+    setResetPasswordData({ email: '', code: '', newPassword: '' });
+    setResetPasswordErrors({});
+    setResetPasswordMessage('');
+    setResetPasswordToken(null);
+    setResetPasswordEmail('');
+  };
+
 
   const handleResendEmail = async () => {
     // Validate email and username before sending
@@ -396,21 +526,29 @@ const Header = ({ isLoggedIn, onLogin, onLogout }) => {
                   {loginMessage}
                 </div>
               )}
-              <div className="form-actions">
-                <div className="form-actions-left">
-                  <a href="#" onClick={(e) => { e.preventDefault(); setShowValidationForm(true); closeLoginForm(); }} className="link">
-                    Validate account
-                  </a>
-                </div>
-                <div className="form-actions-right">
-                  <button type="button" className="btn-secondary" onClick={closeLoginForm}>
-                    Cancel
-                  </button>
-                  <button type="submit" className="btn-primary">
-                    Login
-                  </button>
-                </div>
-              </div>
+        <div className="form-actions">
+          <div className="form-actions-right">
+            <button type="button" className="btn-secondary" onClick={closeLoginForm}>
+              Cancel
+            </button>
+            <button type="submit" className="btn-primary btn-login">
+              <LogIn className="icon" />
+              Login
+            </button>
+          </div>
+        </div>
+        <div className="form-links-bottom">
+          <div className="form-links-left">
+            <a href="#" onClick={(e) => { e.preventDefault(); setShowValidationForm(true); closeLoginForm(); }} className="link">
+              Validate account
+            </a>
+          </div>
+          <div className="form-links-right">
+            <a href="#" onClick={(e) => { e.preventDefault(); handleResetPassword(); }} className="link">
+              Reset password
+            </a>
+          </div>
+        </div>
             </form>
           </div>
         </div>
@@ -496,7 +634,7 @@ const Header = ({ isLoggedIn, onLogin, onLogout }) => {
       {/* Validation Modal */}
       {showValidationForm && (
         <div className="modal-overlay" onClick={closeValidationForm}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
+          <div className="modal validation-popup" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>Validate Your Account</h2>
               <button className="modal-close" onClick={closeValidationForm}>
@@ -538,16 +676,21 @@ const Header = ({ isLoggedIn, onLogin, onLogout }) => {
               </div>
               <div className="form-group">
                 <label htmlFor="validation-code">Verification Code *</label>
-                <input
-                  type="number"
-                  id="validation-code"
-                  name="code"
-                  value={validationData.code}
-                  onChange={(e) => setValidationData({ ...validationData, code: e.target.value })}
-                  placeholder="Enter the 6-9 digit code sent to your email"
-                  className={validationErrors.code ? 'error' : ''}
-                  required
-                />
+                <div className="form-group-input">
+                  <input
+                    type="text"
+                    id="validation-code"
+                    name="code"
+                    value={validationData.code}
+                    onChange={(e) => setValidationData({ ...validationData, code: e.target.value })}
+                    placeholder="Enter the 6-9 digit code sent to your email"
+                    className={validationErrors.code ? 'error' : ''}
+                    required
+                  />
+                  <a href="#" onClick={(e) => { e.preventDefault(); handleResendEmail(); }} className="link" style={{ pointerEvents: emailSent ? 'none' : 'auto', opacity: emailSent ? 0.6 : 1 }}>
+                    {emailSent ? 'Email sent! Check your inbox.' : 'Email code'}
+                  </a>
+                </div>
                 {validationErrors.code && (
                   <div className="error-message">{validationErrors.code}</div>
                 )}
@@ -558,17 +701,13 @@ const Header = ({ isLoggedIn, onLogin, onLogout }) => {
                 </div>
               )}
               <div className="form-actions">
-                <div className="form-actions-left">
-                  <a href="#" onClick={(e) => { e.preventDefault(); handleResendEmail(); }} className="link" style={{ pointerEvents: emailSent ? 'none' : 'auto', opacity: emailSent ? 0.6 : 1 }}>
-                    {emailSent ? 'Email sent! Check your inbox.' : 'Send email with code'}
-                  </a>
-                </div>
                 <div className="form-actions-right">
                   <button type="button" className="btn-secondary" onClick={closeValidationForm}>
                     Cancel
                   </button>
-                  <button type="submit" className="btn-primary">
-                    Validate Account
+                  <button type="submit" className="btn-primary btn-validate">
+                    <LogIn className="icon" />
+                    Validate
                   </button>
                 </div>
               </div>
@@ -594,6 +733,116 @@ const Header = ({ isLoggedIn, onLogin, onLogout }) => {
                 OK
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reset Password Email Dialog */}
+      {showResetPasswordEmailDialog && (
+        <div className="modal-overlay" onClick={closeResetPasswordEmailDialog}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Reset Password</h2>
+              <button className="modal-close" onClick={closeResetPasswordEmailDialog}>
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleResetPasswordEmailSubmit} className="login-form">
+              <div className="form-group">
+                <label htmlFor="reset-email">Email Address *</label>
+                <input
+                  type="email"
+                  id="reset-email"
+                  name="email"
+                  value={resetPasswordData.email}
+                  onChange={(e) => setResetPasswordData({ ...resetPasswordData, email: e.target.value })}
+                  className={resetPasswordErrors.email ? 'error' : ''}
+                  placeholder="Enter your email address"
+                  required
+                />
+                {resetPasswordErrors.email && (
+                  <div className="error-message">{resetPasswordErrors.email}</div>
+                )}
+              </div>
+              {resetPasswordMessage && (
+                <div className={`message ${resetPasswordMessage.includes('successfully') ? 'success' : 'error'}`}>
+                  {resetPasswordMessage}
+                </div>
+              )}
+              <div className="form-actions">
+                <div className="form-actions-right">
+                  <button type="button" className="btn-secondary" onClick={closeResetPasswordEmailDialog}>
+                    Cancel
+                  </button>
+                  <button type="submit" className="btn-primary">
+                    Send Reset Code
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Reset Password Dialog */}
+      {showResetPasswordDialog && (
+        <div className="modal-overlay" onClick={closeResetPasswordDialog}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Reset Password</h2>
+              <button className="modal-close" onClick={closeResetPasswordDialog}>
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleResetPasswordSubmit} className="login-form">
+              <div className="form-group">
+                <label htmlFor="reset-code">Code *</label>
+                <input
+                  type="text"
+                  id="reset-code"
+                  name="code"
+                  value={resetPasswordData.code}
+                  onChange={(e) => setResetPasswordData({ ...resetPasswordData, code: e.target.value })}
+                  className={resetPasswordErrors.code ? 'error' : ''}
+                  placeholder="Enter the code sent to your email"
+                  required
+                />
+                {resetPasswordErrors.code && (
+                  <div className="error-message">{resetPasswordErrors.code}</div>
+                )}
+              </div>
+              <div className="form-group">
+                <label htmlFor="reset-new-password">New Password *</label>
+                <input
+                  type="password"
+                  id="reset-new-password"
+                  name="newPassword"
+                  value={resetPasswordData.newPassword}
+                  onChange={(e) => setResetPasswordData({ ...resetPasswordData, newPassword: e.target.value })}
+                  className={resetPasswordErrors.newPassword ? 'error' : ''}
+                  placeholder="Enter your new password (min 6 characters)"
+                  required
+                />
+                {resetPasswordErrors.newPassword && (
+                  <div className="error-message">{resetPasswordErrors.newPassword}</div>
+                )}
+              </div>
+              {resetPasswordMessage && (
+                <div className={`message ${resetPasswordMessage.includes('successfully') ? 'success' : 'error'}`}>
+                  {resetPasswordMessage}
+                </div>
+              )}
+              <div className="form-actions">
+                <div className="form-actions-right">
+                  <button type="button" className="btn-secondary" onClick={closeResetPasswordDialog}>
+                    Cancel
+                  </button>
+                  <button type="submit" className="btn-primary">
+                    Reset
+                  </button>
+                </div>
+              </div>
+            </form>
           </div>
         </div>
       )}

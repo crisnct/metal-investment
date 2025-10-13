@@ -282,9 +282,10 @@
 .form-actions {
   display: flex;
   gap: 1rem;
-  margin-top: 1.5rem;
-  justify-content: space-between;
+  margin-top: 0.5rem;
+  justify-content: flex-end;
   align-items: center;
+  width: 100%;
 }
 
 .form-actions-left {
@@ -294,6 +295,24 @@
 .form-actions-right {
   display: flex;
   gap: 1rem;
+  justify-content: flex-end;
+  width: 100%;
+  max-width: 100%;
+}
+
+.btn-login {
+  padding: 0.8rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  min-width: 140px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-login .icon {
+  width: 18px;
+  height: 18px;
 }
 
 .form-actions .btn-primary,
@@ -301,6 +320,11 @@
   flex: 1;
   max-width: 120px;
   transition: all 0.2s ease;
+}
+
+.form-actions .btn-login {
+  flex: none;
+  max-width: none;
 }
 
 .form-actions .btn-primary:hover,
@@ -313,6 +337,25 @@
   margin-top: 1rem;
 }
 
+.form-links-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.form-links-left {
+  flex: 1;
+  text-align: left;
+}
+
+.form-links-right {
+  flex: 1;
+  text-align: right;
+}
+
 .form-links .link {
   color: #007bff;
   text-decoration: none;
@@ -321,6 +364,67 @@
 }
 
 .form-links .link:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+.form-links-left .link,
+.form-links-right .link {
+  color: #007bff;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.2s ease;
+}
+
+.form-links-left .link:hover,
+.form-links-right .link:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+.form-actions .btn-primary .icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 0.5rem;
+}
+
+.btn-validate {
+  padding: 0.8rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  min-width: 140px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-validate .icon {
+  width: 18px;
+  height: 18px;
+  color: #000000 !important;
+  fill: #000000 !important;
+}
+
+/* Validation popup specific styles */
+.form-group-input {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.form-group-input input {
+  flex: 1;
+}
+
+.form-group-input .link {
+  color: #007bff;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.2s ease;
+  white-space: nowrap;
+}
+
+.form-group-input .link:hover {
   color: #0056b3;
   text-decoration: underline;
 }
