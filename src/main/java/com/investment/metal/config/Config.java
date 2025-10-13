@@ -51,6 +51,10 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableWebMvc
@@ -253,6 +257,7 @@ public class Config implements WebMvcConfigurer {
         .exceptionHandling(exception -> exception.authenticationEntryPoint(forbiddenEntryPoint()))
         .addFilterBefore(authenticationFilter, AnonymousAuthenticationFilter.class)
         .authenticationProvider(authenticationProvider)
+        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
         .formLogin(AbstractHttpConfigurer::disable)
         .httpBasic(AbstractHttpConfigurer::disable)
         .logout(AbstractHttpConfigurer::disable);
@@ -270,5 +275,50 @@ public class Config implements WebMvcConfigurer {
   @Bean
   public AuthenticationEntryPoint forbiddenEntryPoint() {
     return new HttpStatusEntryPoint(HttpStatus.FORBIDDEN);
+  }
+
+  @Bean
+  public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration configuration = new CorsConfiguration();
+    configuration.setAllowedOriginPatterns(java.util.Arrays.asList("*"));
+    configuration.setAllowedMethods(java.util.Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+    configuration.setAllowedHeaders(java.util.Arrays.asList("*"));
+    configuration.setAllowCredentials(true);
+    configuration.setMaxAge(3600L);
+    
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", configuration);
+    return source;
+  }
+
+  @Override
+  public void addCorsMappings(CorsRegistry registry) {
+    registry.addMapping("/userRegistration")
+        .allowedOriginPatterns("*")
+        .allowedMethods("POST", "OPTIONS")
+        .allowedHeaders("*")
+        .allowCredentials(true)
+        .maxAge(3600);
+        
+    registry.addMapping("/validateAccount")
+        .allowedOriginPatterns("*")
+        .allowedMethods("POST", "OPTIONS")
+        .allowedHeaders("*")
+        .allowCredentials(true)
+        .maxAge(3600);
+        
+    registry.addMapping("/login")
+        .allowedOriginPatterns("*")
+        .allowedMethods("POST", "OPTIONS")
+        .allowedHeaders("*")
+        .allowCredentials(true)
+        .maxAge(3600);
+        
+    registry.addMapping("/api/**")
+        .allowedOriginPatterns("*")
+        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+        .allowedHeaders("*")
+        .allowCredentials(true)
+        .maxAge(3600);
   }
 }
