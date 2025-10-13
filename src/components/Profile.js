@@ -16,6 +16,9 @@ const Profile = () => {
   const [profitLastUpdated, setProfitLastUpdated] = useState('');
   const [profitEntries, setProfitEntries] = useState([]);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [notificationPeriod, setNotificationPeriod] = useState('');
+  const [notificationLoading, setNotificationLoading] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState('');
 
   useEffect(() => {
     const loadProfit = async () => {
@@ -64,6 +67,26 @@ const Profile = () => {
     };
     loadProfit();
   }, [refreshTrigger]);
+
+  // Load notification period on mount
+  useEffect(() => {
+    const loadNotificationPeriod = async () => {
+      try {
+        setNotificationLoading(true);
+        const data = await ApiService.getNotificationPeriod();
+        if (data && data.seconds) {
+          setNotificationPeriod(data.seconds.toString());
+        }
+      } catch (error) {
+        console.error('Failed to load notification period:', error);
+        // Don't show error to user, just leave field empty
+      } finally {
+        setNotificationLoading(false);
+      }
+    };
+    
+    loadNotificationPeriod();
+  }, []);
 
   const handlePurchaseClick = () => {
     setShowPurchaseDialog(true);
@@ -201,6 +224,31 @@ const Profile = () => {
     }
   };
 
+  const handleSetNotification = async () => {
+    if (!notificationPeriod || isNaN(notificationPeriod) || parseInt(notificationPeriod) <= 0) {
+      setNotificationMessage('Please enter a valid number of seconds');
+      return;
+    }
+
+    try {
+      setNotificationLoading(true);
+      setNotificationMessage('');
+      
+      await ApiService.setNotificationPeriod(parseInt(notificationPeriod));
+      setNotificationMessage('Notification period updated successfully!');
+      
+      // Clear message after 3 seconds
+      setTimeout(() => {
+        setNotificationMessage('');
+      }, 3000);
+      
+    } catch (error) {
+      setNotificationMessage(error.data?.message || error.message || 'Failed to update notification period');
+    } finally {
+      setNotificationLoading(false);
+    }
+  };
+
   return (
     <section id="profile-section" className="profile-section">
       <div className="container">
@@ -219,6 +267,33 @@ const Profile = () => {
               <div className="info-item">
                 <span className="info-label">Email address:</span>
                 <span className="info-value">nelucristian2005@gmail.com</span>
+              </div>
+              
+              <div className="info-item notification-item">
+                <span className="info-label">Notification:</span>
+                <div className="notification-controls">
+                  <input
+                    type="number"
+                    className="notification-input"
+                    placeholder="Enter seconds"
+                    min="1"
+                    value={notificationPeriod}
+                    onChange={(e) => setNotificationPeriod(e.target.value)}
+                    disabled={notificationLoading}
+                  />
+                  <button 
+                    className="btn-set-notification"
+                    onClick={handleSetNotification}
+                    disabled={notificationLoading}
+                  >
+                    {notificationLoading ? 'Setting...' : 'Set'}
+                  </button>
+                </div>
+                {notificationMessage && (
+                  <div className={`notification-message ${notificationMessage.includes('successfully') ? 'success' : 'error'}`}>
+                    {notificationMessage}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -298,6 +373,13 @@ const Profile = () => {
             <h3>Alerts</h3>
             <div className="alerts-content">
               <div className="no-alerts">No alerts configured.</div>
+            </div>
+          </div>
+
+          <div className="profile-functions-section">
+            <h3>Functions</h3>
+            <div className="functions-content">
+              <div className="no-functions">No functions configured</div>
             </div>
           </div>
         </div>

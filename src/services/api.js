@@ -540,7 +540,7 @@ class ApiService {
     console.log('Sell API - Token from storage:', this.getToken());
     
     const response = await fetch(`${this.baseURL}/api/sell`, {
-      method: 'POST',
+      method: 'DELETE',
       headers: {
         ...this.getAuthHeadersFromStorage(),
         'Accept': 'application/json'
@@ -549,6 +549,58 @@ class ApiService {
         amount: amount,
         symbol: symbol,
         price: price
+      }),
+      mode: 'cors',
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      const errorData = await this.parseJsonSafely(response);
+      const errorMessage = this.getFriendlyErrorMessage(response.status, errorData);
+      const error = new Error(errorMessage);
+      error.response = response;
+      error.data = errorData;
+      error.status = response.status;
+      throw error;
+    }
+
+    return await this.parseJsonSafely(response);
+  }
+
+  async getNotificationPeriod() {
+    const response = await fetch(`${this.baseURL}/api/notificationPeriod`, {
+      method: 'GET',
+      headers: {
+        ...this.getAuthHeadersFromStorage(),
+        'Accept': 'application/json'
+      },
+      mode: 'cors',
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      const errorData = await this.parseJsonSafely(response);
+      const errorMessage = this.getFriendlyErrorMessage(response.status, errorData);
+      const error = new Error(errorMessage);
+      error.response = response;
+      error.data = errorData;
+      error.status = response.status;
+      throw error;
+    }
+
+    return await this.parseJsonSafely(response);
+  }
+
+  async setNotificationPeriod(seconds) {
+    const response = await fetch(`${this.baseURL}/api/setNotificationPeriod`, {
+      method: 'PUT',
+      headers: {
+        ...this.getAuthHeadersFromStorage(),
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        seconds: seconds
       }),
       mode: 'cors',
       credentials: 'include'
