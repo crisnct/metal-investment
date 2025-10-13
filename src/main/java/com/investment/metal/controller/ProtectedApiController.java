@@ -402,7 +402,7 @@ public class ProtectedApiController {
                 MessageKey.INVALID_REQUEST, "Invalid period");
         this.notificationService.save(loginEntity.getUserId(), millis);
 
-        SimpleMessageDto dto = new SimpleMessageDto("The notification period was changed to %s seconds", period);
+        SimpleMessageDto dto = new SimpleMessageDto("The notification period was changed to %s days", period);
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 

@@ -595,12 +595,15 @@ class ApiService {
     return await this.parseJsonSafely(response);
   }
 
-  async setNotificationPeriod(seconds) {
+  async setNotificationPeriod(days) {
+    console.log('Set Notification API - Sending period:', days);
+    console.log('Set Notification API - Period type:', typeof days);
+    
     const response = await fetch(`${this.baseURL}/api/setNotificationPeriod`, {
       method: 'PUT',
       headers: {
         ...this.getAuthHeadersFromStorage(),
-        'period': seconds.toString(),
+        'period': days.toString(),
         'Accept': 'application/json'
       },
       mode: 'cors',
