@@ -1,17 +1,56 @@
 package com.investment.metal.controller;
 
 import com.investment.metal.MessageKey;
-import com.investment.metal.common.*;
-import com.investment.metal.database.*;
-import com.investment.metal.dto.*;
+import com.investment.metal.application.dto.AlertDto;
+import com.investment.metal.application.dto.AlertsDto;
+import com.investment.metal.application.dto.MetalInfoDto;
+import com.investment.metal.application.dto.ProfitDto;
+import com.investment.metal.application.service.AlertService;
+import com.investment.metal.application.service.FunctionInfo;
+import com.investment.metal.application.service.FunctionParam;
+import com.investment.metal.application.service.MetalPriceService;
+import com.investment.metal.application.service.NotificationService;
+import com.investment.metal.application.service.PurchaseService;
+import com.investment.metal.common.AlertFrequency;
+import com.investment.metal.common.CurrencyType;
+import com.investment.metal.common.DtoConversion;
+import com.investment.metal.common.MetalType;
+import com.investment.metal.common.Util;
+import com.investment.metal.domain.dto.ExpressionFunctionDto;
+import com.investment.metal.domain.dto.ExpressionFunctionParameterDto;
+import com.investment.metal.domain.dto.ExpressionFunctionParameterMinMaxDto;
+import com.investment.metal.domain.dto.ExpressionHelperDto;
+import com.investment.metal.domain.service.AccountService;
+import com.investment.metal.domain.service.BannedAccountsService;
+import com.investment.metal.domain.service.BlockedIpService;
+import com.investment.metal.domain.service.LoginService;
+import com.investment.metal.domain.service.price.ExternalMetalPriceReader;
 import com.investment.metal.exceptions.NoRollbackBusinessException;
-import com.investment.metal.price.ExternalMetalPriceReader;
-import com.investment.metal.service.*;
-import com.investment.metal.service.alerts.AlertService;
-import com.investment.metal.service.alerts.FunctionInfo;
-import com.investment.metal.service.alerts.FunctionParam;
-import com.investment.metal.service.exception.ExceptionService;
+import com.investment.metal.infrastructure.dto.AppStatusInfoDto;
+import com.investment.metal.infrastructure.dto.SimpleMessageDto;
+import com.investment.metal.infrastructure.exception.ExceptionService;
+import com.investment.metal.infrastructure.persistence.entity.Currency;
+import com.investment.metal.infrastructure.persistence.entity.Customer;
+import com.investment.metal.infrastructure.persistence.entity.Login;
+import com.investment.metal.infrastructure.persistence.entity.MetalPrice;
+import com.investment.metal.infrastructure.persistence.entity.Purchase;
+import com.investment.metal.infrastructure.service.CurrencyService;
+import com.investment.metal.infrastructure.service.EmailService;
+import com.investment.metal.infrastructure.service.MessageService;
+import com.investment.metal.infrastructure.service.RevolutService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,19 +62,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-
-import jakarta.servlet.http.HttpServletRequest;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * For all of those endpoints, the bearer authentication token it's necessary to be provided.</>
@@ -70,7 +96,7 @@ public class ProtectedApiController {
     private NotificationService notificationService;
 
     @Autowired
-    private com.investment.metal.application.service.MetalPriceService metalPriceService;
+    private MetalPriceService metalPriceService;
 
     @Autowired
     private RevolutService revolutService;

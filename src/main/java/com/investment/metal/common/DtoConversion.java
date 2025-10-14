@@ -1,7 +1,7 @@
 package com.investment.metal.common;
 
-import com.investment.metal.database.Alert;
-import com.investment.metal.dto.AlertDto;
+import com.investment.metal.application.dto.AlertDto;
+import com.investment.metal.infrastructure.persistence.entity.Alert;
 
 public final class DtoConversion {
 

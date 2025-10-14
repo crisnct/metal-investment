@@ -21,7 +21,7 @@ import java.util.Properties;
  * Handles only database and JPA concerns.
  */
 @Configuration
-@EnableJpaRepositories(basePackages = "com.investment.metal.database")
+@EnableJpaRepositories(basePackages = "com.investment.metal.infrastructure.persistence.repository")
 public class DatabaseConfig {
 
     @Value("${spring.datasource.url}")
@@ -61,7 +61,7 @@ public class DatabaseConfig {
     public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(dataSource);
-        em.setPackagesToScan("com.investment.metal.database");
+        em.setPackagesToScan("com.investment.metal.infrastructure.persistence.entity");
 
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         vendorAdapter.setDatabasePlatform("org.hibernate.dialect.MySQL8Dialect");

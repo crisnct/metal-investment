@@ -1,6 +1,6 @@
 package com.investment.metal.exceptions;
 
-import com.investment.metal.dto.ExceptionDto;
+import com.investment.metal.infrastructure.dto.ExceptionDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;

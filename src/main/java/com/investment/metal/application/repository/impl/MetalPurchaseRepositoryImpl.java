@@ -1,9 +1,9 @@
 package com.investment.metal.application.repository.impl;
 
 import com.investment.metal.application.repository.MetalPurchaseRepository;
-import com.investment.metal.database.Purchase;
-import com.investment.metal.database.PurchaseRepository;
 import com.investment.metal.domain.model.MetalPurchase;
+import com.investment.metal.infrastructure.persistence.entity.Purchase;
+import com.investment.metal.infrastructure.persistence.repository.PurchaseRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;

@@ -1,6 +1,6 @@
 package com.investment.metal.domain.model;
 
-import com.investment.metal.database.Customer;
+import com.investment.metal.infrastructure.persistence.entity.Customer;
 import lombok.Builder;
 import lombok.Data;
 
@@ -23,17 +23,29 @@ public class User {
     private final boolean active;
 
     /**
-     * Business rule: Username must be between 3-50 characters
+     * Business rule: Username must be between 3-50 characters and alphanumeric
      */
     public boolean isValidUsername() {
-        return username != null && username.length() >= 3 && username.length() <= 50;
+        if (username == null || username.trim().isEmpty()) {
+            return false;
+        }
+        return username.length() >= 3 && 
+               username.length() <= 50 && 
+               username.matches("^[a-zA-Z0-9_]+$");
     }
 
     /**
-     * Business rule: Email must be valid format
+     * Business rule: Email must be valid format with proper structure
      */
     public boolean isValidEmail() {
-        return email != null && email.contains("@") && email.contains(".");
+        if (email == null || email.trim().isEmpty()) {
+            return false;
+        }
+        return email.contains("@") && 
+               email.contains(".") && 
+               email.length() >= 5 && 
+               email.length() <= 255 &&
+               email.matches("^[^@]+@[^@]+\\.[^@]+$");
     }
 
     /**
@@ -41,6 +53,30 @@ public class User {
      */
     public boolean canPerformActions() {
         return validated && active;
+    }
+    
+    /**
+     * Business rule: Check if user account is in valid state
+     */
+    public boolean isAccountValid() {
+        return isValidUsername() && isValidEmail() && canPerformActions();
+    }
+    
+    /**
+     * Business rule: Check if user can be authenticated
+     */
+    public boolean canBeAuthenticated() {
+        return isAccountValid() && !isExpired();
+    }
+    
+    /**
+     * Business rule: Check if account is expired (older than 1 year)
+     */
+    public boolean isExpired() {
+        if (createdAt == null) {
+            return false;
+        }
+        return createdAt.isBefore(java.time.LocalDateTime.now().minusYears(1));
     }
 
     /**

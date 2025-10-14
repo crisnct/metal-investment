@@ -1,19 +1,18 @@
 package com.investment.metal.application.service;
 
+import com.investment.metal.application.dto.UserMetalInfoDto;
 import com.investment.metal.application.repository.MetalPurchaseRepository;
-import com.investment.metal.application.repository.UserRepository;
 import com.investment.metal.domain.model.MetalPurchase;
 import com.investment.metal.domain.model.User;
 import com.investment.metal.domain.service.MetalInvestmentDomainService;
-import com.investment.metal.dto.UserMetalInfoDto;
+import com.investment.metal.application.repository.UserApplicationRepository;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Application service for metal investment use cases.
@@ -29,7 +28,7 @@ public class MetalInvestmentApplicationService {
     private final MetalInvestmentDomainService metalInvestmentDomainService;
     private final MetalPurchaseRepository metalPurchaseRepository;
     private final MetalPriceService metalPriceService;
-    private final UserRepository userRepository;
+    private final UserApplicationRepository userRepository;
 
     /**
      * Add metal purchase for user

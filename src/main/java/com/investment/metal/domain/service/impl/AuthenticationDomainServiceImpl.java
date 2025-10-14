@@ -1,12 +1,12 @@
 package com.investment.metal.domain.service.impl;
 
-import com.investment.metal.database.Customer;
-import com.investment.metal.database.CustomerRepository;
 import com.investment.metal.domain.model.User;
 import com.investment.metal.domain.service.AuthenticationDomainService;
 import com.investment.metal.domain.valueobject.LoginAttempt;
 import com.investment.metal.domain.valueobject.Token;
 import com.investment.metal.exceptions.BusinessException;
+import com.investment.metal.infrastructure.persistence.entity.Customer;
+import com.investment.metal.infrastructure.persistence.repository.CustomerRepository;
 import com.investment.metal.security.CustomAuthenticationProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

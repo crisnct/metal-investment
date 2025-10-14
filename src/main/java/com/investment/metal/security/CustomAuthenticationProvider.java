@@ -1,9 +1,9 @@
 package com.investment.metal.security;
 
-import com.investment.metal.database.Customer;
-import com.investment.metal.database.Login;
-import com.investment.metal.service.AccountService;
-import com.investment.metal.service.LoginService;
+import com.investment.metal.domain.service.AccountService;
+import com.investment.metal.domain.service.LoginService;
+import com.investment.metal.infrastructure.persistence.entity.Customer;
+import com.investment.metal.infrastructure.persistence.entity.Login;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.AbstractUserDetailsAuthenticationProvider;

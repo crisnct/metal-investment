@@ -1,11 +1,11 @@
 package com.investment.metal.application.service;
 
-import com.investment.metal.application.repository.TokenRepository;
-import com.investment.metal.application.repository.UserRepository;
 import com.investment.metal.domain.model.User;
 import com.investment.metal.domain.service.AuthenticationDomainService;
 import com.investment.metal.domain.valueobject.Token;
 import com.investment.metal.exceptions.BusinessException;
+import com.investment.metal.application.repository.UserApplicationRepository;
+import com.investment.metal.infrastructure.persistence.repository.TokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,7 +25,7 @@ import java.util.Optional;
 public class AuthenticationApplicationService {
 
     private final AuthenticationDomainService authenticationDomainService;
-    private final UserRepository userRepository;
+    private final UserApplicationRepository userRepository;
     private final TokenRepository tokenRepository;
 
     /**
