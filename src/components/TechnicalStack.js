@@ -42,7 +42,7 @@ const TechnicalStack = () => {
       color: '#85ea2d'
     },
     {
-      name: 'Lombok',
+      name: 'Lombok 1.18.40',
       description: 'Java library that automatically generates boilerplate code like getters, setters, constructors, and equals methods.',
       icon: Wrench,
       color: '#ff6b35'
@@ -54,25 +54,25 @@ const TechnicalStack = () => {
       color: '#4285f4'
     },
     {
-      name: 'MySQL',
+      name: 'MySQL 8.0',
       description: 'Database.',
       icon: Database,
       color: '#0ea5e9'
     },
     {
-      name: 'Liquibase',
+      name: 'Liquibase 4.31.1',
       description: 'Library for tracking, managing and applying database schema changes.',
       icon: Database,
       color: '#0891b2'
     },
     {
-      name: 'Resilience4j',
+      name: 'Resilience4j 2.2.0',
       description: 'Lightweight fault tolerance library that implements resilience patterns, like circuit breakers, rate limiters, and retries.',
       icon: Zap,
       color: '#dc2626'
     },
     {
-      name: 'Unirest',
+      name: 'Unirest 3.14.5',
       description: 'HTTP client library for making API calls to fetch real-time metal prices.',
       icon: Globe,
       color: '#7c3aed'
@@ -84,13 +84,13 @@ const TechnicalStack = () => {
       color: '#ea580c'
     },
     {
-      name: 'Hibernate/Ehcache',
+      name: 'Hibernate 6.6.25',
       description: 'Caching integration for database.',
       icon: Database,
       color: '#059669'
     },
     {
-      name: 'Maven',
+      name: 'Maven 3.14.0',
       description: 'Build automation tool for project management and dependency handling.',
       icon: GitBranch,
       color: '#dc2626'

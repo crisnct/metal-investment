@@ -287,6 +287,7 @@ const Profile = () => {
                     onChange={(e) => setNotificationPeriod(e.target.value)}
                     disabled={notificationLoading}
                   />
+                  <span className="notification-unit">day(s)</span>
                   <button 
                     className="btn-set-notification"
                     onClick={handleSetNotification}

@@ -60,7 +60,7 @@
 
 .info-item {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 1rem;
   padding: 0.8rem 0;
   border-bottom: 1px solid #f0f0f0;
@@ -91,7 +91,7 @@
 }
 
 .notification-item {
-  align-items: flex-start;
+  align-items: center;
 }
 
 .notification-controls {
@@ -144,6 +144,13 @@
 .notification-input:disabled {
   background-color: #f8f9fa;
   cursor: not-allowed;
+}
+
+.notification-unit {
+  color: #6c757d;
+  font-size: 0.9rem;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .notification-message {
