@@ -1,12 +1,11 @@
 package com.investment.metal.infrastructure.service;
 
+import jakarta.annotation.PostConstruct;
+import java.util.Locale;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.stereotype.Service;
-
-import jakarta.annotation.PostConstruct;
-import java.util.Locale;
 
 /**
  * Infrastructure service for internationalization (i18n) message handling.

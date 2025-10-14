@@ -1,12 +1,10 @@
 package com.investment.metal.domain.model;
 
-import com.investment.metal.domain.model.MetalType;
-import lombok.Builder;
-import lombok.Data;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import lombok.Builder;
+import lombok.Data;
 
 /**
  * Rich domain model for Metal Purchase following Domain-Driven Design principles.

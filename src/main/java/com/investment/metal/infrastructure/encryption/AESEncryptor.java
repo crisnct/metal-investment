@@ -1,13 +1,12 @@
 package com.investment.metal.infrastructure.encryption;
 
+import java.nio.charset.Charset;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.nio.charset.Charset;
 
 public class AESEncryptor {
 

@@ -1,10 +1,9 @@
 package com.investment.metal;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
 import java.util.HashSet;
 import java.util.Set;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 @AllArgsConstructor
 public enum MessageKey {

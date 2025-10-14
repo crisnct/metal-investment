@@ -1,9 +1,8 @@
 package com.investment.metal.domain.valueobject;
 
+import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Data;
-
-import java.time.LocalDateTime;
 
 /**
  * Value object representing an authentication token.

@@ -1,7 +1,6 @@
 package com.investment.metal.infrastructure.persistence.repository;
 
 import com.investment.metal.domain.model.User;
-
 import java.util.Optional;
 
 /**

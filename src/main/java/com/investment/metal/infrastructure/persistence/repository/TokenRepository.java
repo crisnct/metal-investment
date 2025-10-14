@@ -1,7 +1,6 @@
 package com.investment.metal.infrastructure.persistence.repository;
 
 import com.investment.metal.domain.valueobject.Token;
-
 import java.util.Optional;
 
 /**

@@ -1,25 +1,25 @@
 package com.investment.metal.infrastructure.controller;
 
-import com.investment.metal.infrastructure.util.Util;
-import com.investment.metal.infrastructure.persistence.entity.Customer;
-import com.investment.metal.infrastructure.persistence.entity.Login;
-import com.investment.metal.domain.dto.ResetPasswordDto;
-import com.investment.metal.infrastructure.dto.SimpleMessageDto;
-import com.investment.metal.application.dto.UserLoginDto;
-import com.investment.metal.domain.exception.NoRollbackBusinessException;
 import com.investment.metal.MessageKey;
+import com.investment.metal.application.dto.UserLoginDto;
+import com.investment.metal.domain.dto.ResetPasswordDto;
+import com.investment.metal.domain.exception.NoRollbackBusinessException;
 import com.investment.metal.domain.service.AccountService;
 import com.investment.metal.domain.service.BannedAccountsService;
 import com.investment.metal.domain.service.BlockedIpService;
 import com.investment.metal.domain.service.LoginService;
+import com.investment.metal.infrastructure.dto.SimpleMessageDto;
 import com.investment.metal.infrastructure.exception.ExceptionService;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import com.investment.metal.infrastructure.persistence.entity.Customer;
+import com.investment.metal.infrastructure.persistence.entity.Login;
+import com.investment.metal.infrastructure.util.Util;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -32,7 +32,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * REST Controller for public API endpoints that don't require authentication.

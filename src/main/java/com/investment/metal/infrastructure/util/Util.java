@@ -1,17 +1,16 @@
 package com.investment.metal.infrastructure.util;
 
-import lombok.Getter;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.util.Strings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Infrastructure utility class for common operations.

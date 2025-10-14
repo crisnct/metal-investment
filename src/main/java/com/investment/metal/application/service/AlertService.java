@@ -2,30 +2,28 @@ package com.investment.metal.application.service;
 
 import com.google.common.collect.Maps;
 import com.investment.metal.MessageKey;
+import com.investment.metal.domain.exception.BusinessException;
 import com.investment.metal.domain.model.AlertFrequency;
 import com.investment.metal.domain.model.MetalType;
-import com.investment.metal.infrastructure.persistence.entity.*;
+import com.investment.metal.infrastructure.persistence.entity.Alert;
+import com.investment.metal.infrastructure.persistence.entity.ExpressionFunction;
+import com.investment.metal.infrastructure.persistence.entity.ExpressionParameter;
 import com.investment.metal.infrastructure.persistence.repository.AlertRepository;
 import com.investment.metal.infrastructure.persistence.repository.ExpressionFunctionRepository;
 import com.investment.metal.infrastructure.persistence.repository.ExpressionParameterRepository;
-import com.investment.metal.domain.exception.BusinessException;
 import com.investment.metal.infrastructure.service.AbstractService;
 import com.investment.metal.infrastructure.service.MessageService;
-import com.investment.metal.application.service.MetalPriceService;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import lombok.Getter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import jakarta.annotation.PostConstruct;
-//import jakarta.script.ScriptEngine;
-//import jakarta.script.ScriptEngineManager;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import lombok.Getter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * Application service for managing price alerts and mathematical expressions.

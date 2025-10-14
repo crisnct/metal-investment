@@ -1,14 +1,15 @@
 package com.investment.metal.infrastructure.service;
 
 import com.investment.metal.MessageKey;
-import com.investment.metal.infrastructure.service.MailParameterBuilder;
-import com.investment.metal.infrastructure.service.MailTemplates;
-import com.investment.metal.domain.model.MetalType;
-import com.investment.metal.infrastructure.util.Util;
-import com.investment.metal.infrastructure.persistence.entity.Alert;
-import com.investment.metal.infrastructure.persistence.entity.Customer;
 import com.investment.metal.application.dto.UserMetalInfoDto;
 import com.investment.metal.domain.exception.BusinessException;
+import com.investment.metal.domain.model.MetalType;
+import com.investment.metal.infrastructure.persistence.entity.Alert;
+import com.investment.metal.infrastructure.persistence.entity.Customer;
+import com.investment.metal.infrastructure.util.Util;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +17,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-
-import jakarta.mail.internet.MimeMessage;
-import jakarta.servlet.http.HttpServletRequest;
-import java.util.Map;
 
 @Service
 public class EmailService extends AbstractService {

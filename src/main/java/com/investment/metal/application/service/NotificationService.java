@@ -1,27 +1,26 @@
 package com.investment.metal.application.service;
 
 import com.investment.metal.MessageKey;
-import com.investment.metal.infrastructure.persistence.entity.Customer;
-import com.investment.metal.infrastructure.persistence.entity.Notification;
-import com.investment.metal.infrastructure.persistence.repository.NotificationRepository;
-import com.investment.metal.infrastructure.persistence.entity.Purchase;
 import com.investment.metal.application.dto.UserMetalInfoDto;
 import com.investment.metal.domain.exception.BusinessException;
-import com.investment.metal.infrastructure.service.AbstractService;
 import com.investment.metal.domain.service.AccountService;
+import com.investment.metal.infrastructure.persistence.entity.Customer;
+import com.investment.metal.infrastructure.persistence.entity.Notification;
+import com.investment.metal.infrastructure.persistence.entity.Purchase;
+import com.investment.metal.infrastructure.persistence.repository.NotificationRepository;
+import com.investment.metal.infrastructure.service.AbstractService;
 import com.investment.metal.infrastructure.service.EmailService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class NotificationService extends AbstractService {

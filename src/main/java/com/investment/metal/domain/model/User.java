@@ -1,11 +1,11 @@
 package com.investment.metal.domain.model;
 
 // Domain model should not depend on infrastructure entities
-import lombok.Builder;
-import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
+import lombok.Builder;
+import lombok.Data;
 
 /**
  * Rich domain model for User following Domain-Driven Design principles.

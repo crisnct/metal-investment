@@ -1,7 +1,6 @@
 package com.investment.metal.application.repository;
 
 import com.investment.metal.domain.model.MetalPurchase;
-
 import java.util.List;
 
 /**

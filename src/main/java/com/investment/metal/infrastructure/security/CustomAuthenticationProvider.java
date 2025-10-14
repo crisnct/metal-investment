@@ -4,6 +4,7 @@ import com.investment.metal.domain.service.AccountService;
 import com.investment.metal.domain.service.LoginService;
 import com.investment.metal.infrastructure.persistence.entity.Customer;
 import com.investment.metal.infrastructure.persistence.entity.Login;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.AbstractUserDetailsAuthenticationProvider;
@@ -13,8 +14,6 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
-
-import java.util.Optional;
 
 /**
  * Infrastructure security provider for custom authentication.

@@ -2,13 +2,11 @@ package com.investment.metal.infrastructure.service;
 
 import com.google.common.base.Charsets;
 import io.micrometer.core.instrument.util.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Infrastructure service for building mail parameters.

@@ -4,13 +4,12 @@ import com.investment.metal.application.repository.MetalPurchaseRepository;
 import com.investment.metal.domain.model.MetalPurchase;
 import com.investment.metal.infrastructure.persistence.entity.Purchase;
 import com.investment.metal.infrastructure.persistence.repository.PurchaseRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Repository;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Repository;
 
 /**
  * Implementation of MetalPurchaseRepository.

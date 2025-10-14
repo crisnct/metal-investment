@@ -1,18 +1,17 @@
 package com.investment.metal.application.service;
 
 import com.investment.metal.MessageKey;
+import com.investment.metal.domain.exception.BusinessException;
 import com.investment.metal.domain.model.MetalType;
 import com.investment.metal.infrastructure.persistence.entity.Purchase;
 import com.investment.metal.infrastructure.persistence.repository.PurchaseRepository;
-import com.investment.metal.domain.exception.BusinessException;
 import com.investment.metal.infrastructure.service.AbstractService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * Application service for managing metal purchases and sales.

@@ -1,11 +1,8 @@
 package com.investment.metal.domain.model;
 
-import com.investment.metal.domain.model.AlertFrequency;
-import com.investment.metal.domain.model.MetalType;
+import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Data;
-
-import java.time.LocalDateTime;
 
 /**
  * Domain model for Alert.
