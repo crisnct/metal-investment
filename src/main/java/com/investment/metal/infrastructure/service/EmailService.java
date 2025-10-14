@@ -1,14 +1,14 @@
 package com.investment.metal.infrastructure.service;
 
 import com.investment.metal.MessageKey;
-import com.investment.metal.common.MailParameterBuilder;
-import com.investment.metal.common.MailTemplates;
-import com.investment.metal.common.MetalType;
-import com.investment.metal.common.Util;
+import com.investment.metal.infrastructure.service.MailParameterBuilder;
+import com.investment.metal.infrastructure.service.MailTemplates;
+import com.investment.metal.domain.model.MetalType;
+import com.investment.metal.infrastructure.util.Util;
 import com.investment.metal.infrastructure.persistence.entity.Alert;
 import com.investment.metal.infrastructure.persistence.entity.Customer;
 import com.investment.metal.application.dto.UserMetalInfoDto;
-import com.investment.metal.exceptions.BusinessException;
+import com.investment.metal.domain.exception.BusinessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

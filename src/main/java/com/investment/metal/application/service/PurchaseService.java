@@ -1,10 +1,10 @@
 package com.investment.metal.application.service;
 
 import com.investment.metal.MessageKey;
-import com.investment.metal.common.MetalType;
+import com.investment.metal.domain.model.MetalType;
 import com.investment.metal.infrastructure.persistence.entity.Purchase;
 import com.investment.metal.infrastructure.persistence.repository.PurchaseRepository;
-import com.investment.metal.exceptions.BusinessException;
+import com.investment.metal.domain.exception.BusinessException;
 import com.investment.metal.infrastructure.service.AbstractService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

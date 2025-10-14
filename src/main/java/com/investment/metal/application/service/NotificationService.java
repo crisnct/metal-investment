@@ -6,7 +6,7 @@ import com.investment.metal.infrastructure.persistence.entity.Notification;
 import com.investment.metal.infrastructure.persistence.repository.NotificationRepository;
 import com.investment.metal.infrastructure.persistence.entity.Purchase;
 import com.investment.metal.application.dto.UserMetalInfoDto;
-import com.investment.metal.exceptions.BusinessException;
+import com.investment.metal.domain.exception.BusinessException;
 import com.investment.metal.infrastructure.service.AbstractService;
 import com.investment.metal.domain.service.AccountService;
 import com.investment.metal.infrastructure.service.EmailService;

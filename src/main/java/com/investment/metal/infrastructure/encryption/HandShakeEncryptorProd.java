@@ -1,6 +1,6 @@
 package com.investment.metal.infrastructure.encryption;
 
-import com.investment.metal.exceptions.BusinessException;
+import com.investment.metal.domain.exception.BusinessException;
 import com.investment.metal.domain.service.BlockedIpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

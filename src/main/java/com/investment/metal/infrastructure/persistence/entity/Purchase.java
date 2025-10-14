@@ -1,6 +1,6 @@
 package com.investment.metal.infrastructure.persistence.entity;
 
-import com.investment.metal.common.MetalType;
+import com.investment.metal.domain.model.MetalType;
 import lombok.Data;
 
 import jakarta.persistence.*;

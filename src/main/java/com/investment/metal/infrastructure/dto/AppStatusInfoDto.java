@@ -1,8 +1,8 @@
 package com.investment.metal.infrastructure.dto;
 
 import com.investment.metal.application.dto.MetalInfoDto;
-import com.investment.metal.common.CurrencyType;
-import com.investment.metal.common.MetalType;
+import com.investment.metal.domain.model.CurrencyType;
+import com.investment.metal.domain.model.MetalType;
 import lombok.Data;
 import lombok.Getter;
 

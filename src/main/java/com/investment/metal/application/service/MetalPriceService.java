@@ -1,8 +1,8 @@
 package com.investment.metal.application.service;
 
-import com.investment.metal.common.CurrencyType;
-import com.investment.metal.common.MetalType;
-import com.investment.metal.common.Util;
+import com.investment.metal.domain.model.CurrencyType;
+import com.investment.metal.domain.model.MetalType;
+import com.investment.metal.infrastructure.util.Util;
 import com.investment.metal.infrastructure.persistence.entity.Currency;
 import com.investment.metal.infrastructure.service.RevolutService;
 import com.investment.metal.infrastructure.service.CurrencyService;

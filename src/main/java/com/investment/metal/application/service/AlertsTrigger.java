@@ -1,6 +1,6 @@
 package com.investment.metal.application.service;
 
-import com.investment.metal.common.MetalType;
+import com.investment.metal.domain.model.MetalType;
 import com.investment.metal.infrastructure.persistence.entity.Alert;
 import com.investment.metal.infrastructure.persistence.entity.Customer;
 import com.investment.metal.infrastructure.persistence.entity.MetalPrice;

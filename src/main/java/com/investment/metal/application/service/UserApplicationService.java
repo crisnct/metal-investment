@@ -3,7 +3,7 @@ package com.investment.metal.application.service;
 import com.investment.metal.domain.model.User;
 import com.investment.metal.domain.service.UserDomainService;
 import com.investment.metal.application.repository.UserApplicationRepository;
-import com.investment.metal.exceptions.BusinessException;
+import com.investment.metal.domain.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

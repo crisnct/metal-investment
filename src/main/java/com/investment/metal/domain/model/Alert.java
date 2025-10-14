@@ -1,7 +1,7 @@
 package com.investment.metal.domain.model;
 
-import com.investment.metal.common.AlertFrequency;
-import com.investment.metal.common.MetalType;
+import com.investment.metal.domain.model.AlertFrequency;
+import com.investment.metal.domain.model.MetalType;
 import lombok.Builder;
 import lombok.Data;
 

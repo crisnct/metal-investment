@@ -3,7 +3,7 @@ package com.investment.metal.domain.service;
 import com.investment.metal.domain.model.User;
 import com.investment.metal.domain.valueobject.LoginAttempt;
 import com.investment.metal.domain.valueobject.Token;
-import com.investment.metal.exceptions.BusinessException;
+import com.investment.metal.domain.exception.BusinessException;
 
 import java.util.Optional;
 

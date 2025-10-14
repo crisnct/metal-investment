@@ -1,8 +1,8 @@
 package com.investment.metal;
 
-import com.investment.metal.common.CurrencyType;
-import com.investment.metal.common.MetalType;
-import com.investment.metal.common.RSSFeedParser;
+import com.investment.metal.domain.model.CurrencyType;
+import com.investment.metal.domain.model.MetalType;
+import com.investment.metal.infrastructure.service.RSSFeedParser;
 import com.investment.metal.infrastructure.service.CurrencyService;
 import com.investment.metal.application.service.MetalPriceService;
 import com.investment.metal.application.service.NotificationService;

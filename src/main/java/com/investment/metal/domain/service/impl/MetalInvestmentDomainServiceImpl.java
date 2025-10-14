@@ -1,6 +1,6 @@
 package com.investment.metal.domain.service.impl;
 
-import com.investment.metal.common.MetalType;
+import com.investment.metal.domain.model.MetalType;
 import com.investment.metal.domain.service.MetalInvestmentDomainService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

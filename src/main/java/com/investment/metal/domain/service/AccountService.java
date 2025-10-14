@@ -3,7 +3,7 @@ package com.investment.metal.domain.service;
 import com.investment.metal.MessageKey;
 import com.investment.metal.infrastructure.persistence.entity.Customer;
 import com.investment.metal.infrastructure.persistence.repository.CustomerRepository;
-import com.investment.metal.exceptions.BusinessException;
+import com.investment.metal.domain.exception.BusinessException;
 import com.investment.metal.infrastructure.service.AbstractService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

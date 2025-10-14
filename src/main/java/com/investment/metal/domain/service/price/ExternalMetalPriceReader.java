@@ -1,7 +1,7 @@
 package com.investment.metal.domain.service.price;
 
-import com.investment.metal.common.CurrencyType;
-import com.investment.metal.common.MetalType;
+import com.investment.metal.domain.model.CurrencyType;
+import com.investment.metal.domain.model.MetalType;
 
 public interface ExternalMetalPriceReader {
 

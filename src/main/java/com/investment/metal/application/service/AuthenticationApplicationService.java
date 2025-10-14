@@ -3,7 +3,7 @@ package com.investment.metal.application.service;
 import com.investment.metal.domain.model.User;
 import com.investment.metal.domain.service.AuthenticationDomainService;
 import com.investment.metal.domain.valueobject.Token;
-import com.investment.metal.exceptions.BusinessException;
+import com.investment.metal.domain.exception.BusinessException;
 import com.investment.metal.application.repository.UserApplicationRepository;
 import com.investment.metal.infrastructure.persistence.repository.TokenRepository;
 import lombok.RequiredArgsConstructor;

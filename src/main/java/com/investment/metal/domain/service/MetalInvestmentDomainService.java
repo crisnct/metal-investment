@@ -1,6 +1,6 @@
 package com.investment.metal.domain.service;
 
-import com.investment.metal.common.MetalType;
+import com.investment.metal.domain.model.MetalType;
 
 /**
  * Domain service for metal investment business logic.

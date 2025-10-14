@@ -1,12 +1,12 @@
 package com.investment.metal.infrastructure.service;
 
-import com.investment.metal.common.CurrencyType;
-import com.investment.metal.common.MetalType;
-import com.investment.metal.common.Util;
+import com.investment.metal.domain.model.CurrencyType;
+import com.investment.metal.domain.model.MetalType;
+import com.investment.metal.infrastructure.util.Util;
 import com.investment.metal.infrastructure.persistence.entity.Currency;
 import com.investment.metal.infrastructure.persistence.entity.RevolutProfit;
 import com.investment.metal.infrastructure.persistence.repository.RevolutProfitRepository;
-import com.investment.metal.exceptions.BusinessException;
+import com.investment.metal.domain.exception.BusinessException;
 import com.investment.metal.domain.service.price.ExternalMetalPriceReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

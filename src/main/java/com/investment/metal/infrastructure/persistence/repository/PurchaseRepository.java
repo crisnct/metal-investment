@@ -1,6 +1,6 @@
 package com.investment.metal.infrastructure.persistence.repository;
 
-import com.investment.metal.exceptions.BusinessException;
+import com.investment.metal.domain.exception.BusinessException;
 import com.investment.metal.infrastructure.persistence.entity.Purchase;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

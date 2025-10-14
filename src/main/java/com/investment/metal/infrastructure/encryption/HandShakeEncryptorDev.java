@@ -1,7 +1,7 @@
 package com.investment.metal.infrastructure.encryption;
 
 import com.investment.metal.MessageKey;
-import com.investment.metal.exceptions.BusinessException;
+import com.investment.metal.domain.exception.BusinessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;

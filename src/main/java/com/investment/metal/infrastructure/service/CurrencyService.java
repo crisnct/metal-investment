@@ -1,6 +1,6 @@
 package com.investment.metal.infrastructure.service;
 
-import com.investment.metal.common.CurrencyType;
+import com.investment.metal.domain.model.CurrencyType;
 import com.investment.metal.infrastructure.persistence.entity.Currency;
 import com.investment.metal.infrastructure.persistence.repository.CurrencyRepository;
 import org.springframework.beans.factory.annotation.Autowired;

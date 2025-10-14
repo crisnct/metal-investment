@@ -1,8 +1,8 @@
 package com.investment.metal.domain.service.price;
 
-import com.investment.metal.common.CurrencyType;
-import com.investment.metal.common.MetalType;
-import com.investment.metal.common.Util;
+import com.investment.metal.domain.model.CurrencyType;
+import com.investment.metal.domain.model.MetalType;
+import com.investment.metal.infrastructure.util.Util;
 import kong.unirest.HttpResponse;
 import kong.unirest.JsonNode;
 import kong.unirest.Unirest;

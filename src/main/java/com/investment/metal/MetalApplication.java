@@ -1,7 +1,7 @@
 package com.investment.metal;
 
-import com.investment.metal.common.PropertyFile;
-import com.investment.metal.common.Util;
+import com.investment.metal.infrastructure.util.PropertyFile;
+import com.investment.metal.infrastructure.util.Util;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
