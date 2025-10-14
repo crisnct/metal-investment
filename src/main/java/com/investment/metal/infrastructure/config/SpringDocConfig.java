@@ -9,10 +9,14 @@ import io.swagger.v3.oas.models.tags.Tag;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 import java.util.List;
 
 @Configuration
+@ComponentScan(basePackages = "com.investment.metal.infrastructure.controller")
+@ConditionalOnProperty(name = "springdoc.api-docs.enabled", havingValue = "true", matchIfMissing = true)
 public class SpringDocConfig {
 
     @Bean
@@ -23,8 +27,8 @@ public class SpringDocConfig {
                         .description("API for monitoring precious metals prices and managing investment alerts for Revolut users in Romania")
                         .version("1.0.0")
                         .contact(new Contact()
-                                .name("Metal Investment Team")
-                                .email("support@metalinvestment.com"))
+                                .name("Cristian Țone")
+                                .email("nelucristian2005@gmail.com"))
                         .license(new License()
                                 .name("MIT License")
                                 .url("https://opensource.org/licenses/MIT")))
@@ -46,7 +50,7 @@ public class SpringDocConfig {
     public GroupedOpenApi publicApi() {
         return GroupedOpenApi.builder()
                 .group("public")
-                .pathsToMatch("/userRegistration", "/validateAccount", "/login", "/resetPassword", "/changePassword")
+                .pathsToMatch("/userRegistration", "/validateAccount", "/login", "/resetPassword", "/changePassword", "/checkUserPendingValidation", "/resendValidationEmail", "/health", "/")
                 .packagesToScan("com.investment.metal.infrastructure.controller")
                 .build();
     }
