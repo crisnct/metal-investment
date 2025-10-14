@@ -63,14 +63,21 @@ public class MetalPurchase {
     }
 
     /**
-     * Calculate profit percentage
+     * Calculate profit percentage based on current metal price
+     * Formula: ((current_value - cost) / cost) * 100
+     * 
+     * @param currentPrice the current price per unit of the metal
+     * @return profit percentage as BigDecimal, or BigDecimal.ZERO if invalid data
      */
     public BigDecimal calculateProfitPercentage(BigDecimal currentPrice) {
-        if (cost.compareTo(BigDecimal.ZERO) == 0) {
+        if (currentPrice == null || currentPrice.compareTo(BigDecimal.ZERO) <= 0 || 
+            cost == null || cost.compareTo(BigDecimal.ZERO) <= 0) {
             return BigDecimal.ZERO;
         }
+        
         BigDecimal profit = calculateProfit(currentPrice);
-        return profit.divide(cost, 4, java.math.RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100));
+        return profit.divide(cost, 4, java.math.RoundingMode.HALF_UP)
+                    .multiply(new BigDecimal("100"));
     }
 
     /**

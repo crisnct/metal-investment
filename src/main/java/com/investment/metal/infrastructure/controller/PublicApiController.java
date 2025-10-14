@@ -34,30 +34,69 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * REST Controller for public API endpoints that don't require authentication.
+ * Handles user registration, login, password reset, and account validation.
+ * Follows Clean Architecture principles by keeping controller concerns separate.
+ */
 @RestController
 @Tag(name = "Public API", description = "Public endpoints with no authentication")
 public class PublicApiController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PublicApiController.class);
 
+    /**
+     * Domain service for account-related business logic
+     */
     @Autowired
     private AccountService accountService;
 
+    /**
+     * Domain service for managing banned accounts
+     */
     @Autowired
     private BannedAccountsService bannedAccountsService;
 
+    /**
+     * Domain service for managing blocked IP addresses
+     */
     @Autowired
     private BlockedIpService blockedIpService;
 
+    /**
+     * Domain service for login and authentication logic
+     */
     @Autowired
     private LoginService loginService;
 
+    /**
+     * Spring Security password encoder for hashing passwords
+     */
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    /**
+     * Infrastructure service for exception handling and message localization
+     */
     @Autowired
     private ExceptionService exceptionService;
 
+    /**
+     * Register a new user account.
+     * Creates a new user account with the provided credentials and sends a validation email.
+     * 
+     * Business Rules:
+     * - Email must be in valid format
+     * - IP address must not be blocked
+     * - Username must be unique
+     * - Email must be unique
+     * - User must not be banned
+     * 
+     * @param username the username for the new account
+     * @param password the password for the new account (will be hashed)
+     * @param email the email address for the new account
+     * @return ResponseEntity with success message or error details
+     */
     @RequestMapping(value = "/userRegistration", method = RequestMethod.POST)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
     @Operation(
@@ -79,10 +118,19 @@ public class PublicApiController {
             @RequestHeader("email") String email
     ) {
         try {
+            // Business rule: Email must be in valid format
             this.exceptionService.check(!Util.isValidEmailAddress(email), MessageKey.INVALID_REQUEST, "Invalid email address!");
+            
+            // Business rule: IP address must not be blocked
             this.blockedIpService.checkBlockedIPGlobal();
+            
+            // Create new user account with hashed password
             Customer user = this.accountService.registerNewUser(username, this.passwordEncoder.encode(password), email);
+            
+            // Business rule: User must not be banned
             this.bannedAccountsService.checkBanned(user.getId());
+            
+            // Send validation email to user
             this.loginService.validateAccount(user, false);
 
             SimpleMessageDto dto = new SimpleMessageDto("An email was sent to %s with a code. Call validation request with that code", email);

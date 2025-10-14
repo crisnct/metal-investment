@@ -23,7 +23,14 @@ public class Alert {
     private LocalDateTime lastTimeChecked;
     
     /**
-     * Check if alert is valid
+     * Business rule: Check if alert configuration is valid
+     * An alert is valid if it has all required fields:
+     * - userId: Must be specified
+     * - metalType: Must be specified
+     * - expression: Must be non-empty string
+     * - frequency: Must be specified
+     * 
+     * @return true if alert is valid, false otherwise
      */
     public boolean isValid() {
         return userId != null && 
@@ -34,11 +41,15 @@ public class Alert {
     }
     
     /**
-     * Check if alert should be triggered based on frequency
+     * Business rule: Check if alert should be triggered based on frequency
+     * Determines if enough time has passed since last check based on alert frequency
+     * 
+     * @param currentTime the current timestamp to compare against
+     * @return true if alert should be checked, false otherwise
      */
     public boolean shouldCheck(LocalDateTime currentTime) {
         if (lastTimeChecked == null) {
-            return true;
+            return true; // Never checked before, should check now
         }
         
         return switch (frequency) {
@@ -46,6 +57,26 @@ public class Alert {
             case DAILY -> lastTimeChecked.isBefore(currentTime.minusDays(1));
             case WEEKLY -> lastTimeChecked.isBefore(currentTime.minusWeeks(1));
             case MONTHLY -> lastTimeChecked.isBefore(currentTime.minusMonths(1));
+        };
+    }
+    
+    /**
+     * Business rule: Check if alert is overdue for checking
+     * An alert is overdue if it should have been checked but wasn't
+     * 
+     * @param currentTime the current timestamp
+     * @return true if alert is overdue, false otherwise
+     */
+    public boolean isOverdue(LocalDateTime currentTime) {
+        if (lastTimeChecked == null) {
+            return true; // Never checked, definitely overdue
+        }
+        
+        return switch (frequency) {
+            case HOURLY -> lastTimeChecked.isBefore(currentTime.minusHours(2));
+            case DAILY -> lastTimeChecked.isBefore(currentTime.minusDays(2));
+            case WEEKLY -> lastTimeChecked.isBefore(currentTime.minusWeeks(2));
+            case MONTHLY -> lastTimeChecked.isBefore(currentTime.minusMonths(2));
         };
     }
 }

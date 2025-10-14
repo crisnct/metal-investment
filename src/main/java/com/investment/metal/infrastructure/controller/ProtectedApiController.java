@@ -64,9 +64,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * For all of those endpoints, the bearer authentication token it's necessary to be provided.</>
- * See {@code SecurityConfiguration.class}
- *
+ * REST Controller for protected API endpoints that require JWT authentication.
+ * Handles authenticated user operations like metal purchases, sales, alerts, and profit calculations.
+ * All endpoints require a valid JWT token in the Authorization header.
+ * 
+ * Security: All endpoints are protected by JWT authentication via SecurityConfiguration.
+ * 
  * @author cristian.tone
  */
 @RestController
@@ -125,6 +128,20 @@ public class ProtectedApiController {
     @Autowired
     private HttpServletRequest request;
 
+    /**
+     * Block an IP address permanently.
+     * This endpoint allows authenticated users to block specific IP addresses
+     * with an optional reason for security purposes.
+     * 
+     * Business Rules:
+     * - User must be authenticated with valid JWT token
+     * - IP address must be provided
+     * - Blocking is permanent until manually unblocked
+     * 
+     * @param ip the IP address to block
+     * @param reason the reason for blocking (optional, defaults to "unknown reason")
+     * @return ResponseEntity with success message
+     */
     @RequestMapping(value = "/blockIp", method = RequestMethod.POST)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
     @Operation(
@@ -143,8 +160,13 @@ public class ProtectedApiController {
             @Parameter(description = "Reason for blocking the IP", required = false)
             @RequestHeader(value = "reason", defaultValue = "unknown reason") final String reason
     ) {
+        // Extract JWT token from request
         String token = Util.getTokenFromRequest(request);
+        
+        // Get authenticated user from token
         final Login loginEntity = this.loginService.getLogin(token);
+        
+        // Block the IP address permanently
         this.blockedIpService.blockIPForever(loginEntity.getUserId(), ip, reason);
 
         SimpleMessageDto dto = new SimpleMessageDto(messageService.getMessage("IP_BLOCKED", ip));
@@ -197,6 +219,22 @@ public class ProtectedApiController {
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
+    /**
+     * Record a metal purchase transaction for the authenticated user.
+     * This endpoint allows users to record their precious metal purchases
+     * which will be used for profit/loss calculations.
+     * 
+     * Business Rules:
+     * - User must be authenticated with valid JWT token
+     * - Metal symbol must be valid (GOLD, SILVER, PLATINUM, etc.)
+     * - Amount and cost must be positive numbers
+     * - Purchase is accumulated with existing holdings
+     * 
+     * @param metalAmount the amount of metal purchased
+     * @param metalSymbol the symbol of the metal (e.g., GOLD, SILVER)
+     * @param cost the total cost of the purchase
+     * @return ResponseEntity with success message
+     */
     @RequestMapping(value = "/purchase", method = RequestMethod.POST)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
     @Operation(
@@ -219,11 +257,15 @@ public class ProtectedApiController {
             @Parameter(description = "Total cost of the purchase", required = true)
             @RequestHeader("cost") final double cost
     ) {
+        // Validate metal symbol
         MetalType metalType = MetalType.lookup(metalSymbol);
         this.exceptionService.check(metalType == null, MessageKey.INVALID_REQUEST, "metalSymbol header is invalid");
+        
+        // Extract authenticated user from JWT token
         String token = Util.getTokenFromRequest(request);
         final Login loginEntity = this.loginService.getLogin(token);
 
+        // Record the purchase transaction
         this.purchaseService.purchase(loginEntity.getUserId(), metalAmount, metalType, cost);
 
         SimpleMessageDto dto = new SimpleMessageDto("Your purchase of %.7f %s was recorded in the database", metalAmount, metalType.getSymbol());

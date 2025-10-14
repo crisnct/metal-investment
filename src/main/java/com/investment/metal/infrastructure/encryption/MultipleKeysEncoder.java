@@ -72,6 +72,14 @@ public class MultipleKeysEncoder implements ConsistentEncoder {
         });
     }
 
+    /**
+     * Transform a string using multiple encryption keys with a specific transformation function.
+     * This method applies the transformation using different keys in a rotating pattern.
+     * 
+     * @param str the string to transform
+     * @param transformation the transformation function to apply
+     * @return the transformed string
+     */
     private String transform(String str, MultipleKeysTransformation transformation) {
         String key1 = keys.get(0);
         StringBuilder builder = new StringBuilder();

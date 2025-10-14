@@ -85,6 +85,14 @@ public class ExpressionEvaluator {
         }
     }
 
+    /**
+     * Evaluate the mathematical expression by replacing variables with actual values.
+     * This method processes the expression by substituting variables with their
+     * calculated values and then evaluates the resulting expression using JavaScript engine.
+     * 
+     * @return true if the expression evaluates to true, false otherwise
+     * @throws ScriptException if there's an error evaluating the expression
+     */
     public boolean evaluate() throws ScriptException {
         String filledExpression = this.expression;
         for (Map.Entry<String, Object[]> entry : this.getVariables().entrySet()) {

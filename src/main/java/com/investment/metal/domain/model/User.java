@@ -64,9 +64,12 @@ public class User {
     
     /**
      * Business rule: Check if user can be authenticated
+     * A user can be authenticated if they are active and validated
+     * 
+     * @return true if user can be authenticated, false otherwise
      */
     public boolean canBeAuthenticated() {
-        return isAccountValid() && !isExpired();
+        return active && validated;
     }
     
     /**

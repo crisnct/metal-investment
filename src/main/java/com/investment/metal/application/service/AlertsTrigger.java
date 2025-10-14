@@ -111,6 +111,14 @@ public class AlertsTrigger {
         return isInc;
     }
 
+    /**
+     * Calculate profit information for all users for a specific metal type.
+     * This method iterates through all users and calculates their profit/loss
+     * based on their metal purchases and current market prices.
+     * 
+     * @param metalType the type of metal to calculate profits for
+     * @return map of user ID to their profit information
+     */
     private Map<Integer, UserProfit> calculateUsersProfit(MetalType metalType) {
         final List<Customer> allUsers = this.accountService.findAll();
         final Map<Integer, UserProfit> usersProfit = new HashMap<>();
@@ -139,6 +147,13 @@ public class AlertsTrigger {
         return usersProfit;
     }
 
+    /**
+     * Check if it's time to evaluate an alert based on its frequency.
+     * Compares the time since last check against the alert's frequency setting.
+     * 
+     * @param alert the alert to check
+     * @return true if enough time has passed to check the alert again
+     */
     private boolean isTimeToCheckAlert(Alert alert) {
         long diff = System.currentTimeMillis() - alert.getLastTimeChecked().getTime();
         switch (alert.getFrequency()) {
