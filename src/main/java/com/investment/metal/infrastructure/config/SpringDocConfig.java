@@ -47,7 +47,7 @@ public class SpringDocConfig {
         return GroupedOpenApi.builder()
                 .group("public")
                 .pathsToMatch("/userRegistration", "/validateAccount", "/login", "/resetPassword", "/changePassword")
-                .packagesToScan("com.investment.metal.controller")
+                .packagesToScan("com.investment.metal.infrastructure.controller")
                 .build();
     }
 
@@ -56,7 +56,7 @@ public class SpringDocConfig {
         return GroupedOpenApi.builder()
                 .group("protected")
                 .pathsToMatch("/api/**")
-                .packagesToScan("com.investment.metal.controller")
+                .packagesToScan("com.investment.metal.infrastructure.controller")
                 .build();
     }
 

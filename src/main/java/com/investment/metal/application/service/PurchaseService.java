@@ -45,7 +45,11 @@ public class PurchaseService extends AbstractService {
         double amount = purchase.getAmount();
         double newAmount = amount - metalAmount;
 
-        double newCost = purchase.getCost() - price;
+        // Calculate the proportional cost reduction based on the amount being sold
+        double costPerUnit = purchase.getCost() / purchase.getAmount();
+        double costOfSoldAmount = costPerUnit * metalAmount;
+        double newCost = purchase.getCost() - costOfSoldAmount;
+        
         if (newCost < 0) {
             newCost = 0;
         }

@@ -543,13 +543,11 @@ class ApiService {
       method: 'DELETE',
       headers: {
         ...this.getAuthHeadersFromStorage(),
+        'metalAmount': amount.toString(),
+        'metalSymbol': symbol,
+        'price': price.toString(),
         'Accept': 'application/json'
       },
-      body: JSON.stringify({
-        amount: amount,
-        symbol: symbol,
-        price: price
-      }),
       mode: 'cors',
       credentials: 'include'
     });
