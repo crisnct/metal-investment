@@ -12,7 +12,6 @@ import java.util.Map;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -24,43 +23,46 @@ public class Scheduler {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Scheduler.class);
 
-  private final RSSFeedParser rssFeedParser = new RSSFeedParser();
+  private final MetalPriceService metalPricesService;
+  private final CurrencyService currencyService;
+  private final AlertsTrigger alertsTrigger;
+  private final NotificationService notificationService;
+  private final RSSFeedParser rssFeedParser;
 
-  @Autowired
-  private MetalPriceService metalPricesService;
-
-  @Autowired
-  private CurrencyService currencyService;
-
-  @Autowired
-  private AlertsTrigger alertsTrigger;
-
-  @Autowired
-  private NotificationService notificationService;
-
-  private MetalType metalType = MetalType.GOLD;
+  public Scheduler(
+      MetalPriceService metalPricesService,
+      CurrencyService currencyService,
+      AlertsTrigger alertsTrigger,
+      NotificationService notificationService,
+      RSSFeedParser rssFeedParser) {
+    this.metalPricesService = metalPricesService;
+    this.currencyService = currencyService;
+    this.alertsTrigger = alertsTrigger;
+    this.notificationService = notificationService;
+    this.rssFeedParser = rssFeedParser;
+  }
 
   @PostConstruct
   public void init() {
     this.fetchCurrencyValues();
-    for (MetalType type : MetalType.values()) {
-      this.metalType = type;
-      this.fetchMetalPrices();
-    }
+    this.updateAllMetalPrices();
   }
 
   @Transactional
   @Scheduled(fixedDelay = 3600 * 1000)
   public void fetchMetalPrices() {
-    try {
-      final double metalPrice = this.metalPricesService.fetchMetalPrice(metalType);
-      this.metalPricesService.save(metalType, metalPrice);
-      this.alertsTrigger.triggerAlerts(metalType);
+    this.updateAllMetalPrices();
+  }
 
-      int ord = (this.metalType.ordinal() + 1) % MetalType.values().length;
-      this.metalType = MetalType.values()[ord];
-    }catch(Exception e){
-      LOGGER.error("Fail to read metal prices", e);
+  private void updateAllMetalPrices() {
+    for (MetalType type : MetalType.values()) {
+      try {
+        final double metalPrice = this.metalPricesService.fetchMetalPrice(type);
+        this.metalPricesService.save(type, metalPrice);
+        this.alertsTrigger.triggerAlerts(type);
+      } catch (Exception e) {
+        LOGGER.error("Fail to read metal prices for {}", type, e);
+      }
     }
   }
 
@@ -72,7 +74,12 @@ public class Scheduler {
           = this.rssFeedParser.readFeed("https://curs.bnr.ro/nbrfxrates.xml");
       currenciesValues.put(CurrencyType.RON, 1.0);
       for (CurrencyType currency : CurrencyType.values()) {
-        this.currencyService.save(currency, currenciesValues.get(currency));
+        Double value = currenciesValues.get(currency);
+        if (value == null) {
+          LOGGER.warn("Currency {} missing from RSS feed", currency);
+          continue;
+        }
+        this.currencyService.save(currency, value);
       }
     } catch (IOException e) {
       LOGGER.error("Fail to read currency values", e);
