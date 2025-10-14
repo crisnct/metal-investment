@@ -11,7 +11,6 @@ import com.investment.metal.infrastructure.persistence.entity.Purchase;
 import com.investment.metal.domain.model.MetalPurchase;
 import com.investment.metal.infrastructure.service.EmailService;
 import com.investment.metal.infrastructure.service.UserProfit;
-import com.investment.metal.domain.service.ExpressionEvaluator;
 import com.investment.metal.infrastructure.mapper.MetalPurchaseMapper;
 import java.sql.Timestamp;
 import java.util.Comparator;

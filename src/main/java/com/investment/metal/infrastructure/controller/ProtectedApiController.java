@@ -29,7 +29,7 @@ import com.investment.metal.infrastructure.service.price.ExternalMetalPriceReade
 import com.investment.metal.infrastructure.dto.AppStatusInfoDto;
 import com.investment.metal.infrastructure.dto.SimpleMessageDto;
 import com.investment.metal.infrastructure.exception.ExceptionService;
-import com.investment.metal.infrastructure.mapper.DtoConversion;
+import com.investment.metal.infrastructure.mapper.DtoMapper;
 import com.investment.metal.infrastructure.persistence.entity.Currency;
 import com.investment.metal.infrastructure.persistence.entity.Customer;
 import com.investment.metal.infrastructure.persistence.entity.Login;
@@ -90,6 +90,9 @@ public class ProtectedApiController {
 
     @Autowired
     private BlockedIpService blockedIpService;
+
+    @Autowired
+    private DtoMapper dtoMapper;
 
     @Autowired
     private LoginService loginService;
@@ -435,7 +438,7 @@ public class ProtectedApiController {
         final List<AlertDto> alerts = this.alertService
                 .findAllByUserId(loginEntity.getUserId())
                 .stream()
-                .map(DtoConversion::toDto)
+                .map(p -> dtoMapper.toDto(p))
                 .collect(Collectors.toList());
 
         Customer user = this.accountService.findById(loginEntity.getUserId());
