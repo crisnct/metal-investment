@@ -8,8 +8,12 @@ import com.investment.metal.infrastructure.persistence.entity.Customer;
 import com.investment.metal.infrastructure.persistence.entity.Notification;
 import com.investment.metal.infrastructure.persistence.entity.Purchase;
 import com.investment.metal.infrastructure.persistence.repository.NotificationRepository;
-import com.investment.metal.infrastructure.service.AbstractService;
+import com.investment.metal.infrastructure.exception.ExceptionService;
 import com.investment.metal.infrastructure.service.EmailService;
+import com.investment.metal.infrastructure.mapper.UserMapper;
+import com.investment.metal.infrastructure.mapper.MetalPurchaseMapper;
+import com.investment.metal.domain.model.User;
+import com.investment.metal.domain.model.MetalPurchase;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.HashMap;
@@ -23,7 +27,25 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class NotificationService extends AbstractService {
+public class NotificationService {
+
+    /**
+     * Exception service for handling business exceptions
+     */
+    @Autowired
+    private ExceptionService exceptionService;
+
+    /**
+     * Mapper for converting between domain models and infrastructure entities
+     */
+    @Autowired
+    private UserMapper userMapper;
+
+    /**
+     * Mapper for converting between metal purchase domain models and entities
+     */
+    @Autowired
+    private MetalPurchaseMapper metalPurchaseMapper;
 
     public static final long MIN_NOTIFICATION_PERIOD = TimeUnit.DAYS.toMillis(1);
 
@@ -55,12 +77,13 @@ public class NotificationService extends AbstractService {
     }
 
     public void notifyUser(Integer userId) {
-        Customer user = this.accountService.findById(userId);
+        Customer customerEntity = this.accountService.findById(userId);
+        User user = userMapper.toDomainModel(customerEntity);
         this.notifyUser(user);
     }
 
-    public void notifyUser(Customer user) {
-        List<Purchase> purchases = this.purchaseService.getAllPurchase(user.getId());
+    public void notifyUser(User user) {
+        List<MetalPurchase> purchases = this.purchaseService.getAllPurchase(user.getId());
         if (purchases.isEmpty()) {
             throw this.exceptionService
                     .createBuilder(MessageKey.INVALID_REQUEST)
@@ -68,11 +91,15 @@ public class NotificationService extends AbstractService {
                     .build();
         } else {
             Map<String, UserMetalInfoDto> userProfit = new HashMap<>();
-            for (Purchase purchase : purchases) {
-                final UserMetalInfoDto info = this.metalPricesService.calculatesUserProfit(purchase);
+            for (MetalPurchase purchase : purchases) {
+                // Convert domain model to entity for the service that still expects entities
+                Purchase purchaseEntity = this.metalPurchaseMapper.toEntity(purchase);
+                final UserMetalInfoDto info = this.metalPricesService.calculatesUserProfit(purchaseEntity);
                 userProfit.put(info.getMetalSymbol(), info);
             }
-            this.emailService.sendStatusNotification(user, userProfit);
+            // Convert User domain model to Customer entity for email service
+            Customer customerEntity = userMapper.toEntity(user);
+            this.emailService.sendStatusNotification(customerEntity, userProfit);
         }
     }
 

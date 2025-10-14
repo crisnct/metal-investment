@@ -3,9 +3,12 @@ package com.investment.metal.application.service;
 import com.investment.metal.MessageKey;
 import com.investment.metal.domain.exception.BusinessException;
 import com.investment.metal.domain.model.MetalType;
+import com.investment.metal.domain.model.MetalPurchase;
 import com.investment.metal.infrastructure.persistence.entity.Purchase;
 import com.investment.metal.infrastructure.persistence.repository.PurchaseRepository;
-import com.investment.metal.infrastructure.service.AbstractService;
+import com.investment.metal.infrastructure.exception.ExceptionService;
+import com.investment.metal.infrastructure.mapper.MetalPurchaseMapper;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,13 +22,25 @@ import org.springframework.stereotype.Service;
  * Follows Clean Architecture principles by orchestrating domain and infrastructure concerns.
  */
 @Service
-public class PurchaseService extends AbstractService {
+public class PurchaseService {
 
     /**
      * Repository for managing purchase data persistence
      */
     @Autowired
     private PurchaseRepository purchaseRepo;
+
+    /**
+     * Exception service for handling business exceptions
+     */
+    @Autowired
+    private ExceptionService exceptionService;
+
+    /**
+     * Mapper for converting between domain models and infrastructure entities
+     */
+    @Autowired
+    private MetalPurchaseMapper metalPurchaseMapper;
 
     /**
      * Record a new metal purchase for a user.
@@ -38,22 +53,28 @@ public class PurchaseService extends AbstractService {
      */
     public void purchase(Integer userId, double metalAmount, MetalType metalType, double cost) {
         Optional<Purchase> purchaseOp = this.purchaseRepo.findByUserIdAndMetalSymbol(userId, metalType.getSymbol());
-        final Purchase purchase;
+        final MetalPurchase metalPurchase;
         if (purchaseOp.isPresent()) {
             // User already has purchases of this metal type - accumulate amounts and costs
-            purchase = purchaseOp.get();
-            purchase.setAmount(metalAmount + purchase.getAmount());
-            purchase.setCost(cost + purchase.getCost());
+            MetalPurchase existingPurchase = metalPurchaseMapper.toDomainModel(purchaseOp.get());
+            metalPurchase = existingPurchase.toBuilder()
+                    .amount(existingPurchase.getAmount().add(BigDecimal.valueOf(metalAmount)))
+                    .cost(existingPurchase.getCost().add(BigDecimal.valueOf(cost)))
+                    .build();
         } else {
             // First purchase of this metal type for the user
-            purchase = new Purchase();
-            purchase.setUserId(userId);
-            purchase.setMetalSymbol(metalType.getSymbol());
-            purchase.setAmount(metalAmount);
-            purchase.setCost(cost);
+            metalPurchase = MetalPurchase.builder()
+                    .userId(userId)
+                    .metalType(metalType)
+                    .amount(BigDecimal.valueOf(metalAmount))
+                    .cost(BigDecimal.valueOf(cost))
+                    .purchaseTime(java.time.LocalDateTime.now())
+                    .build();
         }
-        purchase.setTime(new Timestamp(System.currentTimeMillis()));
-        this.purchaseRepo.save(purchase);
+        
+        // Convert domain model to entity and save
+        Purchase purchaseEntity = metalPurchaseMapper.toEntity(metalPurchase);
+        this.purchaseRepo.save(purchaseEntity);
     }
 
     /**
@@ -98,10 +119,13 @@ public class PurchaseService extends AbstractService {
      * Returns an empty list if the user has no purchases.
      * 
      * @param userId the ID of the user
-     * @return list of all purchases for the user, or empty list if none found
+     * @return list of all metal purchases for the user, or empty list if none found
      */
-    public List<Purchase> getAllPurchase(Integer userId) {
-        return this.purchaseRepo.findByUserId(userId).orElse(new ArrayList<>());
+    public List<MetalPurchase> getAllPurchase(Integer userId) {
+        List<Purchase> purchaseEntities = this.purchaseRepo.findByUserId(userId).orElse(new ArrayList<>());
+        return purchaseEntities.stream()
+                .map(metalPurchaseMapper::toDomainModel)
+                .collect(java.util.stream.Collectors.toList());
     }
 
     /**
@@ -109,10 +133,11 @@ public class PurchaseService extends AbstractService {
      * 
      * @param userId the ID of the user
      * @param metalSymbol the symbol of the metal type
-     * @return the purchase record, or null if not found
+     * @return the metal purchase domain model, or null if not found
      */
-    public Purchase getPurchase(Integer userId, String metalSymbol) {
-        return this.purchaseRepo.findByUserIdAndMetalSymbol(userId, metalSymbol).orElse(null);
+    public MetalPurchase getPurchase(Integer userId, String metalSymbol) {
+        Optional<Purchase> purchaseEntity = this.purchaseRepo.findByUserIdAndMetalSymbol(userId, metalSymbol);
+        return purchaseEntity.map(metalPurchaseMapper::toDomainModel).orElse(null);
     }
 
 }

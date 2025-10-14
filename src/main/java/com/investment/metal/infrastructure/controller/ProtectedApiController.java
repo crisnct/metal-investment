@@ -23,6 +23,8 @@ import com.investment.metal.infrastructure.service.AccountService;
 import com.investment.metal.infrastructure.service.BannedAccountsService;
 import com.investment.metal.infrastructure.service.BlockedIpService;
 import com.investment.metal.infrastructure.service.LoginService;
+import com.investment.metal.infrastructure.mapper.MetalPurchaseMapper;
+import com.investment.metal.domain.model.MetalPurchase;
 import com.investment.metal.infrastructure.service.price.ExternalMetalPriceReader;
 import com.investment.metal.infrastructure.dto.AppStatusInfoDto;
 import com.investment.metal.infrastructure.dto.SimpleMessageDto;
@@ -97,6 +99,9 @@ public class ProtectedApiController {
 
     @Autowired
     private NotificationService notificationService;
+
+    @Autowired
+    private MetalPurchaseMapper metalPurchaseMapper;
 
     @Autowired
     private MetalPriceService metalPriceService;
@@ -324,9 +329,13 @@ public class ProtectedApiController {
         Customer user = this.accountService.findById(loginEntity.getUserId());
 
         final ProfitDto dto = new ProfitDto(user.getUsername());
-        List<Purchase> purchases = this.purchaseService.getAllPurchase(loginEntity.getUserId());
-        purchases.stream()
-                .map(purchase -> this.metalPriceService.calculatesUserProfit(purchase))
+        List<MetalPurchase> metalPurchases = this.purchaseService.getAllPurchase(loginEntity.getUserId());
+        metalPurchases.stream()
+                .map(metalPurchase -> {
+                    // Convert domain model to entity for the service that still expects entities
+                    Purchase purchaseEntity = this.metalPurchaseMapper.toEntity(metalPurchase);
+                    return this.metalPriceService.calculatesUserProfit(purchaseEntity);
+                })
                 .forEach(dto::addInfo);
 
         return new ResponseEntity<>(dto, HttpStatus.OK);
@@ -498,10 +507,12 @@ public class ProtectedApiController {
         MetalType metalType = MetalType.lookup(metalSymbol);
         this.exceptionService.check(profit < 0, MessageKey.INVALID_REQUEST, "profit can not be negative");
         this.exceptionService.check(metalType == null, MessageKey.INVALID_REQUEST, "metalSymbol header is invalid");
-        Purchase purchase = this.purchaseService.getPurchase(loginEntity.getUserId(), metalSymbol);
-        this.exceptionService.check(purchase == null, MessageKey.INVALID_REQUEST, "the user didn't purchase " + metalSymbol);
+        MetalPurchase metalPurchase = this.purchaseService.getPurchase(loginEntity.getUserId(), metalSymbol);
+        this.exceptionService.check(metalPurchase == null, MessageKey.INVALID_REQUEST, "the user didn't purchase " + metalSymbol);
 
-        double revPrice = this.metalPriceService.calculatesRevolutPrice(purchase, profit);
+        // Convert domain model to entity for the service that still expects entities
+        Purchase purchaseEntity = this.metalPurchaseMapper.toEntity(metalPurchase);
+        double revPrice = this.metalPriceService.calculatesRevolutPrice(purchaseEntity, profit);
 
         SimpleMessageDto dto = new SimpleMessageDto("If you ant to be notified by Revolut when your profit is %.2f for %s then you would need to set an alert in your Revolut account for %.2f RON",
                 profit, metalSymbol, revPrice);

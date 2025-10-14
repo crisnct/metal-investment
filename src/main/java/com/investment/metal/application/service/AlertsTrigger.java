@@ -8,9 +8,11 @@ import com.investment.metal.infrastructure.persistence.entity.Alert;
 import com.investment.metal.infrastructure.persistence.entity.Customer;
 import com.investment.metal.infrastructure.persistence.entity.MetalPrice;
 import com.investment.metal.infrastructure.persistence.entity.Purchase;
+import com.investment.metal.domain.model.MetalPurchase;
 import com.investment.metal.infrastructure.service.EmailService;
 import com.investment.metal.infrastructure.service.UserProfit;
 import com.investment.metal.domain.service.ExpressionEvaluator;
+import com.investment.metal.infrastructure.mapper.MetalPurchaseMapper;
 import java.sql.Timestamp;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -47,6 +49,9 @@ public class AlertsTrigger {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private MetalPurchaseMapper metalPurchaseMapper;
 
     public void triggerAlerts(MetalType metalType) {
         final Map<Integer, UserProfit> usersProfit = this.calculateUsersProfit(metalType);
@@ -127,16 +132,18 @@ public class AlertsTrigger {
         final List<Customer> allUsers = this.accountService.findAll();
         final Map<Integer, UserProfit> usersProfit = new HashMap<>();
         for (Customer user : allUsers) {
-            Purchase purchase = this.purchaseService.getPurchase(user.getId(), metalType.getSymbol());
+            MetalPurchase metalPurchase = this.purchaseService.getPurchase(user.getId(), metalType.getSymbol());
             double totalProfit = 0;
             double totalCost = 0;
             double totalCostNow = 0;
             double totalAmount = 0;
-            if (purchase != null) {
-                final UserMetalInfoDto info = this.metalPricesService.calculatesUserProfit(purchase);
+            if (metalPurchase != null) {
+                // Convert domain model to entity for the service that still expects entities
+                Purchase purchaseEntity = this.metalPurchaseMapper.toEntity(metalPurchase);
+                final UserMetalInfoDto info = this.metalPricesService.calculatesUserProfit(purchaseEntity);
                 totalProfit += info.getProfit();
-                totalCost += purchase.getCost();
-                totalAmount += purchase.getAmount();
+                totalCost += metalPurchase.getCost().doubleValue();
+                totalAmount += metalPurchase.getAmount().doubleValue();
                 totalCostNow += info.getCostNow();
             }
             final UserProfit info = UserProfit.builder()

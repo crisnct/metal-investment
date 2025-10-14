@@ -11,7 +11,7 @@ import com.investment.metal.infrastructure.persistence.entity.ExpressionParamete
 import com.investment.metal.infrastructure.persistence.repository.AlertRepository;
 import com.investment.metal.infrastructure.persistence.repository.ExpressionFunctionRepository;
 import com.investment.metal.infrastructure.persistence.repository.ExpressionParameterRepository;
-import com.investment.metal.infrastructure.service.AbstractService;
+import com.investment.metal.infrastructure.exception.ExceptionService;
 import com.investment.metal.infrastructure.service.MessageService;
 import com.investment.metal.domain.service.ExpressionEvaluator;
 import jakarta.annotation.PostConstruct;
@@ -32,7 +32,13 @@ import org.springframework.stereotype.Service;
  * Follows Clean Architecture principles by orchestrating domain and infrastructure concerns.
  */
 @Service
-public class AlertService extends AbstractService {
+public class AlertService {
+
+    /**
+     * Exception service for handling business exceptions
+     */
+    @Autowired
+    private ExceptionService exceptionService;
 
     /**
      * JavaScript engine for evaluating mathematical expressions in alerts

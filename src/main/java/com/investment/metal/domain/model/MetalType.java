@@ -35,5 +35,9 @@ public enum MetalType {
         return null;
     }
 
+    public static MetalType fromSymbol(String metalSymbol) {
+        return lookup(metalSymbol);
+    }
+
     public abstract String getSymbol();
 }

@@ -11,7 +11,7 @@ import lombok.Data;
  * Encapsulates business logic for metal purchases and profit calculations.
  */
 @Data
-@Builder
+@Builder(toBuilder = true)
 public class MetalPurchase {
     
     private final Integer id;
