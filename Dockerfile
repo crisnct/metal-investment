@@ -4,7 +4,28 @@
 #ENTRYPOINT ["java", "-jar", "/app.jar"]
 #
 # Multi-stage build for Spring Boot application
-FROM maven:3.9.6-eclipse-temurin-25 AS build
+FROM ubuntu:22.04 AS build
+
+# Install OpenJDK 25 and Maven
+RUN apt-get update && \
+    apt-get install -y wget && \
+    # Download and install OpenJDK 25
+    wget https://download.java.net/java/early_access/jdk25/25/GPL/openjdk-25_linux-x64_bin.tar.gz && \
+    tar -xzf openjdk-25_linux-x64_bin.tar.gz -C /opt && \
+    ln -s /opt/jdk-25 /opt/java25 && \
+    rm openjdk-25_linux-x64_bin.tar.gz && \
+    # Download and install Maven
+    wget https://archive.apache.org/dist/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.tar.gz && \
+    tar -xzf apache-maven-3.9.6-bin.tar.gz -C /opt && \
+    ln -s /opt/apache-maven-3.9.6 /opt/maven && \
+    rm apache-maven-3.9.6-bin.tar.gz && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Set OpenJDK 25 and Maven environment variables
+ENV JAVA_HOME=/opt/java25
+ENV MAVEN_HOME=/opt/maven
+ENV PATH=$JAVA_HOME/bin:$MAVEN_HOME/bin:$PATH
 
 WORKDIR /app
 
@@ -17,7 +38,22 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Runtime stage
-FROM eclipse-temurin:25-jre-jammy
+FROM ubuntu:22.04
+
+# Install OpenJDK 25 runtime
+RUN apt-get update && \
+    apt-get install -y wget && \
+    # Download and install OpenJDK 25
+    wget https://download.java.net/java/early_access/jdk25/25/GPL/openjdk-25_linux-x64_bin.tar.gz && \
+    tar -xzf openjdk-25_linux-x64_bin.tar.gz -C /opt && \
+    ln -s /opt/jdk-25 /opt/java25 && \
+    rm openjdk-25_linux-x64_bin.tar.gz && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Set OpenJDK 25 environment variables
+ENV JAVA_HOME=/opt/java25
+ENV PATH=$JAVA_HOME/bin:$PATH
 
 WORKDIR /app
 
