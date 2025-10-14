@@ -14,6 +14,7 @@ public class MetalPrice {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(name = "metal_symbol")
     private String metalSymbol;
 
     private double price;

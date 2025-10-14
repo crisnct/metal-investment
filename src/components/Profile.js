@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import './Profile.css';
 import ApiService from '../services/api';
 
-const Profile = () => {
+const Profile = ({ userInfo }) => {
   const [showPurchaseDialog, setShowPurchaseDialog] = useState(false);
   const [purchaseData, setPurchaseData] = useState({ symbol: '', amount: '', cost: '' });
   const [purchaseErrors, setPurchaseErrors] = useState({});
@@ -268,11 +268,11 @@ const Profile = () => {
             <div className="profile-info">
               <div className="info-item">
                 <span className="info-label">Username:</span>
-                <span className="info-value">nelucristian</span>
+                <span className="info-value">{userInfo?.username || 'Loading...'}</span>
               </div>
               <div className="info-item">
                 <span className="info-label">Email address:</span>
-                <span className="info-value">nelucristian2005@gmail.com</span>
+                <span className="info-value">{userInfo?.email || 'Loading...'}</span>
               </div>
               
               <div className="info-item notification-item">

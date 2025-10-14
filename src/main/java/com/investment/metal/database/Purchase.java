@@ -15,8 +15,10 @@ public class Purchase {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(name = "user_id")
     private Integer userId;
 
+    @Column(name = "metal_symbol")
     private String metalSymbol;
 
     private Double amount;

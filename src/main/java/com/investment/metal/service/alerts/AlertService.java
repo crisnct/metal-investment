@@ -8,7 +8,7 @@ import com.investment.metal.database.*;
 import com.investment.metal.exceptions.BusinessException;
 import com.investment.metal.service.AbstractService;
 import com.investment.metal.service.MessageService;
-import com.investment.metal.service.MetalPriceService;
+import com.investment.metal.application.service.MetalPriceService;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import org.springframework.beans.factory.annotation.Autowired;

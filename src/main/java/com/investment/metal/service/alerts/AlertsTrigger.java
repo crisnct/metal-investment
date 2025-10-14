@@ -31,7 +31,7 @@ public class AlertsTrigger {
     private AccountService accountService;
 
     @Autowired
-    private MetalPriceService metalPricesService;
+    private com.investment.metal.application.service.MetalPriceService metalPricesService;
 
     @Autowired
     private AlertService alertService;

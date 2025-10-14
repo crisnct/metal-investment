@@ -28,7 +28,7 @@ public class NotificationService extends AbstractService {
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificationService.class);
 
     @Autowired
-    private MetalPriceService metalPricesService;
+    private com.investment.metal.application.service.MetalPriceService metalPricesService;
 
     @Autowired
     private AccountService accountService;

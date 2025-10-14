@@ -4,7 +4,7 @@ import com.investment.metal.common.CurrencyType;
 import com.investment.metal.common.MetalType;
 import com.investment.metal.common.RSSFeedParser;
 import com.investment.metal.service.CurrencyService;
-import com.investment.metal.service.MetalPriceService;
+import com.investment.metal.application.service.MetalPriceService;
 import com.investment.metal.service.NotificationService;
 import com.investment.metal.service.alerts.AlertsTrigger;
 import java.io.IOException;

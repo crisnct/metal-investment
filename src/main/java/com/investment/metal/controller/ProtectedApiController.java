@@ -70,7 +70,7 @@ public class ProtectedApiController {
     private NotificationService notificationService;
 
     @Autowired
-    private MetalPriceService metalPriceService;
+    private com.investment.metal.application.service.MetalPriceService metalPriceService;
 
     @Autowired
     private RevolutService revolutService;

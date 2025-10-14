@@ -13,10 +13,12 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(name = "user_id")
     private Integer userId;
 
     private int frequency;
 
+    @Column(name = "last_time_notified")
     private Timestamp lastTimeNotified;
 
 }

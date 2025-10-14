@@ -11,13 +11,21 @@ import ApiService from './services/api';
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userToken, setUserToken] = useState(null);
+  const [userInfo, setUserInfo] = useState({ username: '', email: '' });
 
   useEffect(() => {
-    // Check if user is logged in (check localStorage for token)
+    // Check if user is logged in (check localStorage for token and user info)
     const token = localStorage.getItem('userToken');
+    const storedUsername = localStorage.getItem('userUsername');
+    const storedEmail = localStorage.getItem('userEmail');
+    
     if (token) {
       setUserToken(token);
       setIsLoggedIn(true);
+      setUserInfo({ 
+        username: storedUsername || '', 
+        email: storedEmail || '' 
+      });
     }
   }, []);
 
@@ -25,8 +33,16 @@ function App() {
     try {
       const response = await ApiService.login(username, password);
       if (response.token) {
+        // Store token and user details in localStorage
         localStorage.setItem('userToken', response.token);
+        localStorage.setItem('userUsername', response.username || '');
+        localStorage.setItem('userEmail', response.email || '');
+        
         setUserToken(response.token);
+        setUserInfo({ 
+          username: response.username || '', 
+          email: response.email || '' 
+        });
         setIsLoggedIn(true);
         return { success: true, message: 'Login successful!' };
       }
@@ -36,8 +52,13 @@ function App() {
   };
 
   const handleLogout = () => {
+    // Clear all user data from localStorage
     localStorage.removeItem('userToken');
+    localStorage.removeItem('userUsername');
+    localStorage.removeItem('userEmail');
+    
     setUserToken(null);
+    setUserInfo({ username: '', email: '' });
     setIsLoggedIn(false);
   };
 
@@ -50,7 +71,7 @@ function App() {
         onLogout={handleLogout}
       />
       <Hero />
-      {isLoggedIn && <Profile />}
+      {isLoggedIn && <Profile userInfo={userInfo} />}
       <Features />
       <TechnicalStack />
       <Footer />

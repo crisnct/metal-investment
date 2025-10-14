@@ -13,10 +13,12 @@ public class BanIp {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(name = "user_id")
     private Integer userId;
 
     private String ip;
 
+    @Column(name = "blocked_until")
     private Timestamp blockedUntil;
 
     private String reason;

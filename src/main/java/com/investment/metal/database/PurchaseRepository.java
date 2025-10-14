@@ -14,4 +14,6 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
 
     Optional<Purchase> findByUserIdAndMetalSymbol(Integer userId, String metalSymbol) throws BusinessException;
 
+    void deleteByUserIdAndMetalSymbol(Integer userId, String metalSymbol);
+
 }

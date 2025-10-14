@@ -15,6 +15,7 @@ public class ExpressionFunction {
 
     private String name;
 
+    @Column(name = "returned_type")
     private String returnedType;
 
 }

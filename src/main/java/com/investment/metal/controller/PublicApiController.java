@@ -124,10 +124,10 @@ public class PublicApiController {
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
     @Operation(
             summary = "User login",
-            description = "Authenticates a user and returns a JWT token for protected endpoints"
+            description = "Authenticates a user and returns a JWT token along with user details (username and email) for protected endpoints"
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Login successful, JWT token returned",
+            @ApiResponse(responseCode = "200", description = "Login successful, JWT token and user details returned",
                     content = @Content(schema = @Schema(implementation = UserLoginDto.class))),
             @ApiResponse(responseCode = "401", description = "Invalid credentials or account banned",
                     content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
@@ -146,7 +146,7 @@ public class PublicApiController {
         }
 
         String token = this.loginService.login(user);
-        UserLoginDto dto = new UserLoginDto(token);
+        UserLoginDto dto = new UserLoginDto(token, user.getUsername(), user.getEmail());
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 

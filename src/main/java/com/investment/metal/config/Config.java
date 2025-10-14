@@ -4,10 +4,7 @@ import com.investment.metal.common.PriceServiceType;
 import com.investment.metal.price.BloombergPriceReader;
 import com.investment.metal.price.ExternalMetalPriceReader;
 import com.investment.metal.price.GalmarleyPriceReader;
-import com.investment.metal.security.AuthenticationFilter;
-import com.investment.metal.security.CustomAuthenticationProvider;
 import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import io.github.resilience4j.bulkhead.BulkheadConfig;
 import io.github.resilience4j.bulkhead.BulkheadRegistry;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
@@ -16,50 +13,19 @@ import io.github.resilience4j.timelimiter.TimeLimiterConfig;
 import io.github.resilience4j.timelimiter.TimeLimiterRegistry;
 import java.io.IOException;
 import java.time.Duration;
-import java.util.Properties;
 import java.util.concurrent.TimeoutException;
-import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Primary;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.http.HttpStatus;
-import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
-import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder.SecretKeyFactoryAlgorithm;
-import org.springframework.security.web.AuthenticationEntryPoint;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.security.web.util.matcher.OrRequestMatcher;
-import org.springframework.security.web.util.matcher.RequestMatcher;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableWebMvc
-@EnableJpaRepositories(basePackages = "com.investment.metal.database")
-@EnableWebSecurity
 @ComponentScan(basePackages = "com.investment.metal")
 public class Config implements WebMvcConfigurer {
 
@@ -72,66 +38,8 @@ public class Config implements WebMvcConfigurer {
   @Value("${spring.datasource.password}")
   private String password;
 
-  private static final RequestMatcher PROTECTED_URLS = new OrRequestMatcher(
-      new AntPathRequestMatcher("/api/**")
-  );
-
-  @Value("${METAL_INVESTMENT_ENCODER_SECRETE}")
-  private String encoderSecrete;
-
-
   @Value("${service.metal.price.host}")
   private PriceServiceType servicePriceType;
-
-  @Bean(name = "entityManagerFactory")
-  @DependsOn("liquibaseChangelog")
-  @Primary
-  public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
-    LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
-    em.setDataSource(dataSource);
-    em.setPackagesToScan("com.investment.metal.database");
-
-    HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
-    vendorAdapter.setDatabasePlatform("org.hibernate.dialect.MySQL8Dialect");
-    vendorAdapter.setShowSql(false);
-    vendorAdapter.setGenerateDdl(false);
-
-    em.setJpaVendorAdapter(vendorAdapter);
-    em.setPersistenceUnitName("default");
-
-    // Set Hibernate properties to completely disable XML mapping and JAXB
-    Properties jpaProperties = new Properties();
-    jpaProperties.setProperty("hibernate.hbm2ddl.auto", "validate");
-    jpaProperties.setProperty("hibernate.connection.provider_disables_autocommit", "true");
-    jpaProperties.setProperty("hibernate.jdbc.time_zone", "UTC");
-    jpaProperties.setProperty("hibernate.format_sql", "false");
-    jpaProperties.setProperty("hibernate.show_sql", "false");
-    jpaProperties.setProperty("hibernate.use_sql_comments", "false");
-    jpaProperties.setProperty("hibernate.generate_statistics", "false");
-    jpaProperties.setProperty("hibernate.cache.use_second_level_cache", "false");
-    jpaProperties.setProperty("hibernate.cache.use_query_cache", "false");
-
-    // Completely disable XML mapping and JAXB
-    jpaProperties.setProperty("hibernate.xml_mapping_enabled", "false");
-    jpaProperties.setProperty("hibernate.jaxb.enabled", "false");
-    jpaProperties.setProperty("hibernate.hbm2ddl.import_files", "");
-    jpaProperties.setProperty("hibernate.hbm2ddl.import_files_sql_extractor", "");
-
-    // Configure naming strategies for camelCase to snake_case conversion
-    jpaProperties.setProperty("hibernate.physical_naming_strategy", "org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy");
-    jpaProperties.setProperty("hibernate.implicit_naming_strategy", "org.hibernate.boot.model.naming.ImplicitNamingStrategyJpaCompliantImpl");
-
-    em.setJpaProperties(jpaProperties);
-
-    return em;
-  }
-
-  @Bean
-  public PlatformTransactionManager transactionManager(LocalContainerEntityManagerFactoryBean entityManagerFactory) {
-    JpaTransactionManager transactionManager = new JpaTransactionManager();
-    transactionManager.setEntityManagerFactory(entityManagerFactory.getObject());
-    return transactionManager;
-  }
 
   @Bean
   @Primary
@@ -139,20 +47,6 @@ public class Config implements WebMvcConfigurer {
   public HikariConfig hikariConfig() {
     return new HikariConfig();
   }
-
-  @Bean
-  @Primary
-  @ConditionalOnMissingBean
-  public DataSource dataSource(HikariConfig hikariConfig) {
-    hikariConfig.setJdbcUrl(dbUrl);
-    hikariConfig.setUsername(username);
-    hikariConfig.setPassword(password);
-    hikariConfig.setDriverClassName("com.mysql.cj.jdbc.Driver");
-    hikariConfig.setAutoCommit(false);
-    return new HikariDataSource(hikariConfig);
-  }
-
-  // JPA and Liquibase configuration is handled by Spring Boot auto-configuration
 
   @Bean
   public CircuitBreakerRegistry circuitBreaker() {
@@ -191,14 +85,6 @@ public class Config implements WebMvcConfigurer {
   }
 
   @Bean
-  public PasswordEncoder encoder() {
-    Pbkdf2PasswordEncoder encoder = new Pbkdf2PasswordEncoder(encoderSecrete, 16, 255, SecretKeyFactoryAlgorithm.PBKDF2WithHmacSHA256);
-    encoder.setEncodeHashAsBase64(true);
-    encoder.setAlgorithm(Pbkdf2PasswordEncoder.SecretKeyFactoryAlgorithm.PBKDF2WithHmacSHA256);
-    return encoder;
-  }
-
-  @Bean
   public ExternalMetalPriceReader createMetalPriceReader() {
     ExternalMetalPriceReader priceService = null;
     switch (servicePriceType) {
@@ -213,114 +99,16 @@ public class Config implements WebMvcConfigurer {
   }
 
 
-
-   @Bean
-   public WebSecurityCustomizer webSecurityCustomizer() {
-     return (web) -> web.ignoring().requestMatchers(
-         "/token/**",
-         "/swagger-ui.html",
-         "/swagger-ui/**",
-         "/v3/api-docs",
-         "/v3/api-docs/**",
-         "/webjars/**"
-     );
-   }
-
   @Bean
-  public SecurityFilterChain filterChain(HttpSecurity http, CustomAuthenticationProvider authenticationProvider, AuthenticationFilter authenticationFilter) throws Exception {
-    http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .csrf(AbstractHttpConfigurer::disable)
-        .authorizeHttpRequests(auth -> auth
-            .requestMatchers(
-                "/",
-                "/static/**",
-                "/favicon.ico",
-                "/actuator/health",
-                "/actuator/health/**",
-                "/actuator/info",
-                "/actuator/**",
-                "/",
-                "/swagger-ui.html",
-                "/swagger-ui/**",
-                "/v3/api-docs",
-                "/v3/api-docs/**",
-                "/webjars/**",
-                "/userRegistration",
-                "/validateAccount",
-                "/login",
-                "/resetPassword",
-                "/changePassword",
-                "/checkUserPendingValidation",
-                "/resendValidationEmail",
-                "/health"
-                ).permitAll()
-            .requestMatchers(PROTECTED_URLS).authenticated()
-        )
-        .exceptionHandling(exception -> exception.authenticationEntryPoint(forbiddenEntryPoint()))
-        .addFilterBefore(authenticationFilter, AnonymousAuthenticationFilter.class)
-        .authenticationProvider(authenticationProvider)
-        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-        .formLogin(AbstractHttpConfigurer::disable)
-        .httpBasic(AbstractHttpConfigurer::disable)
-        .logout(AbstractHttpConfigurer::disable);
-
-    return http.build();
+  public WebSecurityCustomizer webSecurityCustomizer() {
+    return (web) -> web.ignoring().requestMatchers(
+        "/token/**",
+        "/swagger-ui.html",
+        "/swagger-ui/**",
+        "/v3/api-docs",
+        "/v3/api-docs/**",
+        "/webjars/**"
+    );
   }
 
-  @Bean
-  public AuthenticationFilter authenticationFilter(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-    final AuthenticationFilter filter = new AuthenticationFilter(PROTECTED_URLS);
-    filter.setAuthenticationManager(authenticationConfiguration.getAuthenticationManager());
-    return filter;
-  }
-
-  @Bean
-  public AuthenticationEntryPoint forbiddenEntryPoint() {
-    return new HttpStatusEntryPoint(HttpStatus.FORBIDDEN);
-  }
-
-  @Bean
-  public CorsConfigurationSource corsConfigurationSource() {
-    CorsConfiguration configuration = new CorsConfiguration();
-    configuration.setAllowedOriginPatterns(java.util.Arrays.asList("*"));
-    configuration.setAllowedMethods(java.util.Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-    configuration.setAllowedHeaders(java.util.Arrays.asList("*"));
-    configuration.setAllowCredentials(true);
-    configuration.setMaxAge(3600L);
-    
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/**", configuration);
-    return source;
-  }
-
-  @Override
-  public void addCorsMappings(CorsRegistry registry) {
-    registry.addMapping("/userRegistration")
-        .allowedOriginPatterns("*")
-        .allowedMethods("POST", "OPTIONS")
-        .allowedHeaders("*")
-        .allowCredentials(true)
-        .maxAge(3600);
-        
-    registry.addMapping("/validateAccount")
-        .allowedOriginPatterns("*")
-        .allowedMethods("POST", "OPTIONS")
-        .allowedHeaders("*")
-        .allowCredentials(true)
-        .maxAge(3600);
-        
-    registry.addMapping("/login")
-        .allowedOriginPatterns("*")
-        .allowedMethods("POST", "OPTIONS")
-        .allowedHeaders("*")
-        .allowCredentials(true)
-        .maxAge(3600);
-        
-    registry.addMapping("/api/**")
-        .allowedOriginPatterns("*")
-        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-        .allowedHeaders("*")
-        .allowCredentials(true)
-        .maxAge(3600);
-  }
 }

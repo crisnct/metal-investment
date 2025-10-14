@@ -12,6 +12,7 @@ public class ExpressionParameter {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(name = "expression_function_id")
     private Integer expressionFunctionId;
 
     private String name;

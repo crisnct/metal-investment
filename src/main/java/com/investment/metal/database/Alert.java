@@ -15,14 +15,17 @@ public class Alert {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(name = "user_id")
     private Integer userId;
 
+    @Column(name = "metal_symbol")
     private String metalSymbol;
 
     private String expression;
 
     private String frequency;
 
+    @Column(name = "last_time_checked")
     private Timestamp lastTimeChecked;
 
     public AlertFrequency getFrequency() {
