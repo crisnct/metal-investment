@@ -1,4 +1,4 @@
-package com.investment.metal.domain.service.price;
+package com.investment.metal.infrastructure.service.price;
 
 import com.investment.metal.domain.model.CurrencyType;
 import com.investment.metal.domain.model.MetalType;

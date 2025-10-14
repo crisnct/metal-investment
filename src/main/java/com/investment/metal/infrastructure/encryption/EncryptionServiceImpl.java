@@ -1,6 +1,5 @@
 package com.investment.metal.infrastructure.encryption;
 
-import com.investment.metal.domain.service.EncryptionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

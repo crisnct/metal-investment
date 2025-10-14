@@ -1,4 +1,4 @@
-package com.investment.metal.application.service;
+package com.investment.metal.domain.model;
 
 public enum ExpressionType {
 

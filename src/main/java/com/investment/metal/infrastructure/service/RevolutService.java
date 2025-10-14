@@ -3,7 +3,7 @@ package com.investment.metal.infrastructure.service;
 import com.investment.metal.domain.exception.BusinessException;
 import com.investment.metal.domain.model.CurrencyType;
 import com.investment.metal.domain.model.MetalType;
-import com.investment.metal.domain.service.price.ExternalMetalPriceReader;
+import com.investment.metal.infrastructure.service.price.ExternalMetalPriceReader;
 import com.investment.metal.infrastructure.persistence.entity.Currency;
 import com.investment.metal.infrastructure.persistence.entity.RevolutProfit;
 import com.investment.metal.infrastructure.persistence.repository.RevolutProfitRepository;

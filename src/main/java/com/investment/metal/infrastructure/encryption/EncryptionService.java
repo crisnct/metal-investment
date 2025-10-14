@@ -1,4 +1,4 @@
-package com.investment.metal.domain.service;
+package com.investment.metal.infrastructure.encryption;
 
 /**
  * Domain service interface for encryption operations.

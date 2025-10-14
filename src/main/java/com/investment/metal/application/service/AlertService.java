@@ -13,6 +13,7 @@ import com.investment.metal.infrastructure.persistence.repository.ExpressionFunc
 import com.investment.metal.infrastructure.persistence.repository.ExpressionParameterRepository;
 import com.investment.metal.infrastructure.service.AbstractService;
 import com.investment.metal.infrastructure.service.MessageService;
+import com.investment.metal.domain.service.ExpressionEvaluator;
 import jakarta.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.util.ArrayList;

@@ -2,7 +2,7 @@ package com.investment.metal.application.service;
 
 import com.investment.metal.application.dto.UserMetalInfoDto;
 import com.investment.metal.domain.model.MetalType;
-import com.investment.metal.domain.service.AccountService;
+import com.investment.metal.infrastructure.service.AccountService;
 import com.investment.metal.infrastructure.exception.ExceptionService;
 import com.investment.metal.infrastructure.persistence.entity.Alert;
 import com.investment.metal.infrastructure.persistence.entity.Customer;
@@ -10,6 +10,7 @@ import com.investment.metal.infrastructure.persistence.entity.MetalPrice;
 import com.investment.metal.infrastructure.persistence.entity.Purchase;
 import com.investment.metal.infrastructure.service.EmailService;
 import com.investment.metal.infrastructure.service.UserProfit;
+import com.investment.metal.domain.service.ExpressionEvaluator;
 import java.sql.Timestamp;
 import java.util.Comparator;
 import java.util.HashMap;

@@ -1,9 +1,9 @@
 package com.investment.metal.infrastructure.config;
 
 import com.investment.metal.domain.model.PriceServiceType;
-import com.investment.metal.domain.service.price.BloombergPriceReader;
-import com.investment.metal.domain.service.price.ExternalMetalPriceReader;
-import com.investment.metal.domain.service.price.GalmarleyPriceReader;
+import com.investment.metal.infrastructure.service.price.BloombergPriceReader;
+import com.investment.metal.infrastructure.service.price.ExternalMetalPriceReader;
+import com.investment.metal.infrastructure.service.price.GalmarleyPriceReader;
 import com.zaxxer.hikari.HikariConfig;
 import io.github.resilience4j.bulkhead.BulkheadConfig;
 import io.github.resilience4j.bulkhead.BulkheadRegistry;

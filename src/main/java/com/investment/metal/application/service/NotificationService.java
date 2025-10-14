@@ -3,7 +3,7 @@ package com.investment.metal.application.service;
 import com.investment.metal.MessageKey;
 import com.investment.metal.application.dto.UserMetalInfoDto;
 import com.investment.metal.domain.exception.BusinessException;
-import com.investment.metal.domain.service.AccountService;
+import com.investment.metal.infrastructure.service.AccountService;
 import com.investment.metal.infrastructure.persistence.entity.Customer;
 import com.investment.metal.infrastructure.persistence.entity.Notification;
 import com.investment.metal.infrastructure.persistence.entity.Purchase;

@@ -1,7 +1,7 @@
 package com.investment.metal.infrastructure.encryption;
 
 import com.investment.metal.domain.exception.BusinessException;
-import com.investment.metal.domain.service.BlockedIpService;
+import com.investment.metal.infrastructure.service.BlockedIpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
