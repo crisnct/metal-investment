@@ -33,5 +33,6 @@
   <ul class="list-disc list-inside text-gray-700 space-y-2">
     <li><a href="API_DOCUMENTATION.md" class="text-blue-600 hover:text-blue-800 underline">API Documentation</a> - Complete API reference with Swagger annotations and endpoint details</li>
     <li><a href="README-UI.md" class="text-blue-600 hover:text-blue-800 underline">UI Documentation</a> - React frontend documentation with build process and deployment guide</li>
+    <li><a href="README_TESTING.md" class="text-blue-600 hover:text-blue-800 underline">Testing Documentation</a> - Comprehensive testing guide with JUnit 5, Mockito, and integration tests</li>
   </ul>
 </section>
