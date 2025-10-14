@@ -1,6 +1,6 @@
 package com.investment.metal.domain.model;
 
-import com.investment.metal.infrastructure.persistence.entity.Customer;
+// Domain model should not depend on infrastructure entities
 import lombok.Builder;
 import lombok.Data;
 
@@ -79,30 +79,8 @@ public class User {
         return createdAt.isBefore(java.time.LocalDateTime.now().minusYears(1));
     }
 
-    /**
-     * Factory method to create User from Customer entity
-     */
-    public static User fromEntity(Customer customer) {
-        return User.builder()
-            .id(customer.getId())
-            .username(customer.getUsername())
-            .email(customer.getEmail())
-            .createdAt(LocalDateTime.now()) // TODO: Add createdAt to Customer entity
-            .validated(true) // TODO: Add validation status to Customer entity
-            .active(true) // TODO: Add active status to Customer entity
-            .build();
-    }
-
-    /**
-     * Convert to Customer entity for persistence
-     */
-    public Customer toEntity() {
-        Customer customer = new Customer();
-        customer.setId(this.id);
-        customer.setUsername(this.username);
-        customer.setEmail(this.email);
-        return customer;
-    }
+    // Domain models should not contain infrastructure mapping methods
+    // Mapping should be handled by application layer mappers
 
     @Override
     public boolean equals(Object o) {

@@ -5,7 +5,6 @@ import com.investment.metal.infrastructure.util.Util;
 import com.investment.metal.infrastructure.persistence.entity.Customer;
 import com.investment.metal.infrastructure.persistence.entity.Login;
 import com.investment.metal.infrastructure.persistence.repository.LoginRepository;
-import com.investment.metal.domain.service.encryption.EncryptionService;
 import com.investment.metal.domain.exception.BusinessException;
 import com.investment.metal.domain.exception.NoRollbackBusinessException;
 import com.investment.metal.infrastructure.service.AbstractService;

@@ -2,10 +2,7 @@ package com.investment.metal.domain.service.impl;
 
 import com.investment.metal.domain.model.User;
 import com.investment.metal.domain.service.AccountDomainService;
-import com.investment.metal.infrastructure.persistence.repository.CustomerRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 /**
@@ -14,11 +11,7 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class AccountDomainServiceImpl implements AccountDomainService {
-    
-    private final CustomerRepository customerRepository;
-    private final PasswordEncoder passwordEncoder;
     
     @Override
     public boolean isValidRegistrationData(String username, String email, String password) {
@@ -46,22 +39,16 @@ public class AccountDomainServiceImpl implements AccountDomainService {
     
     @Override
     public boolean isUsernameAvailable(String username) {
-        try {
-            return customerRepository.findByUsername(username).isEmpty();
-        } catch (Exception e) {
-            log.warn("Failed to check username availability: {}", username, e);
-            return false;
-        }
+        // Domain service should not check data availability - this is application layer concern
+        // This method should be moved to application service
+        throw new UnsupportedOperationException("Data availability checks should be handled by application layer");
     }
     
     @Override
     public boolean isEmailAvailable(String email) {
-        try {
-            return customerRepository.findByEmail(email).isEmpty();
-        } catch (Exception e) {
-            log.warn("Failed to check email availability: {}", email, e);
-            return false;
-        }
+        // Domain service should not check data availability - this is application layer concern
+        // This method should be moved to application service
+        throw new UnsupportedOperationException("Data availability checks should be handled by application layer");
     }
     
     @Override
@@ -89,16 +76,22 @@ public class AccountDomainServiceImpl implements AccountDomainService {
     
     @Override
     public boolean canUserRegister(String username, String email) {
-        return isUsernameAvailable(username) && isEmailAvailable(email);
+        // Domain service should not check data availability - this is application layer concern
+        // This method should be moved to application service
+        throw new UnsupportedOperationException("Data availability checks should be handled by application layer");
     }
     
     @Override
     public String hashPassword(String password) {
-        return passwordEncoder.encode(password);
+        // Password hashing should be handled by infrastructure services
+        // Domain services should focus on business rules only
+        throw new UnsupportedOperationException("Password hashing should be handled by infrastructure layer");
     }
     
     @Override
     public boolean validatePassword(String password, String hash) {
-        return passwordEncoder.matches(password, hash);
+        // Password validation should be handled by infrastructure services
+        // Domain services should focus on business rules only
+        throw new UnsupportedOperationException("Password validation should be handled by infrastructure layer");
     }
 }

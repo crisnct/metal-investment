@@ -1,6 +1,7 @@
 package com.investment.metal.application.repository.impl;
 
 import com.investment.metal.application.repository.UserApplicationRepository;
+import com.investment.metal.application.mapper.UserMapper;
 import com.investment.metal.domain.model.User;
 import com.investment.metal.infrastructure.persistence.repository.CustomerRepository;
 import com.investment.metal.infrastructure.persistence.entity.Customer;
@@ -21,6 +22,7 @@ import java.util.Optional;
 public class UserApplicationRepositoryImpl implements UserApplicationRepository {
     
     private final CustomerRepository customerRepository;
+    private final UserMapper userMapper;
     
     @Override
     public Optional<User> findByUsername(String username) {
@@ -29,7 +31,7 @@ public class UserApplicationRepositoryImpl implements UserApplicationRepository 
             if (customerOpt.isEmpty()) {
                 return Optional.empty();
             }
-            return Optional.of(User.fromEntity(customerOpt.get()));
+            return Optional.of(userMapper.toDomainModel(customerOpt.get()));
         } catch (Exception e) {
             log.warn("Failed to find user by username: {}", username, e);
             return Optional.empty();
@@ -43,7 +45,7 @@ public class UserApplicationRepositoryImpl implements UserApplicationRepository 
             if (customerOpt.isEmpty()) {
                 return Optional.empty();
             }
-            return Optional.of(User.fromEntity(customerOpt.get()));
+            return Optional.of(userMapper.toDomainModel(customerOpt.get()));
         } catch (Exception e) {
             log.warn("Failed to find user by email: {}", email, e);
             return Optional.empty();
@@ -57,7 +59,7 @@ public class UserApplicationRepositoryImpl implements UserApplicationRepository 
             if (customerOpt.isEmpty()) {
                 return Optional.empty();
             }
-            return Optional.of(User.fromEntity(customerOpt.get()));
+            return Optional.of(userMapper.toDomainModel(customerOpt.get()));
         } catch (Exception e) {
             log.warn("Failed to find user by id: {}", id, e);
             return Optional.empty();
@@ -67,9 +69,9 @@ public class UserApplicationRepositoryImpl implements UserApplicationRepository 
     @Override
     public User save(User user) {
         try {
-            Customer customer = user.toEntity();
+            Customer customer = userMapper.toEntity(user);
             Customer savedCustomer = customerRepository.save(customer);
-            return User.fromEntity(savedCustomer);
+            return userMapper.toDomainModel(savedCustomer);
         } catch (Exception e) {
             log.error("Failed to save user: {}", user.getUsername(), e);
             throw new RuntimeException("Failed to save user", e);
@@ -113,7 +115,7 @@ public class UserApplicationRepositoryImpl implements UserApplicationRepository 
             if (customerOpt.isEmpty()) {
                 return Optional.empty();
             }
-            return Optional.of(User.fromEntity(customerOpt.get()));
+            return Optional.of(userMapper.toDomainModel(customerOpt.get()));
         } catch (Exception e) {
             log.warn("Failed to find user by username and password: {}", username, e);
             return Optional.empty();
