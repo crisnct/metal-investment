@@ -14,6 +14,12 @@ import com.investment.metal.service.BlockedIpService;
 import com.investment.metal.service.LoginService;
 import com.investment.metal.service.exception.ExceptionService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -54,9 +60,22 @@ public class PublicApiController {
 
     @RequestMapping(value = "/userRegistration", method = RequestMethod.POST)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
+    @Operation(
+            summary = "Register new user",
+            description = "Registers a new user account with username, password, and email"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User registered successfully, validation email sent",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error during registration",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
+    })
     public ResponseEntity<SimpleMessageDto> userRegistration(
+            @Parameter(description = "Username for the new account", required = true)
             @RequestHeader("username") String username,
+            @Parameter(description = "Password for the new account", required = true)
             @RequestHeader("password") String password,
+            @Parameter(description = "Email address for the new account", required = true)
             @RequestHeader("email") String email
     ) {
         try {
@@ -76,8 +95,20 @@ public class PublicApiController {
 
     @RequestMapping(value = "/validateAccount", method = RequestMethod.POST)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
+    @Operation(
+            summary = "Validate user account",
+            description = "Validates a user account using the verification code sent via email"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Account validated successfully",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid verification code or user not found",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
+    })
     public ResponseEntity<SimpleMessageDto> validateAccount(
+            @Parameter(description = "Username of the account to validate", required = true)
             @RequestHeader("username") final String username,
+            @Parameter(description = "Verification code sent via email", required = true)
             @RequestHeader("code") final int code
     ) {
         this.blockedIpService.checkBlockedIPGlobal();
@@ -91,8 +122,20 @@ public class PublicApiController {
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
+    @Operation(
+            summary = "User login",
+            description = "Authenticates a user and returns a JWT token for protected endpoints"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Login successful, JWT token returned",
+                    content = @Content(schema = @Schema(implementation = UserLoginDto.class))),
+            @ApiResponse(responseCode = "401", description = "Invalid credentials or account banned",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
+    })
     public ResponseEntity<UserLoginDto> login(
+            @Parameter(description = "Username for login", required = true)
             @RequestHeader("username") final String username,
+            @Parameter(description = "Password for login", required = true)
             @RequestHeader("password") final String password
     ) {
         this.blockedIpService.checkBlockedIPGlobal();
@@ -109,7 +152,18 @@ public class PublicApiController {
 
     @RequestMapping(value = "/resetPassword", method = RequestMethod.POST)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
+    @Operation(
+            summary = "Reset password",
+            description = "Initiates password reset process by sending a reset token to the user's email"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Password reset token generated and sent via email",
+                    content = @Content(schema = @Schema(implementation = ResetPasswordDto.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid email address or user not found",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
+    })
     public ResponseEntity<ResetPasswordDto> resetPassword(
+            @Parameter(description = "Email address of the account to reset password for", required = true)
             @RequestHeader("email") final String email
     ) {
         this.exceptionService.check(!Util.isValidEmailAddress(email), MessageKey.INVALID_REQUEST, "Invalid email address!");
@@ -125,10 +179,24 @@ public class PublicApiController {
 
     @RequestMapping(value = "/changePassword", method = RequestMethod.PUT)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
+    @Operation(
+            summary = "Change password",
+            description = "Changes user password using verification code and reset token"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Password changed successfully",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid verification code, token, or email",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
+    })
     public ResponseEntity<SimpleMessageDto> changePassword(
+            @Parameter(description = "Verification code sent via email", required = true)
             @RequestHeader("code") final int code,
+            @Parameter(description = "New password for the account", required = true)
             @RequestHeader("newPassword") final String newPassword,
+            @Parameter(description = "Email address of the account", required = true)
             @RequestHeader("email") final String email,
+            @Parameter(description = "Reset token received via email", required = true)
             @RequestHeader("token") final String token
     ) {
         this.blockedIpService.checkBlockedIPGlobal();
@@ -145,8 +213,20 @@ public class PublicApiController {
 
     @RequestMapping(value = "/checkUserPendingValidation", method = RequestMethod.POST)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
+    @Operation(
+            summary = "Check user validation status",
+            description = "Checks if a user exists and is pending email validation"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User exists and is pending validation",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class))),
+            @ApiResponse(responseCode = "400", description = "User does not exist or already validated",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
+    })
     public ResponseEntity<SimpleMessageDto> checkUserPendingValidation(
+            @Parameter(description = "Username to check", required = true)
             @RequestHeader("username") String username,
+            @Parameter(description = "Email address to verify", required = true)
             @RequestHeader("email") String email
     ) {
         try {
@@ -179,8 +259,24 @@ public class PublicApiController {
 
     @RequestMapping(value = "/resendValidationEmail", method = RequestMethod.POST)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
+    @Operation(
+            summary = "Resend validation email",
+            description = "Resends the validation email to a user who is pending account validation"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Validation email sent successfully",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class))),
+            @ApiResponse(responseCode = "400", description = "User already validated or not found",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class))),
+            @ApiResponse(responseCode = "404", description = "User not found",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
+    })
     public ResponseEntity<SimpleMessageDto> resendValidationEmail(
+            @Parameter(description = "Username of the account", required = true)
             @RequestHeader("username") String username,
+            @Parameter(description = "Email address of the account", required = true)
             @RequestHeader("email") String email
     ) {
         try {
@@ -211,6 +307,15 @@ public class PublicApiController {
     }
 
     @GetMapping("/")
+    @Operation(
+            summary = "Serve React application",
+            description = "Serves the main React application HTML page"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "React app served successfully",
+                    content = @Content(mediaType = "text/html")),
+            @ApiResponse(responseCode = "404", description = "React app not found")
+    })
     public ResponseEntity<Resource> serveReactApp() {
       try {
         Resource resource = new ClassPathResource("static/index.html");
@@ -223,6 +328,14 @@ public class PublicApiController {
     }
 
     @GetMapping("/health")
+    @Operation(
+            summary = "Health check",
+            description = "Returns the health status of the application"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Application is healthy",
+                    content = @Content(schema = @Schema(implementation = Map.class)))
+    })
     public Map<String, String> health() {
       Map<String, String> response = new HashMap<>();
       response.put("status", "UP");
@@ -232,6 +345,14 @@ public class PublicApiController {
     }
 
     @GetMapping("/api/health")
+    @Operation(
+            summary = "API health check",
+            description = "Returns the health status of the API with additional information"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "API is healthy",
+                    content = @Content(schema = @Schema(implementation = Map.class)))
+    })
     public Map<String, String> apiHealth() {
       Map<String, String> response = new HashMap<>();
       response.put("status", "UP");

@@ -127,7 +127,18 @@ public class ProtectedApiController {
 
     @RequestMapping(value = "/unblockIp", method = RequestMethod.POST)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
+    @Operation(
+            summary = "Unblock IP address",
+            description = "Removes an IP address from the blocked list"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "IP unblocked successfully",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - invalid token",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
+    })
     public ResponseEntity<SimpleMessageDto> unblockIp(
+            @Parameter(description = "IP address to unblock", required = true)
             @RequestHeader("ip") final String ip
     ) {
         String token = Util.getTokenFromRequest(request);
@@ -140,6 +151,16 @@ public class ProtectedApiController {
 
     @RequestMapping(value = "/logout", method = RequestMethod.POST)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
+    @Operation(
+            summary = "User logout",
+            description = "Logs out the authenticated user and invalidates the session"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User logged out successfully",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - invalid token",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
+    })
     public ResponseEntity<SimpleMessageDto> logout() {
         String token = Util.getTokenFromRequest(request);
         final Login loginEntity = this.loginService.getLogin(token);
@@ -185,9 +206,24 @@ public class ProtectedApiController {
 
     @RequestMapping(value = "/sell", method = RequestMethod.DELETE)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
+    @Operation(
+            summary = "Record metal sale",
+            description = "Records a metal sale transaction for the authenticated user"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Sale recorded successfully",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid metal symbol or parameters",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - invalid token",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
+    })
     public ResponseEntity<SimpleMessageDto> sell(
+            @Parameter(description = "Amount of metal sold", required = true)
             @RequestHeader("metalAmount") final double metalAmount,
+            @Parameter(description = "Symbol of the metal (e.g., GOLD, SILVER)", required = true)
             @RequestHeader("metalSymbol") final String metalSymbol,
+            @Parameter(description = "Price per unit of metal", required = true)
             @RequestHeader("price") final double price
     ) {
         MetalType metalType = MetalType.lookup(metalSymbol);
@@ -230,8 +266,22 @@ public class ProtectedApiController {
 
     @RequestMapping(value = "/revolutProfit", method = RequestMethod.PUT)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
+    @Operation(
+            summary = "Calculate Revolut profit",
+            description = "Calculates profit percentage for Revolut metal prices"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Profit calculated successfully",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid metal symbol or parameters",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - invalid token",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
+    })
     public ResponseEntity<SimpleMessageDto> calculateRevolutProfit(
+            @Parameter(description = "Revolut price per ounce", required = true)
             @RequestHeader("revolutPriceOunce") final double revolutPriceOunce,
+            @Parameter(description = "Symbol of the metal (e.g., GOLD, SILVER)", required = true)
             @RequestHeader("metalSymbol") final String metalSymbol
     ) {
         MetalType metalType = MetalType.lookup(metalSymbol);
@@ -251,9 +301,24 @@ public class ProtectedApiController {
 
     @RequestMapping(value = "/addAlert", method = RequestMethod.POST)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
+    @Operation(
+            summary = "Add price alert",
+            description = "Creates a new price alert for a specific metal with custom expression"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Alert added successfully",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid expression, metal symbol, or frequency",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - invalid token",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
+    })
     public ResponseEntity<SimpleMessageDto> addAlert(
+            @Parameter(description = "Mathematical expression for the alert condition", required = true)
             @RequestHeader("expression") final String expression,
+            @Parameter(description = "Symbol of the metal (e.g., GOLD, SILVER)", required = true)
             @RequestHeader("metalSymbol") final String metalSymbol,
+            @Parameter(description = "Alert frequency (e.g., DAILY, WEEKLY)", required = true)
             @RequestHeader("frequency") final String frequency
     ) {
         AlertFrequency alertFrequency = AlertFrequency.lookup(frequency);
@@ -277,6 +342,16 @@ public class ProtectedApiController {
 
     @RequestMapping(value = "/getAlerts", method = RequestMethod.GET)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
+    @Operation(
+            summary = "Get user alerts",
+            description = "Retrieves all price alerts for the authenticated user"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Alerts retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = AlertsDto.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - invalid token",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
+    })
     public ResponseEntity<AlertsDto> getAlerts() {
         String token = Util.getTokenFromRequest(request);
         final Login loginEntity = this.loginService.getLogin(token);
@@ -292,7 +367,20 @@ public class ProtectedApiController {
 
     @RequestMapping(value = "/removeAlert", method = RequestMethod.DELETE)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
+    @Operation(
+            summary = "Remove price alert",
+            description = "Removes a specific price alert by ID"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Alert removed successfully",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class))),
+            @ApiResponse(responseCode = "400", description = "Alert not found or not owned by user",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - invalid token",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
+    })
     public ResponseEntity<SimpleMessageDto> removeAlert(
+            @Parameter(description = "ID of the alert to remove", required = true)
             @RequestHeader("alertId") final Integer alertId
     ) {
         String token = Util.getTokenFromRequest(request);
@@ -317,8 +405,22 @@ public class ProtectedApiController {
 
     @RequestMapping(value = "/revolutAlert", method = RequestMethod.GET)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
+    @Operation(
+            summary = "Get Revolut alert price",
+            description = "Calculates the Revolut price needed to set an alert for a specific profit target"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Alert price calculated successfully",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid profit or metal symbol, or user hasn't purchased this metal",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - invalid token",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
+    })
     public ResponseEntity<SimpleMessageDto> revolutAlert(
+            @Parameter(description = "Target profit percentage", required = true)
             @RequestHeader("profit") final double profit,
+            @Parameter(description = "Symbol of the metal (e.g., GOLD, SILVER)", required = true)
             @RequestHeader("metalSymbol") final String metalSymbol
     ) {
         String token = Util.getTokenFromRequest(request);
@@ -340,6 +442,16 @@ public class ProtectedApiController {
 
     @RequestMapping(value = "/functions", method = RequestMethod.GET)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
+    @Operation(
+            summary = "Get expression functions",
+            description = "Retrieves available mathematical functions for creating alert expressions"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Functions retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = ExpressionHelperDto.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - invalid token",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
+    })
     public ResponseEntity<ExpressionHelperDto> functions() {
         String token = Util.getTokenFromRequest(request);
         final Login loginEntity = this.loginService.getLogin(token);
@@ -375,7 +487,20 @@ public class ProtectedApiController {
 
     @RequestMapping(value = "/notifyUser", method = RequestMethod.POST)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
+    @Operation(
+            summary = "Notify user",
+            description = "Sends a notification email to a specific user about their account status"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User notified successfully",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class))),
+            @ApiResponse(responseCode = "400", description = "User not found",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - invalid token",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
+    })
     public ResponseEntity<SimpleMessageDto> notifyUser(
+            @Parameter(description = "Username of the user to notify", required = true)
             @RequestHeader("username") final String username
     ) {
         String token = Util.getTokenFromRequest(request);
@@ -391,7 +516,20 @@ public class ProtectedApiController {
 
     @RequestMapping(value = "/setNotificationPeriod", method = RequestMethod.PUT)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
+    @Operation(
+            summary = "Set notification period",
+            description = "Sets the notification frequency period for the authenticated user"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Notification period set successfully",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid period value",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - invalid token",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
+    })
     public ResponseEntity<SimpleMessageDto> setNotificationPeriod(
+            @Parameter(description = "Notification period in days", required = true)
             @RequestHeader("period") final int period
     ) {
         String token = Util.getTokenFromRequest(request);
@@ -408,6 +546,16 @@ public class ProtectedApiController {
 
     @RequestMapping(value = "/getNotificationPeriod", method = RequestMethod.GET)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
+    @Operation(
+            summary = "Get notification period",
+            description = "Retrieves the current notification frequency period for the authenticated user"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Notification period retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - invalid token",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
+    })
     public ResponseEntity<SimpleMessageDto> getNotificationPeriod() {
         String token = Util.getTokenFromRequest(request);
         final Login loginEntity = this.loginService.getLogin(token);
@@ -419,6 +567,16 @@ public class ProtectedApiController {
 
     @RequestMapping(value = "/metalInfo", method = RequestMethod.GET)
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
+    @Operation(
+            summary = "Get metal information",
+            description = "Retrieves comprehensive metal price information including current prices, Revolut rates, and currency conversions"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Metal information retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = AppStatusInfoDto.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - invalid token",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
+    })
     public ResponseEntity<AppStatusInfoDto> metalInfo() {
         String token = Util.getTokenFromRequest(request);
         final Login loginEntity = this.loginService.getLogin(token);
