@@ -18,7 +18,7 @@ import './TechnicalStack.css';
 const TechnicalStack = () => {
   const technologies = [
     {
-      name: 'Java 22',
+      name: 'Java 25',
       description: 'Core programming language for the application logic.',
       icon: Coffee,
       color: '#e11d48'

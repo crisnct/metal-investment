@@ -1,4 +1,4 @@
-java -jar metal-investment-0.0.1.jar ^
+java -jar metal-investment-1.0.0.jar ^
 --mail.from="**********************" ^
 --mail.password="**********************" ^
 --mail.port="***" ^

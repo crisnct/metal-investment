@@ -34,7 +34,7 @@ services:
       METAL_INVESTMENT_ENCODER_SECRETE: $METAL_INVESTMENT_ENCODER_SECRETE
     networks:
       - test
-    command: java -jar /target/metal-investment-0.0.1.jar
+    command: java -jar /target/metal-investment-1.0.0.jar
 
 
   docker-db:
