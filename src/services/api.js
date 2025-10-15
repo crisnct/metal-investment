@@ -11,40 +11,75 @@ class ApiService {
   // Helper method to get CSRF token from cookies
   getCsrfToken() {
     try {
-      alert('Reading CSRF token from cookies...');
       console.log('=== CSRF TOKEN FROM COOKIES ===');
+      console.log('All cookies:', document.cookie);
       
       // Get CSRF token from cookies
       const cookies = document.cookie.split(';');
       let csrfToken = null;
       
+      // Check for different possible cookie names
       for (let cookie of cookies) {
         const trimmedCookie = cookie.trim();
+        console.log('Checking cookie:', trimmedCookie);
+        
         if (trimmedCookie.startsWith('XSRF-TOKEN=')) {
           csrfToken = decodeURIComponent(trimmedCookie.substring('XSRF-TOKEN='.length));
+          console.log('Found XSRF-TOKEN cookie');
+          break;
+        } else if (trimmedCookie.startsWith('X-XSRF-TOKEN=')) {
+          csrfToken = decodeURIComponent(trimmedCookie.substring('X-XSRF-TOKEN='.length));
+          console.log('Found X-XSRF-TOKEN cookie');
+          break;
+        } else if (trimmedCookie.startsWith('_csrf=')) {
+          csrfToken = decodeURIComponent(trimmedCookie.substring('_csrf='.length));
+          console.log('Found _csrf cookie');
           break;
         }
       }
       
-      console.log('All cookies:', document.cookie);
       console.log('CSRF token from cookies:', csrfToken ? 'FOUND' : 'NOT FOUND');
       console.log('CSRF token value:', csrfToken ? csrfToken.substring(0, 10) + '...' : 'null');
       
       if (csrfToken) {
-        alert(`CSRF token found: ${csrfToken.substring(0, 10)}...`);
         console.log('=== CSRF TOKEN FROM COOKIES SUCCESS ===');
         return csrfToken;
       } else {
-        alert('No CSRF token found in cookies');
         console.warn('No CSRF token found in cookies');
         console.log('=== CSRF TOKEN FROM COOKIES FAILED ===');
         return null;
       }
     } catch (error) {
-      alert(`CSRF token error: ${error.message}`);
       console.error('Failed to get CSRF token from cookies:', error);
       console.log('=== CSRF TOKEN FROM COOKIES ERROR ===');
       return null;
+    }
+  }
+
+  // Helper method to refresh CSRF token by making a request to get a new one
+  async refreshCsrfToken() {
+    try {
+      console.log('=== REFRESHING CSRF TOKEN ===');
+      const response = await fetch(`${this.baseURL}/csrf-token`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        mode: 'cors',
+        credentials: 'include'
+      });
+      
+      if (response.ok) {
+        console.log('CSRF token refreshed successfully');
+        return true;
+      } else {
+        console.error('Failed to refresh CSRF token:', response.status);
+        return false;
+      }
+    } catch (error) {
+      console.error('Error refreshing CSRF token:', error);
+      return false;
     }
   }
 
@@ -58,7 +93,6 @@ class ApiService {
 
   // Helper method to get auth headers with CSRF token (async version)
   async getAuthHeadersWithCsrf(token) {
-    alert('getAuthHeadersWithCsrf called');
     console.log('getAuthHeadersWithCsrf called with token:', token ? 'EXISTS' : 'MISSING');
     
     const headers = {
@@ -69,11 +103,9 @@ class ApiService {
     console.log('Base headers created:', Object.keys(headers));
     
     // Add CSRF token if available
-    alert('About to get CSRF token from cookies...');
     console.log('Attempting to get CSRF token from cookies...');
     try {
       const csrfToken = this.getCsrfToken();
-      alert(`CSRF token result: ${csrfToken ? 'SUCCESS' : 'FAILED'}`);
       console.log('CSRF token result:', csrfToken ? 'SUCCESS' : 'FAILED');
       
       if (csrfToken) {
@@ -83,7 +115,6 @@ class ApiService {
         console.warn('No CSRF token available - request may fail with 403');
       }
     } catch (error) {
-      alert(`CSRF token error: ${error.message}`);
       console.error('Error getting CSRF token:', error);
       console.warn('Proceeding without CSRF token - request may fail with 403');
     }
@@ -106,15 +137,13 @@ class ApiService {
   // Helper method to get auth headers with CSRF token from storage (async)
   async getAuthHeadersFromStorageWithCsrf() {
     const token = this.getToken();
-    alert(`Token check: ${token ? 'EXISTS' : 'MISSING'}`);
     console.log('getAuthHeadersFromStorageWithCsrf - Token from storage:', token ? 'EXISTS' : 'MISSING');
     console.log('getAuthHeadersFromStorageWithCsrf - Token value:', token ? token.substring(0, 20) + '...' : 'null');
     
     if (token) {
-      console.log('User has token, fetching CSRF token...');
+      console.log('User has token, getting CSRF token from cookies...');
       return await this.getAuthHeadersWithCsrf(token);
     } else {
-      alert('No user token found - user may not be logged in');
       console.warn('No user token found - user may not be logged in');
       return {};
     }
@@ -534,7 +563,6 @@ class ApiService {
 
   async recordPurchase(metalAmount, metalSymbol, cost) {
     try {
-      alert('PURCHASE REQUEST START - Check console for details');
       console.log('=== PURCHASE REQUEST START ===');
       console.log('Attempting to record purchase with CSRF protection');
       console.log('Purchase data:', { metalAmount, metalSymbol, cost });
@@ -567,6 +595,38 @@ class ApiService {
       if (!response.ok) {
         const rawText = await response.text();
         console.error('Purchase failed:', response.status, rawText);
+        
+        // If 403 Forbidden, try to refresh CSRF token and retry once
+        if (response.status === 403) {
+          console.log('403 Forbidden - attempting to refresh CSRF token and retry...');
+          const refreshSuccess = await this.refreshCsrfToken();
+          
+          if (refreshSuccess) {
+            console.log('CSRF token refreshed, retrying purchase...');
+            // Retry the request with refreshed CSRF token
+            const retryHeaders = await this.getAuthHeadersFromStorageWithCsrf();
+            const retryResponse = await fetch(`${this.baseURL}/api/purchase`, {
+              method: 'POST',
+              headers: {
+                ...retryHeaders,
+                'metalAmount': metalAmount.toString(),
+                'metalSymbol': metalSymbol,
+                'cost': cost.toString(),
+                'Accept': 'application/json'
+              },
+              mode: 'cors',
+              credentials: 'include'
+            });
+            
+            if (retryResponse.ok) {
+              console.log('Purchase successful after CSRF token refresh');
+              return await this.parseJsonSafely(retryResponse);
+            } else {
+              console.error('Purchase still failed after CSRF token refresh:', retryResponse.status);
+            }
+          }
+        }
+        
         let message = rawText;
         try {
           if (rawText) {

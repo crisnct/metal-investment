@@ -20,9 +20,13 @@ import org.springframework.security.web.authentication.AnonymousAuthenticationFi
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.csrf.InvalidCsrfTokenException;
+import org.springframework.security.web.csrf.MissingCsrfTokenException;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 
 /**
@@ -74,17 +78,18 @@ public class SecurityConfig {
         AuthenticationManager localAuthManager = new ProviderManager(customAuthenticationProvider);
         authFilter.setAuthenticationManager(localAuthManager);
         
-        // SECURITY FIX: Enable CSRF protection with proper REST API handling
-        // Configure CSRF for REST APIs with JWT authentication
+        // SECURITY FIX: Configure CSRF for stateless JWT authentication
+        // Use custom CSRF token repository that works with stateless sessions
         CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
         requestHandler.setCsrfRequestAttributeName("_csrf");
         
-        // Custom CSRF configuration for JWT-based APIs
+        // Custom CSRF configuration for stateless JWT authentication
         CookieCsrfTokenRepository csrfTokenRepository = new CookieCsrfTokenRepository();
-        // Note: setCookieHttpOnly is deprecated, but we need it for SPA compatibility
         csrfTokenRepository.setCookieHttpOnly(false); // Allow JavaScript access for SPA
         csrfTokenRepository.setCookiePath("/");
         csrfTokenRepository.setHeaderName("X-XSRF-TOKEN");
+        csrfTokenRepository.setCookieName("XSRF-TOKEN"); // Explicitly set cookie name
+        csrfTokenRepository.setParameterName("_csrf"); // Set parameter name for forms
         
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -94,7 +99,10 @@ public class SecurityConfig {
                 .ignoringRequestMatchers("/login", "/userRegistration", "/validateAccount", "/resetPassword", "/changePassword", "/csrf-token")
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint()))
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint(authenticationEntryPoint())
+                .accessDeniedHandler(customAccessDeniedHandler())
+            )
             .addFilterBefore(securityHeadersFilter, AnonymousAuthenticationFilter.class)
             .addFilterBefore(authFilter, AnonymousAuthenticationFilter.class)
             .authorizeHttpRequests(auth -> auth
@@ -103,5 +111,23 @@ public class SecurityConfig {
             );
         
         return http.build();
+    }
+
+    @Bean
+    public AccessDeniedHandler customAccessDeniedHandler() {
+        return (request, response, accessDeniedException) -> {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            
+            String errorMessage = "Access denied";
+            if (accessDeniedException instanceof InvalidCsrfTokenException) {
+                errorMessage = "Invalid CSRF token. Please refresh the page and try again.";
+            } else if (accessDeniedException instanceof MissingCsrfTokenException) {
+                errorMessage = "Missing CSRF token. Please refresh the page and try again.";
+            }
+            
+            response.getWriter().write("{\"error\":\"Forbidden\",\"message\":\"" + errorMessage + "\",\"type\":\"" + accessDeniedException.getClass().getSimpleName() + "\"}");
+        };
     }
 }
