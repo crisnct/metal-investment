@@ -42,7 +42,7 @@ const Profile = ({ userInfo }) => {
           // Convert UserMetalInfoDto to table format
           entries = data.metalInfo.map(item => ({
             symbol: item.metalSymbol,
-            amount: Math.round(item.amountPurchased),
+            amount: parseFloat(item.amountPurchased).toFixed(2),
             cost: Math.round(item.costPurchased),
             currentPrice: Math.round(item.costNow / item.amountPurchased), // Calculate price per unit
             value: Math.round(item.costNow),

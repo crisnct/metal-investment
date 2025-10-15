@@ -7,10 +7,10 @@ import com.investment.metal.infrastructure.persistence.entity.Customer;
 import com.investment.metal.infrastructure.persistence.entity.Login;
 import com.investment.metal.infrastructure.persistence.repository.LoginRepository;
 import com.investment.metal.infrastructure.encryption.EncryptionService;
+import com.investment.metal.infrastructure.security.JwtService;
 import com.investment.metal.infrastructure.util.Util;
 import java.sql.Timestamp;
 import java.util.Optional;
-import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +42,9 @@ public class LoginService extends AbstractService {
 
     @Autowired
     private EncryptionService encryptionService;
+
+    @Autowired
+    private JwtService jwtService;
 
     public void saveLoginAttempt(final Integer userId, final int validationCode) throws BusinessException {
         final Login loginEntity = this.loginRepository.findByUserId(userId).orElse(new Login());
@@ -116,7 +119,8 @@ public class LoginService extends AbstractService {
             if (login.getValidated() == null || login.getValidated() == 0) {
                 throw exceptionService.createException(MessageKey.NEEDS_VALIDATION);
             }
-            token = generateToken();
+            // Generate secure JWT token instead of UUID
+            token = jwtService.generateToken(user.getId());
             login.setLoginToken(encryptionService.encrypt(token));
             login.setTime(new Timestamp(System.currentTimeMillis()));
             login.setTokenExpireTime(new Timestamp(System.currentTimeMillis() + TOKEN_EXPIRE_TIME));
@@ -134,7 +138,8 @@ public class LoginService extends AbstractService {
         final String token;
         if (loginOp.isPresent()) {
             Login login = loginOp.get();
-            token = generateToken();
+            // Generate secure JWT token for password reset
+            token = jwtService.generateToken(user.getId());
             login.setResetPasswordToken(encryptionService.encrypt(token));
             this.loginRepository.save(login);
         } else {
@@ -202,9 +207,6 @@ public class LoginService extends AbstractService {
         }
     }
 
-    private String generateToken() {
-        return UUID.randomUUID().toString();
-    }
 
     public Optional<Login> findByToken(String rawToken) {
         return this.loginRepository.findByLoginToken(encryptionService.encrypt(rawToken));
