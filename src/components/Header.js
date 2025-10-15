@@ -556,7 +556,7 @@ const Header = ({ isLoggedIn, onLogin, onLogout }) => {
 
       {/* Sign Up Modal */}
       {showSignupForm && (
-        <div className="modal-overlay" onClick={closeSignupForm}>
+        <div className="modal-overlay">
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>Sign Up for Metal Investment</h2>

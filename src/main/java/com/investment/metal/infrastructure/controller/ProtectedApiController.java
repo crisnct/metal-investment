@@ -40,7 +40,6 @@ import com.investment.metal.infrastructure.service.CurrencyService;
 import com.investment.metal.infrastructure.service.EmailService;
 import com.investment.metal.infrastructure.service.MessageService;
 import com.investment.metal.infrastructure.service.RevolutService;
-import com.investment.metal.infrastructure.util.Util;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -799,7 +798,7 @@ public class ProtectedApiController {
         int codeValue = Integer.parseInt(confirmationCode);
 
         // Store the confirmation code in the database
-        this.loginService.saveAttempt(loginEntity.getUserId(), codeValue);
+        this.loginService.saveDeletionAttempt(loginEntity.getUserId(), codeValue);
 
         // Send preparation email to user
         this.emailService.sendDeleteAccountPreparationEmail(user, confirmationCode);

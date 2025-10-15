@@ -43,7 +43,7 @@ public class LoginService extends AbstractService {
     @Autowired
     private EncryptionService encryptionService;
 
-    public void saveAttempt(final Integer userId, final int validationCode) throws BusinessException {
+    public void saveLoginAttempt(final Integer userId, final int validationCode) throws BusinessException {
         final Login loginEntity = this.loginRepository.findByUserId(userId).orElse(new Login());
         loginEntity.setTime(new Timestamp(System.currentTimeMillis()));
         loginEntity.setUserId(userId);
@@ -51,6 +51,13 @@ public class LoginService extends AbstractService {
         loginEntity.setValidated(0);
         loginEntity.setLoggedIn(0);
         this.loginRepository.save(loginEntity);
+    }
+
+    public void saveDeletionAttempt(final Integer userId, final int validationCode) throws BusinessException {
+      final Login loginEntity = this.loginRepository.findByUserId(userId).orElse(new Login());
+      loginEntity.setTime(new Timestamp(System.currentTimeMillis()));
+      loginEntity.setValidationCode(validationCode);
+      this.loginRepository.save(loginEntity);
     }
 
     public void validateAccount(Customer user, boolean strongCode) throws BusinessException {
@@ -65,7 +72,7 @@ public class LoginService extends AbstractService {
         final int diff = maxValue - minValue;
         final int codeGenerated = minValue + Math.abs(Util.getRandomGenerator().nextInt()) % diff;
         this.emailService.sendMailWithCode(user, codeGenerated);
-        this.saveAttempt(user.getId(), codeGenerated);
+        this.saveLoginAttempt(user.getId(), codeGenerated);
     }
 
     public void verifyCodeAndToken(Integer userId, int code, String rawToken) throws BusinessException {
