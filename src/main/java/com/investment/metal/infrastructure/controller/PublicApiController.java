@@ -13,6 +13,7 @@ import com.investment.metal.infrastructure.exception.ExceptionService;
 import com.investment.metal.infrastructure.persistence.entity.Customer;
 import com.investment.metal.infrastructure.persistence.entity.Login;
 import com.investment.metal.infrastructure.util.Util;
+import com.investment.metal.infrastructure.validation.ValidationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -86,6 +87,12 @@ public class PublicApiController {
     private ExceptionService exceptionService;
 
     /**
+     * Service for validating request parameters to prevent SQL injection
+     */
+    @Autowired
+    private ValidationService validationService;
+
+    /**
      * Register a new user account.
      * Creates a new user account with the provided credentials and sends a validation email.
      * 
@@ -122,6 +129,11 @@ public class PublicApiController {
             @RequestHeader("email") String email
     ) {
         try {
+            // Validate input parameters to prevent SQL injection
+            this.validationService.validateUsername(username);
+            this.validationService.validatePassword(password);
+            this.validationService.validateEmail(email);
+            
             // Business rule: Email must be in valid format
             this.exceptionService.check(!Util.isValidEmailAddress(email), MessageKey.INVALID_REQUEST, "Invalid email address!");
             
@@ -163,6 +175,10 @@ public class PublicApiController {
             @Parameter(description = "Verification code sent via email", required = true)
             @RequestHeader("code") final int code
     ) {
+        // Validate input parameters to prevent SQL injection
+        this.validationService.validateUsername(username);
+        this.validationService.validateIntegerValue(String.valueOf(code), "code");
+        
         this.blockedIpService.checkBlockedIPGlobal();
         Customer user = this.accountService.findByUsername(username);
         this.bannedAccountsService.checkBanned(user.getId());
@@ -190,6 +206,10 @@ public class PublicApiController {
             @Parameter(description = "Password for login", required = true)
             @RequestHeader("password") final String password
     ) {
+        // Validate input parameters to prevent SQL injection
+        this.validationService.validateUsername(username);
+        this.validationService.validatePassword(password);
+        
         this.blockedIpService.checkBlockedIPGlobal();
         final Customer user = this.accountService.findByUsername(username);
         this.bannedAccountsService.checkBanned(user.getId());
@@ -218,6 +238,9 @@ public class PublicApiController {
             @Parameter(description = "Email address of the account to reset password for", required = true)
             @RequestHeader("email") final String email
     ) {
+        // Validate input parameters to prevent SQL injection
+        this.validationService.validateEmail(email);
+        
         this.exceptionService.check(!Util.isValidEmailAddress(email), MessageKey.INVALID_REQUEST, "Invalid email address!");
         this.blockedIpService.checkBlockedIPGlobal();
         final Customer user = this.accountService.findByEmail(email);
@@ -251,6 +274,12 @@ public class PublicApiController {
             @Parameter(description = "Reset token received via email", required = true)
             @RequestHeader("token") final String token
     ) {
+        // Validate input parameters to prevent SQL injection
+        this.validationService.validateIntegerValue(String.valueOf(code), "code");
+        this.validationService.validatePassword(newPassword);
+        this.validationService.validateEmail(email);
+        this.validationService.validateToken(token);
+        
         this.blockedIpService.checkBlockedIPGlobal();
         this.exceptionService.check(!Util.isValidEmailAddress(email), MessageKey.INVALID_REQUEST, "Invalid email address!");
         final Customer user = this.accountService.findByEmail(email);
@@ -282,6 +311,10 @@ public class PublicApiController {
             @RequestHeader("email") String email
     ) {
         try {
+            // Validate input parameters to prevent SQL injection
+            this.validationService.validateUsername(username);
+            this.validationService.validateEmail(email);
+            
             this.exceptionService.check(!Util.isValidEmailAddress(email), MessageKey.INVALID_REQUEST, "Invalid email address!");
             this.blockedIpService.checkBlockedIPGlobal();
             
@@ -332,6 +365,10 @@ public class PublicApiController {
             @RequestHeader("email") String email
     ) {
         try {
+            // Validate input parameters to prevent SQL injection
+            this.validationService.validateUsername(username);
+            this.validationService.validateEmail(email);
+            
             this.exceptionService.check(!Util.isValidEmailAddress(email), MessageKey.INVALID_REQUEST, "Invalid email address!");
             this.blockedIpService.checkBlockedIPGlobal();
             

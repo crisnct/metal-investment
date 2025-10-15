@@ -8,12 +8,32 @@ class ApiService {
     this.baseURL = API_BASE_URL;
   }
 
+  // Helper method to get CSRF token from cookie
+  getCsrfToken() {
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+      const [name, value] = cookie.trim().split('=');
+      if (name === 'XSRF-TOKEN') {
+        return decodeURIComponent(value);
+      }
+    }
+    return null;
+  }
+
   // Helper method to get auth headers
   getAuthHeaders(token) {
-    return {
+    const headers = {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
     };
+    
+    // Add CSRF token if available
+    const csrfToken = this.getCsrfToken();
+    if (csrfToken) {
+      headers['X-XSRF-TOKEN'] = csrfToken;
+    }
+    
+    return headers;
   }
 
   // Helper method to get token from sessionStorage
@@ -46,15 +66,23 @@ class ApiService {
   // Public API methods
   async registerUser(username, password, email) {
     try {
+      const headers = {
+        'username': username,
+        'password': password,
+        'email': email,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      };
+      
+      // Add CSRF token if available
+      const csrfToken = this.getCsrfToken();
+      if (csrfToken) {
+        headers['X-XSRF-TOKEN'] = csrfToken;
+      }
+      
       const response = await fetch(`${this.baseURL}/userRegistration`, {
         method: 'POST',
-        headers: {
-          'username': username,
-          'password': password,
-          'email': email,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
+        headers: headers,
         mode: 'cors',
         credentials: 'include'
       });

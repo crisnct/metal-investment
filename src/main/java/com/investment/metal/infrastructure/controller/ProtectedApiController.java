@@ -40,6 +40,7 @@ import com.investment.metal.infrastructure.service.CurrencyService;
 import com.investment.metal.infrastructure.service.EmailService;
 import com.investment.metal.infrastructure.service.MessageService;
 import com.investment.metal.infrastructure.service.RevolutService;
+import com.investment.metal.infrastructure.validation.ValidationService;
 import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
@@ -138,6 +139,9 @@ public class ProtectedApiController {
     protected MessageService messageService;
 
     @Autowired
+    private ValidationService validationService;
+
+    @Autowired
     private HttpServletRequest request;
 
     /**
@@ -172,6 +176,10 @@ public class ProtectedApiController {
             @Parameter(description = "Reason for blocking the IP", required = false)
             @RequestHeader(value = "reason", defaultValue = "unknown reason") final String reason
     ) {
+        // Validate input parameters to prevent SQL injection
+        this.validationService.validateIp(ip);
+        this.validationService.validateReason(reason);
+        
         // Extract JWT token from request
         String token = Util.getTokenFromRequest(request);
         
@@ -201,6 +209,9 @@ public class ProtectedApiController {
             @Parameter(description = "IP address to unblock", required = true)
             @RequestHeader("ip") final String ip
     ) {
+        // Validate input parameters to prevent SQL injection
+        this.validationService.validateIp(ip);
+        
         String token = Util.getTokenFromRequest(request);
         final Login loginEntity = this.loginService.getLogin(token);
         this.blockedIpService.unblockIP(loginEntity.getUserId(), ip);
@@ -277,6 +288,11 @@ public class ProtectedApiController {
         String clientIp = Util.getClientIpAddress(request);
         
         return CompletableFuture.supplyAsync(() -> {
+            // Validate input parameters to prevent SQL injection
+            this.validationService.validateMetalSymbol(metalSymbol);
+            this.validationService.validateNumericValue(String.valueOf(metalAmount), "metalAmount");
+            this.validationService.validateNumericValue(String.valueOf(cost), "cost");
+            
             // Validate metal symbol
             MetalType metalType = MetalType.lookup(metalSymbol);
             this.exceptionService.check(metalType == null, MessageKey.INVALID_REQUEST, "metalSymbol header is invalid");
@@ -322,9 +338,14 @@ public class ProtectedApiController {
         String clientIp = Util.getClientIpAddress(request);
         
         return CompletableFuture.supplyAsync(() -> {
+            // Validate input parameters to prevent SQL injection
+            this.validationService.validateMetalSymbol(metalSymbol);
+            this.validationService.validateNumericValue(String.valueOf(metalAmount), "metalAmount");
+            this.validationService.validateNumericValue(String.valueOf(price), "price");
+            
             MetalType metalType = MetalType.lookup(metalSymbol);
             this.exceptionService.check(metalType == null, MessageKey.INVALID_REQUEST, "metalSymbol header is invalid");
-            Objects.requireNonNull(metalType);
+            Objects.requireNonNull(metalType, "Metal type must not be null");
 
             // Use captured data instead of accessing request
             final Login loginEntity = this.loginService.getLoginWithIp(token, clientIp);
@@ -385,6 +406,10 @@ public class ProtectedApiController {
             @Parameter(description = "Symbol of the metal (e.g., GOLD, SILVER)", required = true)
             @RequestHeader("metalSymbol") final String metalSymbol
     ) {
+        // Validate input parameters to prevent SQL injection
+        this.validationService.validateMetalSymbol(metalSymbol);
+        this.validationService.validateNumericValue(String.valueOf(revolutPriceOunce), "revolutPriceOunce");
+        
         MetalType metalType = MetalType.lookup(metalSymbol);
         this.exceptionService.check(metalType == null, MessageKey.INVALID_REQUEST, "metalSymbol header is invalid");
         Objects.requireNonNull(metalType);
@@ -425,6 +450,11 @@ public class ProtectedApiController {
             @Parameter(description = "Alert frequency (e.g., DAILY, WEEKLY)", required = true)
             @RequestHeader("frequency") final String frequency
     ) {
+        // Validate input parameters to prevent SQL injection
+        this.validationService.validateExpression(expression);
+        this.validationService.validateMetalSymbol(metalSymbol);
+        this.validationService.validateFrequency(frequency);
+        
         AlertFrequency alertFrequency = AlertFrequency.lookup(frequency);
         this.exceptionService.check(alertFrequency == null, MessageKey.INVALID_REQUEST, "Invalid frequency header");
         MetalType metalType = MetalType.lookup(metalSymbol);
@@ -490,6 +520,9 @@ public class ProtectedApiController {
             @Parameter(description = "ID of the alert to remove", required = true)
             @RequestHeader("alertId") final Integer alertId
     ) {
+        // Validate input parameters to prevent SQL injection
+        this.validationService.validateIntegerValue(String.valueOf(alertId), "alertId");
+        
         String token = Util.getTokenFromRequest(request);
         final Login loginEntity = this.loginService.getLogin(token);
         Integer userId = loginEntity.getUserId();
@@ -530,6 +563,10 @@ public class ProtectedApiController {
             @Parameter(description = "Symbol of the metal (e.g., GOLD, SILVER)", required = true)
             @RequestHeader("metalSymbol") final String metalSymbol
     ) {
+        // Validate input parameters to prevent SQL injection
+        this.validationService.validateMetalSymbol(metalSymbol);
+        this.validationService.validateNumericValue(String.valueOf(profit), "profit");
+        
         String token = Util.getTokenFromRequest(request);
         final Login loginEntity = this.loginService.getLogin(token);
         Objects.requireNonNull(loginEntity, "The user is not logged in");
@@ -612,6 +649,9 @@ public class ProtectedApiController {
             @Parameter(description = "Username of the user to notify", required = true)
             @RequestHeader("username") final String username
     ) {
+        // Validate input parameters to prevent SQL injection
+        this.validationService.validateUsername(username);
+        
         String token = Util.getTokenFromRequest(request);
         final Login loginEntity = this.loginService.getLogin(token);
         Objects.requireNonNull(loginEntity);
@@ -641,6 +681,9 @@ public class ProtectedApiController {
             @Parameter(description = "Notification period in days", required = true)
             @RequestHeader("period") final int period
     ) {
+        // Validate input parameters to prevent SQL injection
+        this.validationService.validateIntegerValue(String.valueOf(period), "period");
+        
         String token = Util.getTokenFromRequest(request);
         final Login loginEntity = this.loginService.getLogin(token);
 
@@ -760,6 +803,10 @@ public class ProtectedApiController {
         String token = Util.getTokenFromRequest(request);
         
         return CompletableFuture.supplyAsync(() -> {
+            // Validate input parameters to prevent SQL injection
+            this.validationService.validatePassword(password);
+            this.validationService.validateString(code, 10, "code");
+            
             // Extract authenticated user from JWT token (bypass validation for account deletion)
             final Login loginEntity = this.loginService.getLoginForDeletion(token);
             Objects.requireNonNull(loginEntity, "User must be authenticated");
