@@ -620,6 +620,67 @@ class ApiService {
 
     return await this.parseJsonSafely(response);
   }
+
+  // Account deletion methods
+  async deleteAccountPreparation() {
+    const response = await fetch(`${this.baseURL}/api/deleteAccountPreparation`, {
+      method: 'POST',
+      headers: {
+        ...this.getAuthHeadersFromStorage(),
+        'Accept': 'application/json'
+      },
+      mode: 'cors',
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      const errorData = await this.parseJsonSafely(response);
+      const errorMessage = this.getFriendlyErrorMessage(response.status, errorData);
+      const error = new Error(errorMessage);
+      error.response = response;
+      error.data = errorData;
+      error.status = response.status;
+      throw error;
+    }
+
+    return await this.parseJsonSafely(response);
+  }
+
+  async deleteAccount(password, code) {
+    const response = await fetch(`${this.baseURL}/api/deleteAccount`, {
+      method: 'DELETE',
+      headers: {
+        ...this.getAuthHeadersFromStorage(),
+        'password': password,
+        'code': code,
+        'Accept': 'application/json'
+      },
+      mode: 'cors',
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      const errorData = await this.parseJsonSafely(response);
+      const errorMessage = this.getFriendlyErrorMessage(response.status, errorData);
+      const error = new Error(errorMessage);
+      error.response = response;
+      error.data = errorData;
+      error.status = response.status;
+      throw error;
+    }
+
+    return await this.parseJsonSafely(response);
+  }
+
+  getFriendlyErrorMessage(status, errorData) {
+    if (status === 401 || status === 403) {
+      return 'Please log in to continue.';
+    }
+    if (errorData && errorData.message) {
+      return errorData.message;
+    }
+    return 'Request failed';
+  }
 }
 
 const apiService = new ApiService();

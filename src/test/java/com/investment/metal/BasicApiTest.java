@@ -131,4 +131,102 @@ class BasicApiTest {
             publicApiController.apiHealth();
         }, "Basic controller methods should not throw exceptions");
     }
+
+    @Test
+    void testDeleteAccountMethodExists() {
+        // Test that the deleteAccount method exists in ProtectedApiController
+        try {
+            java.lang.reflect.Method deleteAccountMethod = ProtectedApiController.class.getMethod("deleteAccount", String.class, String.class);
+            assertNotNull(deleteAccountMethod, "deleteAccount method should exist");
+            assertEquals("deleteAccount", deleteAccountMethod.getName(), "Method name should be deleteAccount");
+        } catch (NoSuchMethodException e) {
+            fail("deleteAccount method should exist in ProtectedApiController");
+        }
+    }
+
+    @Test
+    void testDeleteAccountMethodSignature() {
+        // Test that the deleteAccount method has the correct signature
+        try {
+            java.lang.reflect.Method deleteAccountMethod = ProtectedApiController.class.getMethod("deleteAccount", String.class, String.class);
+            assertEquals(2, deleteAccountMethod.getParameterCount(), "deleteAccount should have 2 parameters");
+            assertEquals(String.class, deleteAccountMethod.getParameterTypes()[0], "First parameter should be String (password)");
+            assertEquals(String.class, deleteAccountMethod.getParameterTypes()[1], "Second parameter should be String (code)");
+        } catch (NoSuchMethodException e) {
+            fail("deleteAccount method should exist with correct signature");
+        }
+    }
+
+    @Test
+    void testDeleteAccountMethodReturnType() {
+        // Test that the deleteAccount method returns the correct type
+        try {
+            java.lang.reflect.Method deleteAccountMethod = ProtectedApiController.class.getMethod("deleteAccount", String.class, String.class);
+            assertEquals(org.springframework.http.ResponseEntity.class, deleteAccountMethod.getReturnType(), "deleteAccount should return ResponseEntity");
+        } catch (NoSuchMethodException e) {
+            fail("deleteAccount method should exist with correct return type");
+        }
+    }
+
+    @Test
+    void testControllerInstantiationWithDeleteAccount() {
+        // Test that ProtectedApiController can be instantiated and has deleteAccount method
+        assertNotNull(protectedApiController, "ProtectedApiController should be instantiated");
+        
+        // Verify the method exists
+        try {
+            java.lang.reflect.Method deleteAccountMethod = ProtectedApiController.class.getMethod("deleteAccount", String.class, String.class);
+            assertNotNull(deleteAccountMethod, "deleteAccount method should exist");
+        } catch (NoSuchMethodException e) {
+            fail("deleteAccount method should exist in ProtectedApiController");
+        }
+    }
+
+    @Test
+    void testDeleteAccountPreparationMethodExists() {
+        // Test that the deleteAccountPreparation method exists in ProtectedApiController
+        try {
+            java.lang.reflect.Method deleteAccountPreparationMethod = ProtectedApiController.class.getMethod("deleteAccountPreparation");
+            assertNotNull(deleteAccountPreparationMethod, "deleteAccountPreparation method should exist");
+            assertEquals("deleteAccountPreparation", deleteAccountPreparationMethod.getName(), "Method name should be deleteAccountPreparation");
+        } catch (NoSuchMethodException e) {
+            fail("deleteAccountPreparation method should exist in ProtectedApiController");
+        }
+    }
+
+    @Test
+    void testDeleteAccountPreparationMethodSignature() {
+        // Test that the deleteAccountPreparation method has the correct signature
+        try {
+            java.lang.reflect.Method deleteAccountPreparationMethod = ProtectedApiController.class.getMethod("deleteAccountPreparation");
+            assertEquals(0, deleteAccountPreparationMethod.getParameterCount(), "deleteAccountPreparation should have 0 parameters");
+        } catch (NoSuchMethodException e) {
+            fail("deleteAccountPreparation method should exist with correct signature");
+        }
+    }
+
+    @Test
+    void testDeleteAccountPreparationMethodReturnType() {
+        // Test that the deleteAccountPreparation method returns the correct type
+        try {
+            java.lang.reflect.Method deleteAccountPreparationMethod = ProtectedApiController.class.getMethod("deleteAccountPreparation");
+            assertEquals(org.springframework.http.ResponseEntity.class, deleteAccountPreparationMethod.getReturnType(), "deleteAccountPreparation should return ResponseEntity");
+        } catch (NoSuchMethodException e) {
+            fail("deleteAccountPreparation method should exist with correct return type");
+        }
+    }
+
+    @Test
+    void testControllerInstantiationWithDeleteAccountPreparation() {
+        // Test that ProtectedApiController can be instantiated and has deleteAccountPreparation method
+        assertNotNull(protectedApiController, "ProtectedApiController should be instantiated");
+        
+        // Verify the method exists
+        try {
+            java.lang.reflect.Method deleteAccountPreparationMethod = ProtectedApiController.class.getMethod("deleteAccountPreparation");
+            assertNotNull(deleteAccountPreparationMethod, "deleteAccountPreparation method should exist");
+        } catch (NoSuchMethodException e) {
+            fail("deleteAccountPreparation method should exist in ProtectedApiController");
+        }
+    }
 }

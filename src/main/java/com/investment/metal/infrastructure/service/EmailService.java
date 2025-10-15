@@ -94,6 +94,21 @@ public class EmailService extends AbstractService {
         this.sendMail(user.getEmail(), appName, emailContentBuilder.build());
     }
 
+    /**
+     * Send account deletion preparation email to user.
+     * This email contains the confirmation code needed for account deletion.
+     * 
+     * @param user the user requesting account deletion
+     * @param confirmationCode the confirmation code for account deletion
+     */
+    public void sendDeleteAccountPreparationEmail(Customer user, String confirmationCode) {
+        final String emailContent = MailParameterBuilder.newInstance(MailTemplates.DELETE_ACCOUNT_PREPARATION)
+                .replace("{username}", user.getUsername())
+                .replace("{code_with_bold}", confirmationCode)
+                .build();
+        this.sendMail(user.getEmail(), appName, emailContent);
+    }
+
     private void sendMail(String toEmail, String subject, String message) throws BusinessException {
         Exception cause = null;
         LOGGER.info("Trying to send email from " + emailFrom + " to " + toEmail + " on host " + host + ":" + port);

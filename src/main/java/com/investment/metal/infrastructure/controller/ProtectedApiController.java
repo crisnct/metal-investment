@@ -23,6 +23,7 @@ import com.investment.metal.infrastructure.service.AccountService;
 import com.investment.metal.infrastructure.service.BannedAccountsService;
 import com.investment.metal.infrastructure.service.BlockedIpService;
 import com.investment.metal.infrastructure.service.LoginService;
+import com.investment.metal.infrastructure.util.Util;
 import com.investment.metal.infrastructure.mapper.MetalPurchaseMapper;
 import com.investment.metal.domain.model.MetalPurchase;
 import com.investment.metal.infrastructure.service.price.ExternalMetalPriceReader;
@@ -688,5 +689,138 @@ public class ProtectedApiController {
             dto.addMetalPrice(metalType, mp);
         }
         return new ResponseEntity<>(dto, HttpStatus.OK);
+    }
+
+    /**
+     * Delete user account and all associated data.
+     * This endpoint allows authenticated users to permanently delete their account
+     * and all related data including alerts, purchases, and notifications.
+     * 
+     * Business Rules:
+     * - User must be authenticated with valid JWT token
+     * - Password must be provided and verified
+     * - Confirmation code must be provided (received from deleteAccountPreparation email)
+     * - All user data is permanently deleted (alerts, purchases, notifications)
+     * - Account deletion is irreversible
+     * 
+     * @param password the user's password for verification
+     * @param code the confirmation code received from the preparation email
+     * @return ResponseEntity with success message
+     */
+    @RequestMapping(value = "/deleteAccount", method = RequestMethod.DELETE)
+    @Transactional(noRollbackFor = NoRollbackBusinessException.class)
+    @Operation(
+            summary = "Delete user account",
+            description = "Permanently deletes the authenticated user's account and all associated data"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Account deleted successfully",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid password or confirmation code",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - invalid token",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
+    })
+    public ResponseEntity<SimpleMessageDto> deleteAccount(
+            @Parameter(description = "User's password for verification", required = true)
+            @RequestHeader("password") final String password,
+            @Parameter(description = "Confirmation code for account deletion", required = true)
+            @RequestHeader("code") final String code
+    ) {
+        // Extract authenticated user from JWT token
+        String token = Util.getTokenFromRequest(request);
+        final Login loginEntity = this.loginService.getLogin(token);
+        Objects.requireNonNull(loginEntity, "User must be authenticated");
+
+        // Get user details
+        Customer user = this.accountService.findById(loginEntity.getUserId());
+        Objects.requireNonNull(user, "User not found");
+
+        // Verify password
+        boolean passwordMatches = this.passwordEncoder.matches(password, user.getPassword());
+        this.exceptionService.check(!passwordMatches, MessageKey.INVALID_REQUEST, "Invalid password provided");
+
+        // Verify confirmation code (code should be received from email)
+        this.exceptionService.check(code == null || code.trim().isEmpty(), MessageKey.INVALID_REQUEST, "Confirmation code is required. Please provide the code received in your email.");
+
+        // Validate the confirmation code
+        int codeValue;
+        try {
+            codeValue = Integer.parseInt(code);
+        } catch (NumberFormatException e) {
+            this.exceptionService.check(true, MessageKey.INVALID_REQUEST, "Invalid confirmation code format. Please provide a valid numeric code.");
+            return null; // This line will never be reached due to the exception above
+        }
+
+        // Delete all user-related data with code validation
+        this.accountService.deleteUserAccount(loginEntity.getUserId(), codeValue);
+
+        SimpleMessageDto dto = new SimpleMessageDto("Account for user %s has been permanently deleted along with all associated data", user.getUsername());
+        return new ResponseEntity<>(dto, HttpStatus.OK);
+    }
+
+    /**
+     * Send account deletion preparation email to the authenticated user.
+     * This endpoint sends an email with a confirmation code that the user
+     * will need to provide when actually deleting their account.
+     * 
+     * Business Rules:
+     * - User must be authenticated with valid JWT token
+     * - Email is sent to the user's registered email address
+     * - Confirmation code is generated and sent via email
+     * - This is a preparation step before actual account deletion
+     * 
+     * @return ResponseEntity with success message
+     */
+    @RequestMapping(value = "/deleteAccountPreparation", method = RequestMethod.POST)
+    @Transactional(noRollbackFor = NoRollbackBusinessException.class)
+    @Operation(
+            summary = "Send account deletion preparation email",
+            description = "Sends an email to the authenticated user with a confirmation code for account deletion"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Preparation email sent successfully",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - invalid token",
+                    content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
+    })
+    public ResponseEntity<SimpleMessageDto> deleteAccountPreparation() {
+        // Extract authenticated user from JWT token
+        String token = Util.getTokenFromRequest(request);
+        final Login loginEntity = this.loginService.getLogin(token);
+        Objects.requireNonNull(loginEntity, "User must be authenticated");
+
+        // Get user details
+        Customer user = this.accountService.findById(loginEntity.getUserId());
+        Objects.requireNonNull(user, "User not found");
+
+        // Generate random confirmation code for account deletion
+        String confirmationCode = generateConfirmationCode();
+        int codeValue = Integer.parseInt(confirmationCode);
+
+        // Store the confirmation code in the database
+        this.loginService.saveAttempt(loginEntity.getUserId(), codeValue);
+
+        // Send preparation email to user
+        this.emailService.sendDeleteAccountPreparationEmail(user, confirmationCode);
+
+        SimpleMessageDto dto = new SimpleMessageDto("Account deletion preparation email has been sent to %s. Please check your email for the confirmation code.", user.getUsername());
+        return new ResponseEntity<>(dto, HttpStatus.OK);
+    }
+
+    /**
+     * Generate a random confirmation code for account deletion.
+     * Uses the same logic as LoginService.validateAccount for consistency.
+     * Creates a 6-digit numeric code for email verification.
+     * 
+     * @return a random 6-digit confirmation code as String
+     */
+    private String generateConfirmationCode() {
+        // Use the same logic as LoginService.validateAccount for consistency
+        final int minValue = 100000;
+        final int maxValue = 899999;
+        final int diff = maxValue - minValue;
+        final int codeGenerated = minValue + Math.abs(Util.getRandomGenerator().nextInt()) % diff;
+        return String.valueOf(codeGenerated);
     }
 }

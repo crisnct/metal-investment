@@ -19,6 +19,12 @@ const Profile = ({ userInfo }) => {
   const [notificationPeriod, setNotificationPeriod] = useState('');
   const [notificationLoading, setNotificationLoading] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
+  const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false);
+  const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false);
+  const [deleteAccountData, setDeleteAccountData] = useState({ password: '', code: '' });
+  const [deleteAccountErrors, setDeleteAccountErrors] = useState({});
+  const [deleteAccountMessage, setDeleteAccountMessage] = useState('');
+  const [deleteAccountLoading, setDeleteAccountLoading] = useState(false);
 
   useEffect(() => {
     const loadProfit = async () => {
@@ -255,6 +261,90 @@ const Profile = ({ userInfo }) => {
     }
   };
 
+  const handleDeleteAccountClick = () => {
+    setShowDeleteConfirmDialog(true);
+  };
+
+  const closeDeleteConfirmDialog = () => {
+    setShowDeleteConfirmDialog(false);
+  };
+
+  const handleDeleteConfirmContinue = async () => {
+    try {
+      setDeleteAccountLoading(true);
+      setDeleteAccountMessage('');
+      
+      // Call the preparation API to send email with code
+      await ApiService.deleteAccountPreparation();
+      
+      // Close confirmation dialog and show delete account dialog
+      setShowDeleteConfirmDialog(false);
+      setShowDeleteAccountDialog(true);
+      
+    } catch (error) {
+      setDeleteAccountMessage(error.data?.message || error.message || 'Failed to send preparation email');
+    } finally {
+      setDeleteAccountLoading(false);
+    }
+  };
+
+  const closeDeleteAccountDialog = () => {
+    setShowDeleteAccountDialog(false);
+    setDeleteAccountData({ password: '', code: '' });
+    setDeleteAccountErrors({});
+    setDeleteAccountMessage('');
+  };
+
+  const validateDeleteAccountForm = () => {
+    const errors = {};
+    
+    if (!deleteAccountData.password.trim()) {
+      errors.password = 'Password is required';
+    }
+    
+    if (!deleteAccountData.code.trim()) {
+      errors.code = 'Confirmation code is required';
+    } else if (isNaN(deleteAccountData.code) || deleteAccountData.code.length !== 6) {
+      errors.code = 'Confirmation code must be a 6-digit number';
+    }
+    
+    return errors;
+  };
+
+  const handleDeleteAccountSubmit = async (e) => {
+    e.preventDefault();
+    
+    const errors = validateDeleteAccountForm();
+    if (Object.keys(errors).length > 0) {
+      setDeleteAccountErrors(errors);
+      return;
+    }
+    
+    setDeleteAccountErrors({});
+    setDeleteAccountMessage('');
+    
+    try {
+      setDeleteAccountLoading(true);
+      
+      // Call the delete account API
+      await ApiService.deleteAccount(deleteAccountData.password, deleteAccountData.code);
+      
+      setDeleteAccountMessage('Account deleted successfully! You will be logged out.');
+      
+      // Clear local storage and redirect to login
+      setTimeout(() => {
+        localStorage.removeItem('userToken');
+        localStorage.removeItem('userInfo');
+        window.location.href = '/';
+      }, 2000);
+      
+    } catch (error) {
+      setDeleteAccountMessage(error.data?.message || error.message || 'Failed to delete account');
+    } finally {
+      setDeleteAccountLoading(false);
+    }
+  };
+
   return (
     <section id="profile-section" className="profile-section">
       <div className="container">
@@ -301,6 +391,19 @@ const Profile = ({ userInfo }) => {
                     {notificationMessage}
                   </div>
                 )}
+              </div>
+              
+              <div className="info-item delete-account-item">
+                <a 
+                  href="#"
+                  className="delete-account-link"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleDeleteAccountClick();
+                  }}
+                >
+                  Delete Account
+                </a>
               </div>
             </div>
           </div>
@@ -566,6 +669,136 @@ const Profile = ({ userInfo }) => {
                       <path d="M12 17v4"/>
                     </svg>
                     Sell
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Account Confirmation Dialog */}
+      {showDeleteConfirmDialog && (
+        <div className="modal-overlay" onClick={closeDeleteConfirmDialog}>
+          <div className="modal-content delete-confirm-popup" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Delete Account</h3>
+              <button className="modal-close" onClick={closeDeleteConfirmDialog}>
+                ×
+              </button>
+            </div>
+            
+            <div className="delete-confirm-content">
+              <div className="warning-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 9v4"/>
+                  <path d="M12 17h.01"/>
+                  <circle cx="12" cy="12" r="10"/>
+                </svg>
+              </div>
+              <h4>Are you sure you want to delete your account?</h4>
+              <p>This action cannot be undone. All your data including:</p>
+              <ul>
+                <li>Investment records</li>
+                <li>Alerts and notifications</li>
+                <li>Account settings</li>
+              </ul>
+              <p><strong>will be permanently deleted.</strong></p>
+              
+              {deleteAccountMessage && (
+                <div className={`message ${deleteAccountMessage.includes('successfully') ? 'success' : 'error'}`}>
+                  {deleteAccountMessage}
+                </div>
+              )}
+            </div>
+            
+            <div className="form-actions">
+              <div className="form-actions-right">
+                <button type="button" className="btn-secondary" onClick={closeDeleteConfirmDialog}>
+                  Cancel
+                </button>
+                <button 
+                  type="button" 
+                  className="btn-danger"
+                  onClick={handleDeleteConfirmContinue}
+                  disabled={deleteAccountLoading}
+                >
+                  {deleteAccountLoading ? 'Sending...' : 'Continue'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Account Dialog */}
+      {showDeleteAccountDialog && (
+        <div className="modal-overlay" onClick={closeDeleteAccountDialog}>
+          <div className="modal-content delete-account-popup" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Delete Account</h3>
+              <button className="modal-close" onClick={closeDeleteAccountDialog}>
+                ×
+              </button>
+            </div>
+            
+            <div className="delete-account-content">
+              <p>Please check your email for the confirmation code and enter your password to confirm account deletion.</p>
+            </div>
+            
+            <form onSubmit={handleDeleteAccountSubmit} className="delete-account-form">
+              <div className="form-group">
+                <label htmlFor="delete-password">Password *</label>
+                <input
+                  type="password"
+                  id="delete-password"
+                  name="password"
+                  value={deleteAccountData.password}
+                  onChange={(e) => setDeleteAccountData({ ...deleteAccountData, password: e.target.value })}
+                  placeholder="Enter your password"
+                  className={deleteAccountErrors.password ? 'error' : ''}
+                  required
+                />
+                {deleteAccountErrors.password && (
+                  <div className="error-message">{deleteAccountErrors.password}</div>
+                )}
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="delete-code">Confirmation Code *</label>
+                <input
+                  type="text"
+                  id="delete-code"
+                  name="code"
+                  value={deleteAccountData.code}
+                  onChange={(e) => setDeleteAccountData({ ...deleteAccountData, code: e.target.value })}
+                  placeholder="Enter 6-digit code from email"
+                  className={deleteAccountErrors.code ? 'error' : ''}
+                  maxLength="6"
+                  required
+                />
+                {deleteAccountErrors.code && (
+                  <div className="error-message">{deleteAccountErrors.code}</div>
+                )}
+              </div>
+
+              {deleteAccountMessage && (
+                <div className={`message ${deleteAccountMessage.includes('successfully') ? 'success' : 'error'}`}>
+                  {deleteAccountMessage}
+                </div>
+              )}
+
+              <div className="form-actions">
+                <div className="form-actions-right">
+                  <button type="button" className="btn-secondary" onClick={closeDeleteAccountDialog}>
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit" 
+                    className="btn-danger"
+                    disabled={deleteAccountLoading}
+                  >
+                    {deleteAccountLoading ? 'Deleting...' : 'Delete Account'}
                   </button>
                 </div>
               </div>

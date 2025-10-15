@@ -31,6 +31,13 @@ public enum MailTemplates {
         public String getFilename() {
             return "mail-template-status-part.html";
         }
+    },
+
+    DELETE_ACCOUNT_PREPARATION {
+        @Override
+        public String getFilename() {
+            return "mail-template-delete-account-preparation.html";
+        }
     };
 
     public abstract String getFilename();

@@ -210,4 +210,60 @@ class ControllerIntegrationTest {
         Map<String, String> healthResponse = publicApiController.health();
         assertNotNull(healthResponse, "PublicApiController should be able to return health response");
     }
+
+    @Test
+    void testProtectedApiControllerDeleteAccountEndpoint() {
+        // Test that the deleteAccount endpoint exists and can be called
+        // This is a basic test since we're not using Spring Boot context
+        assertNotNull(protectedApiController, "ProtectedApiController should be instantiated");
+        
+        // Test that the controller has the deleteAccount method
+        try {
+            java.lang.reflect.Method deleteAccountMethod = ProtectedApiController.class.getMethod("deleteAccount", String.class, String.class);
+            assertNotNull(deleteAccountMethod, "deleteAccount method should exist");
+            assertEquals("deleteAccount", deleteAccountMethod.getName(), "Method name should be deleteAccount");
+        } catch (NoSuchMethodException e) {
+            fail("deleteAccount method should exist in ProtectedApiController");
+        }
+    }
+
+    @Test
+    void testControllerMethodSignatures() {
+        // Test that the deleteAccount method has the correct signature
+        try {
+            java.lang.reflect.Method deleteAccountMethod = ProtectedApiController.class.getMethod("deleteAccount", String.class, String.class);
+            assertEquals(2, deleteAccountMethod.getParameterCount(), "deleteAccount should have 2 parameters");
+            assertEquals(String.class, deleteAccountMethod.getParameterTypes()[0], "First parameter should be String");
+            assertEquals(String.class, deleteAccountMethod.getParameterTypes()[1], "Second parameter should be String");
+        } catch (NoSuchMethodException e) {
+            fail("deleteAccount method should exist with correct signature");
+        }
+    }
+
+    @Test
+    void testProtectedApiControllerDeleteAccountPreparationEndpoint() {
+        // Test that the deleteAccountPreparation endpoint exists and can be called
+        // This is a basic test since we're not using Spring Boot context
+        assertNotNull(protectedApiController, "ProtectedApiController should be instantiated");
+        
+        // Test that the controller has the deleteAccountPreparation method
+        try {
+            java.lang.reflect.Method deleteAccountPreparationMethod = ProtectedApiController.class.getMethod("deleteAccountPreparation");
+            assertNotNull(deleteAccountPreparationMethod, "deleteAccountPreparation method should exist");
+            assertEquals("deleteAccountPreparation", deleteAccountPreparationMethod.getName(), "Method name should be deleteAccountPreparation");
+        } catch (NoSuchMethodException e) {
+            fail("deleteAccountPreparation method should exist in ProtectedApiController");
+        }
+    }
+
+    @Test
+    void testDeleteAccountPreparationMethodSignatures() {
+        // Test that the deleteAccountPreparation method has the correct signature
+        try {
+            java.lang.reflect.Method deleteAccountPreparationMethod = ProtectedApiController.class.getMethod("deleteAccountPreparation");
+            assertEquals(0, deleteAccountPreparationMethod.getParameterCount(), "deleteAccountPreparation should have 0 parameters");
+        } catch (NoSuchMethodException e) {
+            fail("deleteAccountPreparation method should exist with correct signature");
+        }
+    }
 }
