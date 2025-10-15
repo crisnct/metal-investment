@@ -24,7 +24,7 @@ public class InputValidator {
     
     // SQL injection patterns to detect and reject
     private static final Pattern SQL_INJECTION_PATTERN = Pattern.compile(
-        "(?i)(union|select|insert|update|delete|drop|create|alter|exec|execute|script|javascript|vbscript|onload|onerror|onclick|onmouseover|--|/\\*|\\*/|xp_|sp_|'|;|\\||&|\\$|%|#|@|\\*|\\+|\\-|\\/|\\\\|\\^|\\~|\\`|\\[|\\]|\\{|\\}|\\(|\\)|<|>|\\?|\\!|\\:|\\;|\\,|\\.|\\s+or\\s+|\\s+and\\s+)",
+        "(?i)(union|select|insert|update|delete|drop|create|alter|exec|execute|script|javascript|vbscript|onload|onerror|onclick|onmouseover|--|/\\*|\\*/|xp_|sp_|'|;|\\||&|\\$|%|#|@|\\*|\\+|\\-|\\/|\\\\|\\^|\\~|\\`|\\[|\\]|\\{|\\}|\\(|\\)|<|>|\\?|\\!|\\:|\\;|\\s+or\\s+|\\s+and\\s+)",
         Pattern.CASE_INSENSITIVE
     );
 
