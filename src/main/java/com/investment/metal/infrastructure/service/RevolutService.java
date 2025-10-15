@@ -4,6 +4,7 @@ import com.investment.metal.domain.exception.BusinessException;
 import com.investment.metal.domain.model.CurrencyType;
 import com.investment.metal.domain.model.MetalType;
 import com.investment.metal.infrastructure.service.price.ExternalMetalPriceReader;
+import com.investment.metal.infrastructure.service.ResilientPriceService;
 import com.investment.metal.infrastructure.persistence.entity.Currency;
 import com.investment.metal.infrastructure.persistence.entity.RevolutProfit;
 import com.investment.metal.infrastructure.persistence.repository.RevolutProfitRepository;
@@ -27,8 +28,11 @@ public class RevolutService extends AbstractService {
     @Autowired
     private ExternalMetalPriceReader externalMetalPrice;
 
+    @Autowired
+    private ResilientPriceService resilientPriceService;
+
     public double calculateRevolutProfit(double revolutPriceOunce, double priceMetalNowKg, MetalType metalType) throws BusinessException {
-        CurrencyType currencyType = this.externalMetalPrice.getCurrencyType();
+        CurrencyType currencyType = this.resilientPriceService.getCurrencyType();
         final Currency currency = currencyService.findBySymbol(currencyType);
         final double currencyToRonRate = currency.getRon();
 

@@ -4,7 +4,7 @@ import com.investment.metal.application.dto.UserMetalInfoDto;
 import com.investment.metal.domain.model.CurrencyType;
 import com.investment.metal.domain.model.MetalType;
 import com.investment.metal.infrastructure.service.price.ExternalMetalPriceReader;
-import com.investment.metal.infrastructure.service.price.BloombergPriceReader;
+import com.investment.metal.infrastructure.service.ResilientPriceService;
 import com.investment.metal.infrastructure.persistence.entity.Currency;
 import com.investment.metal.infrastructure.persistence.entity.MetalPrice;
 import com.investment.metal.infrastructure.persistence.entity.Purchase;
@@ -36,6 +36,7 @@ public class MetalPriceService {
     public static final long THRESHOLD_TOO_OLD_ENTITIES = TimeUnit.DAYS.toMillis(14);
 
     private final ExternalMetalPriceReader priceReader;
+    private final ResilientPriceService resilientPriceService;
     private final MetalPriceRepository metalPriceRepository;
     private final RevolutService revolutService;
     private final CurrencyService currencyService;
@@ -48,11 +49,12 @@ public class MetalPriceService {
      */
     public BigDecimal getCurrentPrice(MetalType metalType) {
         try {
-            log.debug("Fetching current price for metal: {}", metalType);
-            double price = priceReader.fetchPrice(metalType);
+            log.debug("Fetching current price for metal: {} with circuit breaker protection", metalType);
+            double price = resilientPriceService.fetchPrice(metalType);
             return BigDecimal.valueOf(price);
         } catch (Exception e) {
-            log.error("Failed to fetch price for metal: {}", metalType, e);
+            log.error("Failed to fetch price for metal: {} - Circuit breaker state: {}", 
+                     metalType, resilientPriceService.getCircuitBreakerState(), e);
             return BigDecimal.ZERO;
         }
     }
@@ -81,7 +83,7 @@ public class MetalPriceService {
      * @throws RuntimeException if the API call fails
      */
     public double fetchMetalPrice(MetalType metalType) {
-        return priceReader.fetchPrice(metalType);
+        return resilientPriceService.fetchPrice(metalType);
     }
 
     /**
@@ -113,13 +115,13 @@ public class MetalPriceService {
      * @return user metal info DTO with profit calculations
      */
     public UserMetalInfoDto calculatesUserProfit(Purchase purchase) {
-        CurrencyType currencyType = this.priceReader.getCurrencyType();
+        CurrencyType currencyType = this.resilientPriceService.getCurrencyType();
         Currency currency = this.currencyService.findBySymbol(currencyType);
         double currencyToRonRate = currency.getRon();
 
         double revolutProfitPercentages = this.revolutService
             .getRevolutProfitFor(purchase.getMetalType());
-        double metalPriceNowKg = this.priceReader.fetchPrice(purchase.getMetalType());
+        double metalPriceNowKg = this.resilientPriceService.fetchPrice(purchase.getMetalType());
 
         // Calculate current value with Revolut markup
         double revolutGoldPriceKg = metalPriceNowKg * (revolutProfitPercentages + 1) * currencyToRonRate;

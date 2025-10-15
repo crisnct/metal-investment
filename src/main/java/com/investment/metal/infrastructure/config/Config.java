@@ -7,13 +7,9 @@ import com.investment.metal.infrastructure.service.price.GalmarleyPriceReader;
 import com.zaxxer.hikari.HikariConfig;
 import io.github.resilience4j.bulkhead.BulkheadConfig;
 import io.github.resilience4j.bulkhead.BulkheadRegistry;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.timelimiter.TimeLimiterConfig;
 import io.github.resilience4j.timelimiter.TimeLimiterRegistry;
-import java.io.IOException;
 import java.time.Duration;
-import java.util.concurrent.TimeoutException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -48,22 +44,6 @@ public class Config implements WebMvcConfigurer {
     return new HikariConfig();
   }
 
-  @Bean
-  public CircuitBreakerRegistry circuitBreaker() {
-    CircuitBreakerConfig circuitBreakerConfig = CircuitBreakerConfig.custom()
-        .failureRateThreshold(50)
-        .slowCallRateThreshold(50)
-        .waitDurationInOpenState(Duration.ofMillis(1000))
-        .slowCallDurationThreshold(Duration.ofSeconds(2))
-        .permittedNumberOfCallsInHalfOpenState(3)
-        .minimumNumberOfCalls(10)
-        .slidingWindowType(CircuitBreakerConfig.SlidingWindowType.TIME_BASED)
-        .slidingWindowSize(5)
-        .recordExceptions(IOException.class, TimeoutException.class)
-        .build();
-
-    return CircuitBreakerRegistry.of(circuitBreakerConfig);
-  }
 
   @Bean
   public BulkheadRegistry bulkhead() {
