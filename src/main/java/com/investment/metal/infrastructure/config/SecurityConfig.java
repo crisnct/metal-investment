@@ -18,6 +18,10 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+import org.springframework.security.web.csrf.CsrfTokenRequestHandler;
+import org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler;
 
 /**
  * Security configuration following Single Responsibility Principle.
@@ -54,8 +58,17 @@ public class SecurityConfig {
         AuthenticationManager localAuthManager = new ProviderManager(customAuthenticationProvider);
         authFilter.setAuthenticationManager(localAuthManager);
         
+        // SECURITY FIX: Enable CSRF protection with proper REST API handling
+        // Configure CSRF for REST APIs with JWT authentication
+        CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
+        requestHandler.setCsrfRequestAttributeName("_csrf");
+        
         http
-            .csrf(AbstractHttpConfigurer::disable)
+            .csrf(csrf -> csrf
+                .csrfTokenRequestHandler(requestHandler)
+                .csrfTokenRepository(new CookieCsrfTokenRepository())
+                .ignoringRequestMatchers("/login", "/userRegistration", "/validateAccount", "/resetPassword", "/changePassword")
+            )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint()))
             .addFilterBefore(authFilter, AnonymousAuthenticationFilter.class)
