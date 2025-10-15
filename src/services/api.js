@@ -56,6 +56,39 @@ class ApiService {
     }
   }
 
+  // Force refresh CSRF token by calling the endpoint
+  async forceRefreshCsrfToken() {
+    try {
+      console.log('=== FORCE REFRESH CSRF TOKEN ===');
+      const response = await fetch(`${this.baseURL}/csrf-token`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        mode: 'cors',
+        credentials: 'include'
+      });
+      
+      console.log('Force refresh response status:', response.status);
+      console.log('Force refresh response headers:', Object.fromEntries(response.headers.entries()));
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Force refresh response data:', data);
+        console.log('Cookies after force refresh:', document.cookie);
+        return true;
+      } else {
+        const errorText = await response.text();
+        console.error('Force refresh failed:', response.status, errorText);
+        return false;
+      }
+    } catch (error) {
+      console.error('Force refresh error:', error);
+      return false;
+    }
+  }
+
   // Helper method to refresh CSRF token by making a request to get a new one
   async refreshCsrfToken() {
     try {
@@ -628,6 +661,10 @@ class ApiService {
       // Test CSRF endpoint first
       console.log('Testing CSRF endpoint accessibility...');
       await this.testCsrfEndpoint();
+      
+      // Force refresh CSRF token before making the request
+      console.log('Force refreshing CSRF token...');
+      await this.forceRefreshCsrfToken();
       
       const headers = await this.getAuthHeadersFromStorageWithCsrf();
       console.log('Headers for purchase request:', Object.keys(headers));
