@@ -1,5 +1,5 @@
 import React from 'react';
-import { Cloud, GitBranch, Code, Wrench } from 'lucide-react';
+import { Cloud, GitBranch, Code, Wrench, Container, Github } from 'lucide-react';
 import './DevOps.css';
 
 const DevOps = () => {
@@ -27,6 +27,18 @@ const DevOps = () => {
       description: 'Integrated Development Environment (IDE) for Java development with advanced code analysis and debugging tools.',
       icon: Code,
       color: '#000000'
+    },
+    {
+      name: 'Docker',
+      description: 'Containerization platform for packaging applications and their dependencies into lightweight, portable containers.',
+      icon: Container,
+      color: '#2496ed'
+    },
+    {
+      name: 'GitHub',
+      description: 'Web-based platform for version control and collaboration using Git, with features for code hosting, project management, and CI/CD.',
+      icon: Github,
+      color: '#333333'
     }
   ];
 
@@ -34,7 +46,7 @@ const DevOps = () => {
     <section id="devops" className="devops-section">
       <div className="container">
         <div className="material-card">
-          <h2 className="devops-title">DEVOPS</h2>
+          <h2 className="devops-title">Cloud & DEVOPS</h2>
           <div className="devops-grid">
             {devopsTechnologies.map((tech, index) => (
               <div key={index} className="devops-card">

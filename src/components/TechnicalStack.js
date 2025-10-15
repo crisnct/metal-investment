@@ -11,7 +11,8 @@ import {
   AlertTriangle,
   Code,
   FileText,
-  Wrench
+  Wrench,
+  Layers
 } from 'lucide-react';
 import './TechnicalStack.css';
 
@@ -76,6 +77,12 @@ const TechnicalStack = () => {
       description: 'Caching integration for database.',
       icon: Database,
       color: '#059669'
+    },
+    {
+      name: 'Domain Driven Design',
+      description: 'Software development approach that focuses on modeling complex business domains and creating a shared understanding between technical and business teams.',
+      icon: Layers,
+      color: '#8b5cf6'
     },
   ];
 
