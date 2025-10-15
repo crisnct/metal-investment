@@ -88,8 +88,9 @@ All protected endpoints require a valid JWT token in the Authorization header.
 
 ##### Logout
 - **POST** `/api/logout`
-- **Description**: Logs out the authenticated user
+- **Description**: Logs out the authenticated user from all devices and invalidates all sessions for enhanced security
 - **Response**: `SimpleMessageDto` with logout confirmation
+- **Security**: This endpoint provides enhanced security by invalidating all active sessions
 
 #### 3. Metal Transactions
 

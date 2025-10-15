@@ -53,7 +53,15 @@ function App() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      // Call the logout API to properly invalidate all sessions
+      await ApiService.logout();
+    } catch (error) {
+      console.error('Logout API call failed:', error);
+      // Continue with local logout even if API call fails
+    }
+    
     // Clear all user data from localStorage
     localStorage.removeItem('userToken');
     localStorage.removeItem('userUsername');

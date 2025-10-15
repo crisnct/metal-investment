@@ -59,6 +59,53 @@ public class JwtService {
     }
 
     /**
+     * Generate a secure JWT token with session rotation support.
+     * This method creates a token with a unique session ID to enable
+     * session invalidation and rotation.
+     * 
+     * @param userId the user ID to include in the token
+     * @param sessionId unique session identifier for rotation
+     * @return a signed JWT token with session information
+     */
+    public String generateTokenWithSession(Integer userId, String sessionId) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("sessionId", sessionId);
+        claims.put("tokenType", "access");
+        return generateToken(claims, userId);
+    }
+
+    /**
+     * Extract session ID from a JWT token.
+     * 
+     * @param token the JWT token
+     * @return the session ID or null if not present
+     */
+    public String extractSessionId(String token) {
+        try {
+            Claims claims = extractAllClaims(token);
+            return claims.get("sessionId", String.class);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Check if a token is a valid access token.
+     * 
+     * @param token the JWT token to check
+     * @return true if it's a valid access token, false otherwise
+     */
+    public boolean isAccessToken(String token) {
+        try {
+            Claims claims = extractAllClaims(token);
+            String tokenType = claims.get("tokenType", String.class);
+            return "access".equals(tokenType);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
      * Extract the user ID from a JWT token.
      * 
      * @param token the JWT token

@@ -229,10 +229,10 @@ public class ProtectedApiController {
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
     @Operation(
             summary = "User logout",
-            description = "Logs out the authenticated user and invalidates the session"
+            description = "Logs out the authenticated user and invalidates all sessions for enhanced security"
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "User logged out successfully",
+            @ApiResponse(responseCode = "200", description = "User logged out successfully from all devices",
                     content = @Content(schema = @Schema(implementation = SimpleMessageDto.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized - invalid token",
                     content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
@@ -240,12 +240,15 @@ public class ProtectedApiController {
     public ResponseEntity<SimpleMessageDto> logout() {
         String token = Util.getTokenFromRequest(request);
         final Login loginEntity = this.loginService.getLogin(token);
-        this.loginService.logout(loginEntity);
+        
+        // SECURITY FIX: Invalidate all sessions for enhanced security
+        this.loginService.invalidateAllUserSessions(loginEntity.getUserId());
 
         Customer user = this.accountService.findById(loginEntity.getUserId());
-        SimpleMessageDto dto = new SimpleMessageDto("The user %s has been logged out!", user.getUsername());
+        SimpleMessageDto dto = new SimpleMessageDto("The user %s has been logged out from all devices! Please login again.", user.getUsername());
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
+
 
     /**
      * Record a metal purchase transaction for the authenticated user.

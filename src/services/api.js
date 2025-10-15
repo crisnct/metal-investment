@@ -112,7 +112,7 @@ class ApiService {
       };
       
       // Add CSRF token if available
-      const csrfToken = this.getCsrfToken();
+      const csrfToken = await this.getCsrfToken();
       if (csrfToken) {
         headers['X-XSRF-TOKEN'] = csrfToken;
       }
@@ -736,6 +736,41 @@ class ApiService {
 
     return await this.parseJsonSafely(response);
   }
+
+  /**
+   * Logout the current user from the application.
+   */
+  async logout() {
+    try {
+      const authHeaders = await this.getAuthHeadersFromStorageWithCsrf();
+      const response = await fetch(`${this.baseURL}/api/logout`, {
+        method: 'POST',
+        headers: authHeaders,
+        mode: 'cors',
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch {
+          errorData = { message: await response.text() };
+        }
+        const customError = new Error(errorData.message || 'Failed to logout');
+        customError.data = errorData;
+        throw customError;
+      }
+
+      return await this.parseJsonSafely(response);
+    } catch (error) {
+      console.error('Logout error:', error);
+      const customError = new Error(error.message || 'Network error occurred');
+      customError.data = error.data || { message: 'Failed to logout' };
+      throw customError;
+    }
+  }
+
 
   getFriendlyErrorMessage(status, errorData) {
     if (status === 401 || status === 403) {
