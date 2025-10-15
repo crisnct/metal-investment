@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
+import com.investment.metal.infrastructure.util.SecureRandomGenerator;
 import java.util.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +61,10 @@ class KeyGenerator {
     private String randomSymbols() {
         StringBuilder strReturn = new StringBuilder();
         for (int i = 0; i < KeyGenerator.SYMBOLS.length(); i++) {
-            strReturn.insert((int) (Math.random() * (strReturn.length() + 1)), KeyGenerator.SYMBOLS.charAt(i));
+            // SECURITY FIX: Use secure random generation instead of Math.random()
+            // This prevents predictable patterns and ensures uniform distribution
+            int insertPosition = SecureRandomGenerator.nextInt(0, strReturn.length() + 1);
+            strReturn.insert(insertPosition, KeyGenerator.SYMBOLS.charAt(i));
         }
         return strReturn.toString();
     }

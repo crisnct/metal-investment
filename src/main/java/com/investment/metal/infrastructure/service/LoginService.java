@@ -3,12 +3,12 @@ package com.investment.metal.infrastructure.service;
 import com.investment.metal.MessageKey;
 import com.investment.metal.domain.exception.BusinessException;
 import com.investment.metal.domain.exception.NoRollbackBusinessException;
+import com.investment.metal.infrastructure.encryption.EncryptionService;
 import com.investment.metal.infrastructure.persistence.entity.Customer;
 import com.investment.metal.infrastructure.persistence.entity.Login;
 import com.investment.metal.infrastructure.persistence.repository.LoginRepository;
-import com.investment.metal.infrastructure.encryption.EncryptionService;
 import com.investment.metal.infrastructure.security.JwtService;
-import com.investment.metal.infrastructure.util.Util;
+import com.investment.metal.infrastructure.util.SecureRandomGenerator;
 import java.sql.Timestamp;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
@@ -78,8 +78,9 @@ public class LoginService extends AbstractService {
     }
 
     private void validateAccount(Customer user, int minValue, int maxValue) throws BusinessException {
-        final int diff = maxValue - minValue;
-        final int codeGenerated = minValue + Math.abs(Util.getRandomGenerator().nextInt()) % diff;
+        // SECURITY FIX: Use secure random generation instead of Math.abs(Random.nextInt())
+        // This prevents predictable patterns and ensures uniform distribution
+        final int codeGenerated = SecureRandomGenerator.nextIntInclusive(minValue, maxValue);
         this.emailService.sendMailWithCode(user, codeGenerated);
         this.saveLoginAttempt(user.getId(), codeGenerated);
     }

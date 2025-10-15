@@ -24,6 +24,7 @@ import com.investment.metal.infrastructure.service.BannedAccountsService;
 import com.investment.metal.infrastructure.service.BlockedIpService;
 import com.investment.metal.infrastructure.service.LoginService;
 import com.investment.metal.infrastructure.util.Util;
+import com.investment.metal.infrastructure.util.SecureRandomGenerator;
 import com.investment.metal.infrastructure.mapper.MetalPurchaseMapper;
 import com.investment.metal.domain.model.MetalPurchase;
 import com.investment.metal.infrastructure.service.price.ExternalMetalPriceReader;
@@ -903,18 +904,15 @@ public class ProtectedApiController {
     }
 
     /**
-     * Generate a random confirmation code for account deletion.
-     * Uses the same logic as LoginService.validateAccount for consistency.
-     * Creates a 6-digit numeric code for email verification.
+     * Generate a secure random confirmation code for account deletion.
+     * Uses cryptographically secure random number generation to prevent
+     * predictable patterns and ensure proper entropy for security-sensitive operations.
      * 
-     * @return a random 6-digit confirmation code as String
+     * @return a secure random 6-digit confirmation code as String
      */
     private String generateConfirmationCode() {
-        // Use the same logic as LoginService.validateAccount for consistency
-        final int minValue = 100000;
-        final int maxValue = 899999;
-        final int diff = maxValue - minValue;
-        final int codeGenerated = minValue + Math.abs(Util.getRandomGenerator().nextInt()) % diff;
-        return String.valueOf(codeGenerated);
+        // SECURITY FIX: Use secure random generation instead of Math.abs(Random.nextInt())
+        // This prevents predictable patterns and ensures uniform distribution
+        return SecureRandomGenerator.generateConfirmationCode();
     }
 }
