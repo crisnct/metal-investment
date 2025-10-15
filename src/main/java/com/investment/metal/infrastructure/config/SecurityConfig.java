@@ -2,6 +2,7 @@ package com.investment.metal.infrastructure.config;
 
 import com.investment.metal.infrastructure.security.AuthenticationFilter;
 import com.investment.metal.infrastructure.security.CustomAuthenticationProvider;
+import com.investment.metal.infrastructure.security.SecurityHeadersFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,7 +10,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
@@ -20,8 +20,6 @@ import org.springframework.security.web.authentication.AnonymousAuthenticationFi
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
-import org.springframework.security.web.csrf.CsrfTokenRequestHandler;
-import org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -70,7 +68,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, CustomAuthenticationProvider customAuthenticationProvider) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, CustomAuthenticationProvider customAuthenticationProvider, SecurityHeadersFilter securityHeadersFilter) throws Exception {
         // Create AuthenticationFilter directly in the filter chain to avoid circular dependency
         AuthenticationFilter authFilter = new AuthenticationFilter(request -> request.getRequestURI().startsWith("/api/"));
         AuthenticationManager localAuthManager = new ProviderManager(customAuthenticationProvider);
@@ -83,6 +81,7 @@ public class SecurityConfig {
         
         // Custom CSRF configuration for JWT-based APIs
         CookieCsrfTokenRepository csrfTokenRepository = new CookieCsrfTokenRepository();
+        // Note: setCookieHttpOnly is deprecated, but we need it for SPA compatibility
         csrfTokenRepository.setCookieHttpOnly(false); // Allow JavaScript access for SPA
         csrfTokenRepository.setCookiePath("/");
         csrfTokenRepository.setHeaderName("X-XSRF-TOKEN");
@@ -96,6 +95,7 @@ public class SecurityConfig {
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint()))
+            .addFilterBefore(securityHeadersFilter, AnonymousAuthenticationFilter.class)
             .addFilterBefore(authFilter, AnonymousAuthenticationFilter.class)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/**").authenticated()

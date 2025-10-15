@@ -92,7 +92,20 @@ All protected endpoints require a valid JWT token in the Authorization header.
 - **Response**: `SimpleMessageDto` with logout confirmation
 - **Security**: This endpoint provides enhanced security by invalidating all active sessions
 
-#### 3. Metal Transactions
+#### 3. Security Headers
+
+The application implements comprehensive security headers to protect against common web vulnerabilities:
+
+- **X-Frame-Options**: `DENY` - Prevents clickjacking attacks
+- **X-Content-Type-Options**: `nosniff` - Prevents MIME type sniffing
+- **X-XSS-Protection**: `1; mode=block` - Enables XSS filtering
+- **Strict-Transport-Security**: Forces HTTPS connections
+- **Content-Security-Policy**: Comprehensive XSS protection
+- **Referrer-Policy**: Controls referrer information leakage
+- **Permissions-Policy**: Restricts browser features
+- **Cross-Origin Policies**: Prevents cross-origin attacks
+
+#### 4. Metal Transactions
 
 ##### Record Purchase
 - **POST** `/api/purchase`

@@ -317,4 +317,10 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         </insert>
     </changeSet>
 
+    <changeSet id="1.15" author="Cristian Tone">
+        <comment>Increase login_token and reset_password_token column size to accommodate longer JWT tokens</comment>
+        <modifyDataType tableName="login" columnName="login_token" newDataType="varchar(500)"/>
+        <modifyDataType tableName="login" columnName="reset_password_token" newDataType="varchar(500)"/>
+    </changeSet>
+
 </databaseChangeLog>

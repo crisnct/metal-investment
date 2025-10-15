@@ -1,6 +1,15 @@
 package com.investment.metal.infrastructure.service;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.investment.metal.domain.exception.BusinessException;
+import com.investment.metal.infrastructure.exception.ExceptionService;
 import com.investment.metal.infrastructure.persistence.entity.Alert;
 import com.investment.metal.infrastructure.persistence.entity.Customer;
 import com.investment.metal.infrastructure.persistence.entity.Login;
@@ -9,24 +18,15 @@ import com.investment.metal.infrastructure.persistence.repository.AlertRepositor
 import com.investment.metal.infrastructure.persistence.repository.CustomerRepository;
 import com.investment.metal.infrastructure.persistence.repository.LoginRepository;
 import com.investment.metal.infrastructure.persistence.repository.PurchaseRepository;
-import com.investment.metal.infrastructure.service.AccountService;
-import com.investment.metal.infrastructure.exception.ExceptionService;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for AccountService.
@@ -49,6 +49,9 @@ class AccountServiceTest {
 
     @Mock
     private ExceptionService exceptionService;
+
+    @Mock
+    private LoginService loginService;
 
     @InjectMocks
     private AccountService accountService;
@@ -102,6 +105,8 @@ class AccountServiceTest {
         when(purchaseRepository.findByUserId(userId)).thenReturn(Optional.of(userPurchases));
         when(loginRepository.findByUserId(userId)).thenReturn(Optional.of(testLogin));
         
+        // Mock LoginService behavior
+        doNothing().when(loginService).invalidateAllUserSessions(userId);
 
         // When
         accountService.deleteUserAccount(userId, 123456);
@@ -110,6 +115,7 @@ class AccountServiceTest {
         verify(alertRepository).deleteAll(userAlerts);
         verify(purchaseRepository).deleteAll(userPurchases);
         verify(loginRepository).delete(testLogin);
+        verify(loginService).invalidateAllUserSessions(userId);
         verify(customerRepository).delete(testUser);
     }
 
@@ -137,6 +143,9 @@ class AccountServiceTest {
         when(alertRepository.findByUserId(userId)).thenReturn(Optional.empty());
         when(purchaseRepository.findByUserId(userId)).thenReturn(Optional.empty());
         when(loginRepository.findByUserId(userId)).thenReturn(Optional.empty());
+        
+        // Mock LoginService behavior
+        doNothing().when(loginService).invalidateAllUserSessions(userId);
 
         // When
         accountService.deleteUserAccount(userId, 123456);
@@ -145,6 +154,7 @@ class AccountServiceTest {
         verify(alertRepository, never()).deleteAll(any());
         verify(purchaseRepository, never()).deleteAll(any());
         verify(loginRepository, never()).delete(any());
+        verify(loginService).invalidateAllUserSessions(userId);
         verify(customerRepository).delete(testUser);
     }
 
@@ -159,6 +169,9 @@ class AccountServiceTest {
         when(alertRepository.findByUserId(userId)).thenReturn(Optional.of(userAlerts));
         when(purchaseRepository.findByUserId(userId)).thenReturn(Optional.of(userPurchases));
         when(loginRepository.findByUserId(userId)).thenReturn(Optional.empty());
+        
+        // Mock LoginService behavior
+        doNothing().when(loginService).invalidateAllUserSessions(userId);
 
         // When
         accountService.deleteUserAccount(userId, 123456);
@@ -167,6 +180,7 @@ class AccountServiceTest {
         verify(alertRepository).deleteAll(userAlerts);
         verify(purchaseRepository).deleteAll(userPurchases);
         verify(loginRepository, never()).delete(any());
+        verify(loginService).invalidateAllUserSessions(userId);
         verify(customerRepository).delete(testUser);
     }
 
@@ -179,6 +193,8 @@ class AccountServiceTest {
         when(purchaseRepository.findByUserId(userId)).thenReturn(Optional.empty());
         when(loginRepository.findByUserId(userId)).thenReturn(Optional.of(testLogin));
         
+        // Mock LoginService behavior
+        doNothing().when(loginService).invalidateAllUserSessions(userId);
 
         // When
         accountService.deleteUserAccount(userId, 123456);
@@ -187,6 +203,7 @@ class AccountServiceTest {
         verify(alertRepository, never()).deleteAll(any());
         verify(purchaseRepository, never()).deleteAll(any());
         verify(loginRepository).delete(testLogin);
+        verify(loginService).invalidateAllUserSessions(userId);
         verify(customerRepository).delete(testUser);
     }
 
@@ -216,6 +233,8 @@ class AccountServiceTest {
         when(purchaseRepository.findByUserId(userId)).thenReturn(Optional.of(userPurchases));
         when(loginRepository.findByUserId(userId)).thenReturn(Optional.of(testLogin));
         
+        // Mock LoginService behavior
+        doNothing().when(loginService).invalidateAllUserSessions(userId);
 
         // When
         accountService.deleteUserAccount(userId, 123456);
@@ -224,6 +243,7 @@ class AccountServiceTest {
         verify(alertRepository).deleteAll(userAlerts);
         verify(purchaseRepository).deleteAll(userPurchases);
         verify(loginRepository).delete(testLogin);
+        verify(loginService).invalidateAllUserSessions(userId);
         verify(customerRepository).delete(testUser);
     }
 }
