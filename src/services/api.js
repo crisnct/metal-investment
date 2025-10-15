@@ -8,44 +8,43 @@ class ApiService {
     this.baseURL = API_BASE_URL;
   }
 
-  // Helper method to get CSRF token from API endpoint
-  async getCsrfToken() {
+  // Helper method to get CSRF token from cookies
+  getCsrfToken() {
     try {
-      console.log('=== CSRF TOKEN FETCH START ===');
-      console.log('Fetching CSRF token from /csrf-token endpoint');
-      console.log('Base URL:', this.baseURL);
-      console.log('Full URL:', `${this.baseURL}/csrf-token`);
+      alert('Reading CSRF token from cookies...');
+      console.log('=== CSRF TOKEN FROM COOKIES ===');
       
-      const response = await fetch(`${this.baseURL}/csrf-token`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        mode: 'cors',
-        credentials: 'include'
-      });
+      // Get CSRF token from cookies
+      const cookies = document.cookie.split(';');
+      let csrfToken = null;
       
-      console.log('CSRF token response status:', response.status);
-      console.log('CSRF token response headers:', Object.fromEntries(response.headers.entries()));
+      for (let cookie of cookies) {
+        const trimmedCookie = cookie.trim();
+        if (trimmedCookie.startsWith('XSRF-TOKEN=')) {
+          csrfToken = decodeURIComponent(trimmedCookie.substring('XSRF-TOKEN='.length));
+          break;
+        }
+      }
       
-      if (response.ok) {
-        const data = await response.json();
-        console.log('CSRF token response data:', data);
-        console.log('CSRF token received:', data.token ? 'YES' : 'NO');
-        console.log('CSRF token value:', data.token ? data.token.substring(0, 10) + '...' : 'null');
-        console.log('=== CSRF TOKEN FETCH SUCCESS ===');
-        return data.token;
+      console.log('All cookies:', document.cookie);
+      console.log('CSRF token from cookies:', csrfToken ? 'FOUND' : 'NOT FOUND');
+      console.log('CSRF token value:', csrfToken ? csrfToken.substring(0, 10) + '...' : 'null');
+      
+      if (csrfToken) {
+        alert(`CSRF token found: ${csrfToken.substring(0, 10)}...`);
+        console.log('=== CSRF TOKEN FROM COOKIES SUCCESS ===');
+        return csrfToken;
       } else {
-        const errorText = await response.text();
-        console.error('CSRF token request failed:', response.status, errorText);
-        console.log('=== CSRF TOKEN FETCH FAILED ===');
-        throw new Error(`CSRF token request failed: ${response.status} ${errorText}`);
+        alert('No CSRF token found in cookies');
+        console.warn('No CSRF token found in cookies');
+        console.log('=== CSRF TOKEN FROM COOKIES FAILED ===');
+        return null;
       }
     } catch (error) {
-      console.error('Failed to get CSRF token:', error);
-      console.log('=== CSRF TOKEN FETCH ERROR ===');
-      throw error;
+      alert(`CSRF token error: ${error.message}`);
+      console.error('Failed to get CSRF token from cookies:', error);
+      console.log('=== CSRF TOKEN FROM COOKIES ERROR ===');
+      return null;
     }
   }
 
@@ -59,6 +58,7 @@ class ApiService {
 
   // Helper method to get auth headers with CSRF token (async version)
   async getAuthHeadersWithCsrf(token) {
+    alert('getAuthHeadersWithCsrf called');
     console.log('getAuthHeadersWithCsrf called with token:', token ? 'EXISTS' : 'MISSING');
     
     const headers = {
@@ -69,10 +69,12 @@ class ApiService {
     console.log('Base headers created:', Object.keys(headers));
     
     // Add CSRF token if available
-    console.log('Attempting to fetch CSRF token...');
+    alert('About to get CSRF token from cookies...');
+    console.log('Attempting to get CSRF token from cookies...');
     try {
-      const csrfToken = await this.getCsrfToken();
-      console.log('CSRF token fetch result:', csrfToken ? 'SUCCESS' : 'FAILED');
+      const csrfToken = this.getCsrfToken();
+      alert(`CSRF token result: ${csrfToken ? 'SUCCESS' : 'FAILED'}`);
+      console.log('CSRF token result:', csrfToken ? 'SUCCESS' : 'FAILED');
       
       if (csrfToken) {
         headers['X-XSRF-TOKEN'] = csrfToken;
@@ -81,7 +83,8 @@ class ApiService {
         console.warn('No CSRF token available - request may fail with 403');
       }
     } catch (error) {
-      console.error('Error fetching CSRF token:', error);
+      alert(`CSRF token error: ${error.message}`);
+      console.error('Error getting CSRF token:', error);
       console.warn('Proceeding without CSRF token - request may fail with 403');
     }
     
@@ -103,6 +106,7 @@ class ApiService {
   // Helper method to get auth headers with CSRF token from storage (async)
   async getAuthHeadersFromStorageWithCsrf() {
     const token = this.getToken();
+    alert(`Token check: ${token ? 'EXISTS' : 'MISSING'}`);
     console.log('getAuthHeadersFromStorageWithCsrf - Token from storage:', token ? 'EXISTS' : 'MISSING');
     console.log('getAuthHeadersFromStorageWithCsrf - Token value:', token ? token.substring(0, 20) + '...' : 'null');
     
@@ -110,6 +114,7 @@ class ApiService {
       console.log('User has token, fetching CSRF token...');
       return await this.getAuthHeadersWithCsrf(token);
     } else {
+      alert('No user token found - user may not be logged in');
       console.warn('No user token found - user may not be logged in');
       return {};
     }
@@ -529,6 +534,7 @@ class ApiService {
 
   async recordPurchase(metalAmount, metalSymbol, cost) {
     try {
+      alert('PURCHASE REQUEST START - Check console for details');
       console.log('=== PURCHASE REQUEST START ===');
       console.log('Attempting to record purchase with CSRF protection');
       console.log('Purchase data:', { metalAmount, metalSymbol, cost });
