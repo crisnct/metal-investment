@@ -1,0 +1,75 @@
+/* DevOps Section */
+.devops-section {
+  padding: 0.25rem 0 0.25rem 0;
+}
+
+.devops-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #073B4C;
+  margin-bottom: 3rem;
+  text-align: center;
+}
+
+.devops-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.devops-card {
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 16px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.devops-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.devops-icon {
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: center;
+}
+
+.devops-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #374151;
+  margin-bottom: 0.75rem;
+}
+
+.devops-description {
+  color: #6b7280;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .devops-section {
+    padding: 2rem 0;
+  }
+  
+  .devops-title {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .devops-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .devops-card {
+    padding: 1.25rem;
+  }
+}

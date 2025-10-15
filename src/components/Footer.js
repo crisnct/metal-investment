@@ -31,9 +31,9 @@ const Footer = () => {
             <h4 className="footer-subtitle">Quick Links</h4>
             <ul className="footer-links">
               <li><a href="#home">Home</a></li>
-              <li><a href="#features">Features</a></li>
+              <li><a href="#features">Key Features</a></li>
               <li><a href="#tech">Technology</a></li>
-              <li><a href="https://metal-investment-635786220311.europe-west1.run.app/swagger-ui.html" target="_blank" rel="noopener noreferrer">Swagger UI</a></li>
+              <li><a href="https://metal-investment-635786220311.europe-west1.run.app/swagger-ui.html" target="_blank" rel="noopener noreferrer">Swagger</a></li>
             </ul>
           </div>
           

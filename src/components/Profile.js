@@ -130,8 +130,8 @@ const Profile = ({ userInfo }) => {
     
     if (!purchaseData.amount.trim()) {
       errors.amount = 'Amount is required';
-    } else if (isNaN(purchaseData.amount) || parseInt(purchaseData.amount) <= 0) {
-      errors.amount = 'Amount must be a positive integer';
+    } else if (isNaN(purchaseData.amount) || parseFloat(purchaseData.amount) <= 0) {
+      errors.amount = 'Amount must be a positive number';
     }
     
     if (!purchaseData.cost.trim()) {
@@ -534,11 +534,12 @@ const Profile = ({ userInfo }) => {
                 <label htmlFor="purchase-amount">Amount (oz) *</label>
                 <input
                   type="number"
+                  step="0.01"
                   id="purchase-amount"
                   name="amount"
                   value={purchaseData.amount}
                   onChange={(e) => setPurchaseData({ ...purchaseData, amount: e.target.value })}
-                  placeholder="Enter amount"
+                  placeholder="Enter amount (e.g., 1.5)"
                   className={purchaseErrors.amount ? 'error' : ''}
                   required
                 />
@@ -619,7 +620,7 @@ const Profile = ({ userInfo }) => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="sell-amount">Amount *</label>
+                <label htmlFor="sell-amount">Amount (oz) *</label>
                 <input
                   type="number"
                   step="0.01"
@@ -637,7 +638,7 @@ const Profile = ({ userInfo }) => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="sell-price">Price *</label>
+                <label htmlFor="sell-price">Price (RON) *</label>
                 <input
                   type="number"
                   step="0.01"

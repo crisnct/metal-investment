@@ -36,24 +36,6 @@ const TechnicalStack = () => {
       color: '#61dafb'
     },
     {
-      name: 'Swagger 2.8.13',
-      description: 'API documentation and testing interface using SpringDoc OpenAPI for interactive API exploration.',
-      icon: FileText,
-      color: '#85ea2d'
-    },
-    {
-      name: 'Lombok 1.18.40',
-      description: 'Java library that automatically generates boilerplate code like getters, setters, constructors, and equals methods.',
-      icon: Wrench,
-      color: '#ff6b35'
-    },
-    {
-      name: 'Google Cloud Platform',
-      description: 'Cloud deployment platform with Cloud Run, Cloud SQL, and scalable infrastructure.',
-      icon: Cloud,
-      color: '#4285f4'
-    },
-    {
       name: 'MySQL 8.0',
       description: 'Database.',
       icon: Database,
@@ -72,16 +54,22 @@ const TechnicalStack = () => {
       color: '#dc2626'
     },
     {
+      name: 'Swagger 2.8.13',
+      description: 'API documentation and testing interface using SpringDoc OpenAPI for interactive API exploration.',
+      icon: FileText,
+      color: '#85ea2d'
+    },
+    {
+      name: 'Lombok 1.18.40',
+      description: 'Java library that automatically generates boilerplate code like getters, setters, constructors, and equals methods.',
+      icon: Wrench,
+      color: '#ff6b35'
+    },
+    {
       name: 'Unirest 3.14.5',
       description: 'HTTP client library for making API calls to fetch real-time metal prices.',
       icon: Globe,
       color: '#7c3aed'
-    },
-    {
-      name: 'External APIs',
-      description: 'Bloomberg and Galmarley APIs for fetching real-time precious metal prices with market data integration.',
-      icon: Globe,
-      color: '#ea580c'
     },
     {
       name: 'Hibernate 6.6.25',
@@ -89,18 +77,6 @@ const TechnicalStack = () => {
       icon: Database,
       color: '#059669'
     },
-    {
-      name: 'Maven 3.14.0',
-      description: 'Build automation tool for project management and dependency handling.',
-      icon: GitBranch,
-      color: '#dc2626'
-    },
-    {
-      name: 'Git',
-      description: 'Version control system for collaborative development and code management.',
-      icon: GitBranch,
-      color: '#f59e0b'
-    }
   ];
 
   return (

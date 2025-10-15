@@ -4,6 +4,8 @@ import Header from './components/Header';
 import Hero from './components/Hero';
 import Features from './components/Features';
 import TechnicalStack from './components/TechnicalStack';
+import DevOps from './components/DevOps';
+import PartnerSystems from './components/PartnerSystems';
 import Profile from './components/Profile';
 import Footer from './components/Footer';
 import ApiService from './services/api';
@@ -74,6 +76,8 @@ function App() {
       {isLoggedIn && <Profile userInfo={userInfo} />}
       <Features />
       <TechnicalStack />
+      <DevOps />
+      <PartnerSystems />
       <Footer />
     </div>
   );
