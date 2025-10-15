@@ -98,7 +98,7 @@ public class SecurityConfig {
                 .csrfTokenRepository(csrfTokenRepository)
                 .ignoringRequestMatchers("/login", "/userRegistration", "/validateAccount", "/resetPassword", "/changePassword", "/csrf-token")
             )
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
             .exceptionHandling(ex -> ex
                 .authenticationEntryPoint(authenticationEntryPoint())
                 .accessDeniedHandler(customAccessDeniedHandler())

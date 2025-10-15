@@ -60,6 +60,8 @@ class ApiService {
   async refreshCsrfToken() {
     try {
       console.log('=== REFRESHING CSRF TOKEN ===');
+      console.log('Calling /csrf-token endpoint...');
+      
       const response = await fetch(`${this.baseURL}/csrf-token`, {
         method: 'GET',
         headers: {
@@ -70,15 +72,57 @@ class ApiService {
         credentials: 'include'
       });
       
+      console.log('CSRF token refresh response status:', response.status);
+      console.log('CSRF token refresh response headers:', Object.fromEntries(response.headers.entries()));
+      
       if (response.ok) {
+        const data = await response.json();
+        console.log('CSRF token refresh response data:', data);
         console.log('CSRF token refreshed successfully');
+        
+        // Check if cookies were set
+        console.log('Cookies after CSRF token request:', document.cookie);
+        
         return true;
       } else {
-        console.error('Failed to refresh CSRF token:', response.status);
+        const errorText = await response.text();
+        console.error('Failed to refresh CSRF token:', response.status, errorText);
         return false;
       }
     } catch (error) {
       console.error('Error refreshing CSRF token:', error);
+      return false;
+    }
+  }
+
+  // Test method to check if CSRF endpoint is accessible
+  async testCsrfEndpoint() {
+    try {
+      console.log('=== TESTING CSRF ENDPOINT ===');
+      const response = await fetch(`${this.baseURL}/csrf-token`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        mode: 'cors',
+        credentials: 'include'
+      });
+      
+      console.log('CSRF endpoint test - Status:', response.status);
+      console.log('CSRF endpoint test - Headers:', Object.fromEntries(response.headers.entries()));
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('CSRF endpoint test - Response:', data);
+        return true;
+      } else {
+        const errorText = await response.text();
+        console.log('CSRF endpoint test - Error:', errorText);
+        return false;
+      }
+    } catch (error) {
+      console.error('CSRF endpoint test - Exception:', error);
       return false;
     }
   }
@@ -142,6 +186,20 @@ class ApiService {
     
     if (token) {
       console.log('User has token, getting CSRF token from cookies...');
+      
+      // First, try to get CSRF token from cookies
+      let csrfToken = this.getCsrfToken();
+      
+      // If no CSRF token in cookies, try to fetch one from the server
+      if (!csrfToken) {
+        console.log('No CSRF token in cookies, fetching from server...');
+        const refreshSuccess = await this.refreshCsrfToken();
+        if (refreshSuccess) {
+          csrfToken = this.getCsrfToken();
+          console.log('CSRF token fetched from server:', csrfToken ? 'SUCCESS' : 'FAILED');
+        }
+      }
+      
       return await this.getAuthHeadersWithCsrf(token);
     } else {
       console.warn('No user token found - user may not be logged in');
@@ -567,6 +625,10 @@ class ApiService {
       console.log('Attempting to record purchase with CSRF protection');
       console.log('Purchase data:', { metalAmount, metalSymbol, cost });
       
+      // Test CSRF endpoint first
+      console.log('Testing CSRF endpoint accessibility...');
+      await this.testCsrfEndpoint();
+      
       const headers = await this.getAuthHeadersFromStorageWithCsrf();
       console.log('Headers for purchase request:', Object.keys(headers));
       console.log('Headers details:', headers);
@@ -581,6 +643,8 @@ class ApiService {
       
       console.log('Full headers being sent:', fullHeaders);
       console.log('Request URL:', `${this.baseURL}/api/purchase`);
+      console.log('CSRF token in headers:', fullHeaders['X-XSRF-TOKEN'] ? 'PRESENT' : 'MISSING');
+      console.log('Authorization header:', fullHeaders['Authorization'] ? 'PRESENT' : 'MISSING');
       
       const response = await fetch(`${this.baseURL}/api/purchase`, {
         method: 'POST',
