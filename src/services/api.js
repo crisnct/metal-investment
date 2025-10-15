@@ -681,6 +681,7 @@ class ApiService {
       console.log('Full headers being sent:', fullHeaders);
       console.log('Request URL:', `${this.baseURL}/api/purchase`);
       console.log('CSRF token in headers:', fullHeaders['X-XSRF-TOKEN'] ? 'PRESENT' : 'MISSING');
+      console.log('CSRF token value:', fullHeaders['X-XSRF-TOKEN'] ? fullHeaders['X-XSRF-TOKEN'].substring(0, 20) + '...' : 'null');
       console.log('Authorization header:', fullHeaders['Authorization'] ? 'PRESENT' : 'MISSING');
       
       const response = await fetch(`${this.baseURL}/api/purchase`, {
@@ -700,12 +701,17 @@ class ApiService {
         // If 403 Forbidden, try to refresh CSRF token and retry once
         if (response.status === 403) {
           console.log('403 Forbidden - attempting to refresh CSRF token and retry...');
-          const refreshSuccess = await this.refreshCsrfToken();
+          
+          // Try to get a fresh CSRF token
+          const refreshSuccess = await this.forceRefreshCsrfToken();
           
           if (refreshSuccess) {
             console.log('CSRF token refreshed, retrying purchase...');
             // Retry the request with refreshed CSRF token
             const retryHeaders = await this.getAuthHeadersFromStorageWithCsrf();
+            console.log('Retry headers:', Object.keys(retryHeaders));
+            console.log('Retry CSRF token:', retryHeaders['X-XSRF-TOKEN'] ? retryHeaders['X-XSRF-TOKEN'].substring(0, 20) + '...' : 'null');
+            
             const retryResponse = await fetch(`${this.baseURL}/api/purchase`, {
               method: 'POST',
               headers: {
@@ -719,12 +725,17 @@ class ApiService {
               credentials: 'include'
             });
             
+            console.log('Retry response status:', retryResponse.status);
+            
             if (retryResponse.ok) {
               console.log('Purchase successful after CSRF token refresh');
               return await this.parseJsonSafely(retryResponse);
             } else {
-              console.error('Purchase still failed after CSRF token refresh:', retryResponse.status);
+              const retryErrorText = await retryResponse.text();
+              console.error('Purchase still failed after CSRF token refresh:', retryResponse.status, retryErrorText);
             }
+          } else {
+            console.error('Failed to refresh CSRF token');
           }
         }
         
