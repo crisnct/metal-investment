@@ -197,19 +197,29 @@ public class LoginService extends AbstractService {
      * - User account is deleted
      * - Security breach is detected
      * - User requests logout from all devices
-     * 
+     *
      * @param userId the user ID to invalidate all sessions for
      */
     public void invalidateAllUserSessions(Integer userId) {
-        LOGGER.info("Invalidating all sessions for user ID: {}", userId);
-        
+        this.invalidateAllUserSessions(userId, false);
+    }
+
+    /**
+     * Invalidate all sessions for a specific user and optionally require the user
+     * to re-validate their account before logging in again.
+     *
+     * @param userId the user ID to invalidate all sessions for
+     * @param requireRevalidation whether the user must re-validate after logout
+     */
+    public void invalidateAllUserSessions(Integer userId, boolean requireRevalidation) {
+        LOGGER.info("Invalidating all sessions for user ID: {} (requireRevalidation: {})", userId, requireRevalidation);
+
         Optional<Login> loginOpt = this.loginRepository.findByUserId(userId);
         if (loginOpt.isPresent()) {
             Login login = loginOpt.get();
             login.setLoginToken("");
             login.setResetPasswordToken("");
             login.setLoggedIn(0);
-            login.setValidated(0); // Force re-validation
             this.loginRepository.save(login);
             LOGGER.info("All sessions invalidated for user ID: {}", userId);
         }
@@ -239,17 +249,6 @@ public class LoginService extends AbstractService {
                 LOGGER.info("All other sessions invalidated for user ID: {}", userId);
             }
         }
-    }
-
-    /**
-     * Force logout a user by invalidating their current session.
-     * This method should be called for security purposes or administrative actions.
-     * 
-     * @param userId the user ID to force logout
-     */
-    public void forceLogoutUser(Integer userId) {
-        LOGGER.info("Force logging out user ID: {}", userId);
-        this.invalidateAllUserSessions(userId);
     }
 
     /**

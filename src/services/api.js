@@ -6,6 +6,7 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
 class ApiService {
   constructor() {
     this.baseURL = API_BASE_URL;
+    this.csrfRefreshPromise = null;
   }
 
   // Helper method to get CSRF token from cookies
@@ -91,41 +92,52 @@ class ApiService {
 
   // Helper method to refresh CSRF token by making a request to get a new one
   async refreshCsrfToken() {
-    try {
-      console.log('=== REFRESHING CSRF TOKEN ===');
-      console.log('Calling /csrf-token endpoint...');
-      
-      const response = await fetch(`${this.baseURL}/csrf-token`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        mode: 'cors',
-        credentials: 'include'
-      });
-      
-      console.log('CSRF token refresh response status:', response.status);
-      console.log('CSRF token refresh response headers:', Object.fromEntries(response.headers.entries()));
-      
-      if (response.ok) {
-        const data = await response.json();
-        console.log('CSRF token refresh response data:', data);
-        console.log('CSRF token refreshed successfully');
-        
-        // Check if cookies were set
-        console.log('Cookies after CSRF token request:', document.cookie);
-        
-        return true;
-      } else {
-        const errorText = await response.text();
-        console.error('Failed to refresh CSRF token:', response.status, errorText);
-        return false;
-      }
-    } catch (error) {
-      console.error('Error refreshing CSRF token:', error);
-      return false;
+    if (this.csrfRefreshPromise) {
+      console.log('CSRF token refresh already in progress, waiting for existing request...');
+      return this.csrfRefreshPromise;
     }
+
+    this.csrfRefreshPromise = (async () => {
+      try {
+        console.log('=== REFRESHING CSRF TOKEN ===');
+        console.log('Calling /csrf-token endpoint...');
+        
+        const response = await fetch(`${this.baseURL}/csrf-token`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          mode: 'cors',
+          credentials: 'include'
+        });
+        
+        console.log('CSRF token refresh response status:', response.status);
+        console.log('CSRF token refresh response headers:', Object.fromEntries(response.headers.entries()));
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('CSRF token refresh response data:', data);
+          console.log('CSRF token refreshed successfully');
+          
+          // Check if cookies were set
+          console.log('Cookies after CSRF token request:', document.cookie);
+          
+          return true;
+        } else {
+          const errorText = await response.text();
+          console.error('Failed to refresh CSRF token:', response.status, errorText);
+          return false;
+        }
+      } catch (error) {
+        console.error('Error refreshing CSRF token:', error);
+        return false;
+      } finally {
+        this.csrfRefreshPromise = null;
+      }
+    })();
+
+    return this.csrfRefreshPromise;
   }
 
   // Test method to check if CSRF endpoint is accessible
