@@ -348,11 +348,8 @@ const Profile = ({ userInfo }) => {
   return (
     <section id="profile-section" className="profile-section">
       <div className="container">
-        <div className="profile-header">
-          <h2>Profile</h2>
-        </div>
-        
         <div className="profile-content">
+          <h1>Profile</h1>
           <div className="profile-info-section">
             <h3>Info</h3>
             <div className="profile-info">
