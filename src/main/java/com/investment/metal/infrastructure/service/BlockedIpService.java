@@ -64,6 +64,25 @@ public class BlockedIpService extends AbstractService {
         this.checkBlockedIPGlobal();
     }
 
+    /**
+     * Check if IP is blocked with pre-captured client IP for async contexts.
+     * This method bypasses the request context access for IP checking.
+     * 
+     * @param userId the user ID
+     * @param clientIp the pre-captured client IP address
+     * @throws BusinessException if IP is blocked
+     */
+    public void checkBlockedIPWithIp(Integer userId, String clientIp) throws BusinessException {
+        final BanIp banIp = this.getBanIp(userId, clientIp);
+        if (banIp != null) {
+            throw this.exceptionService
+                    .createBuilder(MessageKey.BANED_IP)
+                    .setArguments(clientIp, banIp.getReason())
+                    .build();
+        }
+        this.checkBlockedIPGlobalWithIp(clientIp);
+    }
+
     public void checkBlockedIPGlobal() throws BusinessException {
         final String ip = Util.getClientIpAddress(this.request);
         final BanIp banIpGlobal = this.getBanIp(ID_GLOBAL_USER, ip);
@@ -71,6 +90,23 @@ public class BlockedIpService extends AbstractService {
             throw this.exceptionService
                     .createBuilder(MessageKey.BANED_IP)
                     .setArguments(ip, banIpGlobal.getReason())
+                    .build();
+        }
+    }
+
+    /**
+     * Check if IP is globally blocked with pre-captured client IP for async contexts.
+     * This method bypasses the request context access for IP checking.
+     * 
+     * @param clientIp the pre-captured client IP address
+     * @throws BusinessException if IP is globally blocked
+     */
+    public void checkBlockedIPGlobalWithIp(String clientIp) throws BusinessException {
+        final BanIp banIpGlobal = this.getBanIp(ID_GLOBAL_USER, clientIp);
+        if (banIpGlobal != null) {
+            throw this.exceptionService
+                    .createBuilder(MessageKey.BANED_IP)
+                    .setArguments(clientIp, banIpGlobal.getReason())
                     .build();
         }
     }

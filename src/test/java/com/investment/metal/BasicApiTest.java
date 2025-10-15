@@ -162,7 +162,7 @@ class BasicApiTest {
         // Test that the deleteAccount method returns the correct type
         try {
             java.lang.reflect.Method deleteAccountMethod = ProtectedApiController.class.getMethod("deleteAccount", String.class, String.class);
-            assertEquals(org.springframework.http.ResponseEntity.class, deleteAccountMethod.getReturnType(), "deleteAccount should return ResponseEntity");
+            assertEquals(java.util.concurrent.CompletableFuture.class, deleteAccountMethod.getReturnType(), "deleteAccount should return CompletableFuture");
         } catch (NoSuchMethodException e) {
             fail("deleteAccount method should exist with correct return type");
         }
@@ -210,7 +210,7 @@ class BasicApiTest {
         // Test that the deleteAccountPreparation method returns the correct type
         try {
             java.lang.reflect.Method deleteAccountPreparationMethod = ProtectedApiController.class.getMethod("deleteAccountPreparation");
-            assertEquals(org.springframework.http.ResponseEntity.class, deleteAccountPreparationMethod.getReturnType(), "deleteAccountPreparation should return ResponseEntity");
+            assertEquals(java.util.concurrent.CompletableFuture.class, deleteAccountPreparationMethod.getReturnType(), "deleteAccountPreparation should return CompletableFuture");
         } catch (NoSuchMethodException e) {
             fail("deleteAccountPreparation method should exist with correct return type");
         }

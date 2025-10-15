@@ -109,6 +109,21 @@ public class EmailService extends AbstractService {
         this.sendMail(user.getEmail(), appName, emailContent);
     }
 
+    /**
+     * Public method to send email for monitoring and alerting purposes.
+     * 
+     * @param toEmail the recipient email address
+     * @param subject the email subject
+     * @param message the email message content
+     */
+    public void sendEmail(String toEmail, String subject, String message) {
+        try {
+            sendMail(toEmail, subject, message);
+        } catch (BusinessException e) {
+            LOGGER.error("Failed to send email to {}: {}", toEmail, e.getMessage());
+        }
+    }
+
     private void sendMail(String toEmail, String subject, String message) throws BusinessException {
         Exception cause = null;
         LOGGER.info("Trying to send email from " + emailFrom + " to " + toEmail + " on host " + host + ":" + port);

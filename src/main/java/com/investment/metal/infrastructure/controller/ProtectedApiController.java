@@ -40,6 +40,9 @@ import com.investment.metal.infrastructure.service.CurrencyService;
 import com.investment.metal.infrastructure.service.EmailService;
 import com.investment.metal.infrastructure.service.MessageService;
 import com.investment.metal.infrastructure.service.RevolutService;
+import io.github.resilience4j.bulkhead.annotation.Bulkhead;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -51,6 +54,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -244,6 +248,9 @@ public class ProtectedApiController {
      * @return ResponseEntity with success message
      */
     @RequestMapping(value = "/purchase", method = RequestMethod.POST)
+    @Bulkhead(name = "api-bulkhead")
+    @RateLimiter(name = "api-rate-limiter")
+    @TimeLimiter(name = "api-time-limiter")
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
     @Operation(
             summary = "Record metal purchase",
@@ -257,7 +264,7 @@ public class ProtectedApiController {
             @ApiResponse(responseCode = "401", description = "Unauthorized - invalid token",
                     content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
     })
-    public ResponseEntity<SimpleMessageDto> purchase(
+    public CompletableFuture<ResponseEntity<SimpleMessageDto>> purchase(
             @Parameter(description = "Amount of metal purchased", required = true)
             @RequestHeader("metalAmount") final double metalAmount,
             @Parameter(description = "Symbol of the metal (e.g., GOLD, SILVER)", required = true)
@@ -265,22 +272,30 @@ public class ProtectedApiController {
             @Parameter(description = "Total cost of the purchase", required = true)
             @RequestHeader("cost") final double cost
     ) {
-        // Validate metal symbol
-        MetalType metalType = MetalType.lookup(metalSymbol);
-        this.exceptionService.check(metalType == null, MessageKey.INVALID_REQUEST, "metalSymbol header is invalid");
-        
-        // Extract authenticated user from JWT token
+        // Capture ALL request context BEFORE entering async context
         String token = Util.getTokenFromRequest(request);
-        final Login loginEntity = this.loginService.getLogin(token);
+        String clientIp = Util.getClientIpAddress(request);
+        
+        return CompletableFuture.supplyAsync(() -> {
+            // Validate metal symbol
+            MetalType metalType = MetalType.lookup(metalSymbol);
+            this.exceptionService.check(metalType == null, MessageKey.INVALID_REQUEST, "metalSymbol header is invalid");
+            
+            // Use captured data instead of accessing request
+            final Login loginEntity = this.loginService.getLoginWithIp(token, clientIp);
 
-        // Record the purchase transaction
-        this.purchaseService.purchase(loginEntity.getUserId(), metalAmount, metalType, cost);
+            // Record the purchase transaction
+            this.purchaseService.purchase(loginEntity.getUserId(), metalAmount, metalType, cost);
 
-        SimpleMessageDto dto = new SimpleMessageDto("Your purchase of %.7f %s was recorded in the database", metalAmount, metalType.getSymbol());
-        return new ResponseEntity<>(dto, HttpStatus.OK);
+            SimpleMessageDto dto = new SimpleMessageDto("Your purchase of %.7f %s was recorded in the database", metalAmount, metalType.getSymbol());
+            return new ResponseEntity<>(dto, HttpStatus.OK);
+        });
     }
 
     @RequestMapping(value = "/sell", method = RequestMethod.DELETE)
+    @Bulkhead(name = "api-bulkhead")
+    @RateLimiter(name = "api-rate-limiter")
+    @TimeLimiter(name = "api-time-limiter")
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
     @Operation(
             summary = "Record metal sale",
@@ -294,7 +309,7 @@ public class ProtectedApiController {
             @ApiResponse(responseCode = "401", description = "Unauthorized - invalid token",
                     content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
     })
-    public ResponseEntity<SimpleMessageDto> sell(
+    public CompletableFuture<ResponseEntity<SimpleMessageDto>> sell(
             @Parameter(description = "Amount of metal sold", required = true)
             @RequestHeader("metalAmount") final double metalAmount,
             @Parameter(description = "Symbol of the metal (e.g., GOLD, SILVER)", required = true)
@@ -302,16 +317,22 @@ public class ProtectedApiController {
             @Parameter(description = "Price per unit of metal", required = true)
             @RequestHeader("price") final double price
     ) {
-        MetalType metalType = MetalType.lookup(metalSymbol);
-        this.exceptionService.check(metalType == null, MessageKey.INVALID_REQUEST, "metalSymbol header is invalid");
-        Objects.requireNonNull(metalType);
-
+        // Capture ALL request context BEFORE entering async context
         String token = Util.getTokenFromRequest(request);
-        final Login loginEntity = this.loginService.getLogin(token);
-        this.purchaseService.sell(loginEntity.getUserId(), metalAmount, metalType, price);
+        String clientIp = Util.getClientIpAddress(request);
+        
+        return CompletableFuture.supplyAsync(() -> {
+            MetalType metalType = MetalType.lookup(metalSymbol);
+            this.exceptionService.check(metalType == null, MessageKey.INVALID_REQUEST, "metalSymbol header is invalid");
+            Objects.requireNonNull(metalType);
 
-        SimpleMessageDto dto = new SimpleMessageDto("Your sold of %.7f %s was recorded in the database", metalAmount, metalType.getSymbol());
-        return new ResponseEntity<>(dto, HttpStatus.OK);
+            // Use captured data instead of accessing request
+            final Login loginEntity = this.loginService.getLoginWithIp(token, clientIp);
+            this.purchaseService.sell(loginEntity.getUserId(), metalAmount, metalType, price);
+
+            SimpleMessageDto dto = new SimpleMessageDto("Your sold of %.7f %s was recorded in the database", metalAmount, metalType.getSymbol());
+            return new ResponseEntity<>(dto, HttpStatus.OK);
+        });
     }
 
     @RequestMapping(value = "/profit", method = RequestMethod.GET)
@@ -380,6 +401,9 @@ public class ProtectedApiController {
     }
 
     @RequestMapping(value = "/addAlert", method = RequestMethod.POST)
+    @Bulkhead(name = "api-bulkhead")
+    @RateLimiter(name = "api-rate-limiter")
+    @TimeLimiter(name = "api-time-limiter")
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
     @Operation(
             summary = "Add price alert",
@@ -446,6 +470,9 @@ public class ProtectedApiController {
     }
 
     @RequestMapping(value = "/removeAlert", method = RequestMethod.DELETE)
+    @Bulkhead(name = "api-bulkhead")
+    @RateLimiter(name = "api-rate-limiter")
+    @TimeLimiter(name = "api-time-limiter")
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
     @Operation(
             summary = "Remove price alert",
@@ -707,6 +734,9 @@ public class ProtectedApiController {
      * @return ResponseEntity with success message
      */
     @RequestMapping(value = "/deleteAccount", method = RequestMethod.DELETE)
+    @Bulkhead(name = "api-bulkhead")
+    @RateLimiter(name = "api-rate-limiter")
+    @TimeLimiter(name = "api-time-limiter")
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
     @Operation(
             summary = "Delete user account",
@@ -720,42 +750,46 @@ public class ProtectedApiController {
             @ApiResponse(responseCode = "401", description = "Unauthorized - invalid token",
                     content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
     })
-    public ResponseEntity<SimpleMessageDto> deleteAccount(
+    public CompletableFuture<ResponseEntity<SimpleMessageDto>> deleteAccount(
             @Parameter(description = "User's password for verification", required = true)
             @RequestHeader("password") final String password,
             @Parameter(description = "Confirmation code for account deletion", required = true)
             @RequestHeader("code") final String code
     ) {
-        // Extract authenticated user from JWT token (bypass validation for account deletion)
+        // Capture request context BEFORE entering async context
         String token = Util.getTokenFromRequest(request);
-        final Login loginEntity = this.loginService.getLoginForDeletion(token);
-        Objects.requireNonNull(loginEntity, "User must be authenticated");
+        
+        return CompletableFuture.supplyAsync(() -> {
+            // Extract authenticated user from JWT token (bypass validation for account deletion)
+            final Login loginEntity = this.loginService.getLoginForDeletion(token);
+            Objects.requireNonNull(loginEntity, "User must be authenticated");
 
-        // Get user details
-        Customer user = this.accountService.findById(loginEntity.getUserId());
-        Objects.requireNonNull(user, "User not found");
+            // Get user details
+            Customer user = this.accountService.findById(loginEntity.getUserId());
+            Objects.requireNonNull(user, "User not found");
 
-        // Verify password
-        boolean passwordMatches = this.passwordEncoder.matches(password, user.getPassword());
-        this.exceptionService.check(!passwordMatches, MessageKey.INVALID_REQUEST, "Invalid password provided");
+            // Verify password
+            boolean passwordMatches = this.passwordEncoder.matches(password, user.getPassword());
+            this.exceptionService.check(!passwordMatches, MessageKey.INVALID_REQUEST, "Invalid password provided");
 
-        // Verify confirmation code (code should be received from email)
-        this.exceptionService.check(code == null || code.trim().isEmpty(), MessageKey.INVALID_REQUEST, "Confirmation code is required. Please provide the code received in your email.");
+            // Verify confirmation code (code should be received from email)
+            this.exceptionService.check(code == null || code.trim().isEmpty(), MessageKey.INVALID_REQUEST, "Confirmation code is required. Please provide the code received in your email.");
 
-        // Validate the confirmation code
-        int codeValue;
-        try {
-            codeValue = Integer.parseInt(code);
-        } catch (NumberFormatException e) {
-            this.exceptionService.check(true, MessageKey.INVALID_REQUEST, "Invalid confirmation code format. Please provide a valid numeric code.");
-            return null; // This line will never be reached due to the exception above
-        }
+            // Validate the confirmation code
+            int codeValue;
+            try {
+                codeValue = Integer.parseInt(code);
+            } catch (NumberFormatException e) {
+                this.exceptionService.check(true, MessageKey.INVALID_REQUEST, "Invalid confirmation code format. Please provide a valid numeric code.");
+                return null; // This line will never be reached due to the exception above
+            }
 
-        // Delete all user-related data with code validation
-        this.accountService.deleteUserAccount(loginEntity.getUserId(), codeValue);
+            // Delete all user-related data with code validation
+            this.accountService.deleteUserAccount(loginEntity.getUserId(), codeValue);
 
-        SimpleMessageDto dto = new SimpleMessageDto("Account for user %s has been permanently deleted along with all associated data", user.getUsername());
-        return new ResponseEntity<>(dto, HttpStatus.OK);
+            SimpleMessageDto dto = new SimpleMessageDto("Account for user %s has been permanently deleted along with all associated data", user.getUsername());
+            return new ResponseEntity<>(dto, HttpStatus.OK);
+        });
     }
 
     /**
@@ -772,6 +806,9 @@ public class ProtectedApiController {
      * @return ResponseEntity with success message
      */
     @RequestMapping(value = "/deleteAccountPreparation", method = RequestMethod.POST)
+    @Bulkhead(name = "api-bulkhead")
+    @RateLimiter(name = "api-rate-limiter")
+    @TimeLimiter(name = "api-time-limiter")
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
     @Operation(
             summary = "Send account deletion preparation email",
@@ -783,28 +820,33 @@ public class ProtectedApiController {
             @ApiResponse(responseCode = "401", description = "Unauthorized - invalid token",
                     content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
     })
-    public ResponseEntity<SimpleMessageDto> deleteAccountPreparation() {
-        // Extract authenticated user from JWT token
+    public CompletableFuture<ResponseEntity<SimpleMessageDto>> deleteAccountPreparation() {
+        // Capture ALL request context BEFORE entering async context
         String token = Util.getTokenFromRequest(request);
-        final Login loginEntity = this.loginService.getLogin(token);
-        Objects.requireNonNull(loginEntity, "User must be authenticated");
+        String clientIp = Util.getClientIpAddress(request);
+        
+        return CompletableFuture.supplyAsync(() -> {
+            // Extract authenticated user from JWT token
+            final Login loginEntity = this.loginService.getLoginWithIp(token, clientIp);
+            Objects.requireNonNull(loginEntity, "User must be authenticated");
 
-        // Get user details
-        Customer user = this.accountService.findById(loginEntity.getUserId());
-        Objects.requireNonNull(user, "User not found");
+            // Get user details
+            Customer user = this.accountService.findById(loginEntity.getUserId());
+            Objects.requireNonNull(user, "User not found");
 
-        // Generate random confirmation code for account deletion
-        String confirmationCode = generateConfirmationCode();
-        int codeValue = Integer.parseInt(confirmationCode);
+            // Generate random confirmation code for account deletion
+            String confirmationCode = generateConfirmationCode();
+            int codeValue = Integer.parseInt(confirmationCode);
 
-        // Store the confirmation code in the database
-        this.loginService.saveDeletionAttempt(loginEntity.getUserId(), codeValue);
+            // Store the confirmation code in the database
+            this.loginService.saveDeletionAttempt(loginEntity.getUserId(), codeValue);
 
-        // Send preparation email to user
-        this.emailService.sendDeleteAccountPreparationEmail(user, confirmationCode);
+            // Send preparation email to user
+            this.emailService.sendDeleteAccountPreparationEmail(user, confirmationCode);
 
-        SimpleMessageDto dto = new SimpleMessageDto("Account deletion preparation email has been sent to %s. Please check your email for the confirmation code.", user.getUsername());
-        return new ResponseEntity<>(dto, HttpStatus.OK);
+            SimpleMessageDto dto = new SimpleMessageDto("Account deletion preparation email has been sent to %s. Please check your email for the confirmation code.", user.getUsername());
+            return new ResponseEntity<>(dto, HttpStatus.OK);
+        });
     }
 
     /**

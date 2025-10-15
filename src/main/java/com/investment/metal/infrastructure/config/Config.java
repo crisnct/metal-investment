@@ -5,8 +5,6 @@ import com.investment.metal.infrastructure.service.price.BloombergPriceReader;
 import com.investment.metal.infrastructure.service.price.ExternalMetalPriceReader;
 import com.investment.metal.infrastructure.service.price.GalmarleyPriceReader;
 import com.zaxxer.hikari.HikariConfig;
-import io.github.resilience4j.bulkhead.BulkheadConfig;
-import io.github.resilience4j.bulkhead.BulkheadRegistry;
 import io.github.resilience4j.timelimiter.TimeLimiterConfig;
 import io.github.resilience4j.timelimiter.TimeLimiterRegistry;
 import java.time.Duration;
@@ -45,14 +43,6 @@ public class Config implements WebMvcConfigurer {
   }
 
 
-  @Bean
-  public BulkheadRegistry bulkhead() {
-    BulkheadConfig config = BulkheadConfig.custom()
-        .maxConcurrentCalls(10)
-        .maxWaitDuration(Duration.ofMillis(1))
-        .build();
-    return BulkheadRegistry.of(config);
-  }
 
   @Bean
   public TimeLimiterRegistry timeLimiter() {

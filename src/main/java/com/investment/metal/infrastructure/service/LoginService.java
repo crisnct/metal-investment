@@ -236,4 +236,33 @@ public class LoginService extends AbstractService {
         }
     }
 
+    /**
+     * Get login entity with pre-captured client IP for async contexts.
+     * This method bypasses the request context access for IP checking.
+     * 
+     * @param rawToken the raw JWT token
+     * @param clientIp the pre-captured client IP address
+     * @return the login entity
+     * @throws BusinessException if token is invalid or user is banned/blocked
+     */
+    public Login getLoginWithIp(String rawToken, String clientIp) {
+        Optional<Login> loginOp = this.findByToken(rawToken);
+        if (loginOp.isEmpty()) {
+            throw exceptionService.createException(MessageKey.WRONG_TOKEN);
+        }
+        
+        Login login = loginOp.get();
+        Integer userId = login.getUserId();
+        this.bannedAccountsService.checkBanned(userId);
+        this.blockedIpService.checkBlockedIPWithIp(userId, clientIp);
+
+        if (login.getValidated() == null || login.getValidated() == 0) {
+            throw exceptionService.createException(MessageKey.NEEDS_VALIDATION);
+        }
+        if (login.getLoggedIn() == null || login.getLoggedIn() == 0) {
+            throw exceptionService.createException(MessageKey.USER_NOT_LOGIN);
+        }
+        return login;
+    }
+
 }

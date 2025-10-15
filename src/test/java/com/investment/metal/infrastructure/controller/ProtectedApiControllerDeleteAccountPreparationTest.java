@@ -17,6 +17,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.concurrent.CompletionException;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -113,7 +115,7 @@ class ProtectedApiControllerDeleteAccountPreparationTest {
         // Test that the deleteAccountPreparation method returns the correct type
         try {
             java.lang.reflect.Method deleteAccountPreparationMethod = ProtectedApiController.class.getMethod("deleteAccountPreparation");
-            assertEquals(org.springframework.http.ResponseEntity.class, deleteAccountPreparationMethod.getReturnType(), "deleteAccountPreparation should return ResponseEntity");
+            assertEquals(java.util.concurrent.CompletableFuture.class, deleteAccountPreparationMethod.getReturnType(), "deleteAccountPreparation should return CompletableFuture");
         } catch (NoSuchMethodException e) {
             fail("deleteAccountPreparation method should exist with correct return type");
         }
@@ -142,17 +144,17 @@ class ProtectedApiControllerDeleteAccountPreparationTest {
         // Given
         try (MockedStatic<Util> mockedUtil = mockStatic(Util.class)) {
             mockedUtil.when(() -> Util.getTokenFromRequest(any())).thenReturn(testToken);
+            mockedUtil.when(() -> Util.getClientIpAddress(any())).thenReturn("127.0.0.1");
             
             // Mock Util.getRandomGenerator()
             java.util.Random mockRandom = mock(java.util.Random.class);
-            when(mockRandom.nextInt()).thenReturn(123456);
             mockedUtil.when(() -> Util.getRandomGenerator()).thenReturn(mockRandom);
             
-            when(loginService.getLogin(testToken)).thenReturn(testLogin);
+            when(loginService.getLoginWithIp(eq(testToken), anyString())).thenReturn(testLogin);
             when(accountService.findById(1)).thenReturn(testUser);
 
             // When
-            ResponseEntity<SimpleMessageDto> response = protectedApiController.deleteAccountPreparation();
+            ResponseEntity<SimpleMessageDto> response = protectedApiController.deleteAccountPreparation().join();
 
             // Then
             assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -169,13 +171,14 @@ class ProtectedApiControllerDeleteAccountPreparationTest {
         // Given
         try (MockedStatic<Util> mockedUtil = mockStatic(Util.class)) {
             mockedUtil.when(() -> Util.getTokenFromRequest(any())).thenReturn(testToken);
+            mockedUtil.when(() -> Util.getClientIpAddress(any())).thenReturn("127.0.0.1");
             
-            when(loginService.getLogin(testToken)).thenReturn(testLogin);
+            when(loginService.getLoginWithIp(eq(testToken), anyString())).thenReturn(testLogin);
             when(accountService.findById(1)).thenReturn(null);
 
             // When & Then
-            assertThrows(NullPointerException.class, () -> {
-                protectedApiController.deleteAccountPreparation();
+            assertThrows(CompletionException.class, () -> {
+                protectedApiController.deleteAccountPreparation().join();
             });
 
             verify(emailService, never()).sendDeleteAccountPreparationEmail(any(), any());
@@ -187,12 +190,13 @@ class ProtectedApiControllerDeleteAccountPreparationTest {
         // Given
         try (MockedStatic<Util> mockedUtil = mockStatic(Util.class)) {
             mockedUtil.when(() -> Util.getTokenFromRequest(any())).thenReturn(testToken);
+            mockedUtil.when(() -> Util.getClientIpAddress(any())).thenReturn("127.0.0.1");
             
-            when(loginService.getLogin(testToken)).thenReturn(null);
+            when(loginService.getLoginWithIp(eq(testToken), anyString())).thenReturn(null);
 
             // When & Then
-            assertThrows(NullPointerException.class, () -> {
-                protectedApiController.deleteAccountPreparation();
+            assertThrows(CompletionException.class, () -> {
+                protectedApiController.deleteAccountPreparation().join();
             });
 
             verify(emailService, never()).sendDeleteAccountPreparationEmail(any(), any());
@@ -219,17 +223,17 @@ class ProtectedApiControllerDeleteAccountPreparationTest {
         // Given
         try (MockedStatic<Util> mockedUtil = mockStatic(Util.class)) {
             mockedUtil.when(() -> Util.getTokenFromRequest(any())).thenReturn(testToken);
+            mockedUtil.when(() -> Util.getClientIpAddress(any())).thenReturn("127.0.0.1");
             
             // Mock Util.getRandomGenerator()
             java.util.Random mockRandom = mock(java.util.Random.class);
-            when(mockRandom.nextInt()).thenReturn(123456);
             mockedUtil.when(() -> Util.getRandomGenerator()).thenReturn(mockRandom);
             
-            when(loginService.getLogin(testToken)).thenReturn(testLogin);
+            when(loginService.getLoginWithIp(eq(testToken), anyString())).thenReturn(testLogin);
             when(accountService.findById(1)).thenReturn(testUser);
 
             // When
-            ResponseEntity<SimpleMessageDto> response = protectedApiController.deleteAccountPreparation();
+            ResponseEntity<SimpleMessageDto> response = protectedApiController.deleteAccountPreparation().join();
 
             // Then
             assertNotNull(response, "Response should not be null");
@@ -244,17 +248,17 @@ class ProtectedApiControllerDeleteAccountPreparationTest {
         // Given
         try (MockedStatic<Util> mockedUtil = mockStatic(Util.class)) {
             mockedUtil.when(() -> Util.getTokenFromRequest(any())).thenReturn(testToken);
+            mockedUtil.when(() -> Util.getClientIpAddress(any())).thenReturn("127.0.0.1");
             
             // Mock Util.getRandomGenerator()
             java.util.Random mockRandom = mock(java.util.Random.class);
-            when(mockRandom.nextInt()).thenReturn(123456);
             mockedUtil.when(() -> Util.getRandomGenerator()).thenReturn(mockRandom);
             
-            when(loginService.getLogin(testToken)).thenReturn(testLogin);
+            when(loginService.getLoginWithIp(eq(testToken), anyString())).thenReturn(testLogin);
             when(accountService.findById(1)).thenReturn(testUser);
 
             // When
-            ResponseEntity<SimpleMessageDto> response = protectedApiController.deleteAccountPreparation();
+            ResponseEntity<SimpleMessageDto> response = protectedApiController.deleteAccountPreparation().join();
 
             // Then
             assertEquals(HttpStatus.OK, response.getStatusCode(), "HTTP status should be OK");
@@ -266,17 +270,17 @@ class ProtectedApiControllerDeleteAccountPreparationTest {
         // Given
         try (MockedStatic<Util> mockedUtil = mockStatic(Util.class)) {
             mockedUtil.when(() -> Util.getTokenFromRequest(any())).thenReturn(testToken);
+            mockedUtil.when(() -> Util.getClientIpAddress(any())).thenReturn("127.0.0.1");
             
             // Mock Util.getRandomGenerator()
             java.util.Random mockRandom = mock(java.util.Random.class);
-            when(mockRandom.nextInt()).thenReturn(123456);
             mockedUtil.when(() -> Util.getRandomGenerator()).thenReturn(mockRandom);
             
-            when(loginService.getLogin(testToken)).thenReturn(testLogin);
+            when(loginService.getLoginWithIp(eq(testToken), anyString())).thenReturn(testLogin);
             when(accountService.findById(1)).thenReturn(testUser);
 
             // When
-            ResponseEntity<SimpleMessageDto> response = protectedApiController.deleteAccountPreparation();
+            ResponseEntity<SimpleMessageDto> response = protectedApiController.deleteAccountPreparation().join();
 
             // Then
             String message = response.getBody().getMessage();

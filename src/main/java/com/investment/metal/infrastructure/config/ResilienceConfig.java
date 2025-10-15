@@ -4,6 +4,8 @@ import io.github.resilience4j.bulkhead.BulkheadConfig;
 import io.github.resilience4j.bulkhead.BulkheadRegistry;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import io.github.resilience4j.ratelimiter.RateLimiterConfig;
+import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
 import io.github.resilience4j.timelimiter.TimeLimiterConfig;
 import io.github.resilience4j.timelimiter.TimeLimiterRegistry;
 import java.time.Duration;
@@ -37,17 +39,29 @@ public class ResilienceConfig {
     @Bean
     public BulkheadRegistry bulkheadRegistry() {
         BulkheadConfig config = BulkheadConfig.custom()
-            .maxConcurrentCalls(10)
-            .maxWaitDuration(Duration.ofSeconds(1))
+            .maxConcurrentCalls(5)  // Reduced for better flooding protection
+            .maxWaitDuration(Duration.ofMillis(500))  // Reduced wait time
             .build();
 
         return BulkheadRegistry.of(config);
     }
 
     @Bean
+    public RateLimiterRegistry rateLimiterRegistry() {
+        RateLimiterConfig config = RateLimiterConfig.custom()
+            .limitForPeriod(10)  // 10 requests per period
+            .limitRefreshPeriod(Duration.ofSeconds(1))  // 1 second window
+            .timeoutDuration(Duration.ofMillis(100))  // 100ms timeout
+            .build();
+
+        return RateLimiterRegistry.of(config);
+    }
+
+    @Bean
     public TimeLimiterRegistry timeLimiterRegistry() {
         TimeLimiterConfig config = TimeLimiterConfig.custom()
-            .timeoutDuration(Duration.ofSeconds(5))
+            .timeoutDuration(Duration.ofSeconds(3))  // Reduced timeout for better protection
+            .cancelRunningFuture(true)  // Cancel running futures on timeout
             .build();
 
         return TimeLimiterRegistry.of(config);

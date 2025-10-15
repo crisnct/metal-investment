@@ -16,6 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.concurrent.CompletionException;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -103,7 +105,7 @@ class DeleteAccountIntegrationTest {
             doNothing().when(accountService).deleteUserAccount(1, 123456);
 
             // When
-            ResponseEntity<SimpleMessageDto> response = protectedApiController.deleteAccount(password, code);
+            ResponseEntity<SimpleMessageDto> response = protectedApiController.deleteAccount(password, code).join();
 
             // Then
             assertNotNull(response);
@@ -126,9 +128,9 @@ class DeleteAccountIntegrationTest {
             when(passwordEncoder.matches(password, testUser.getPassword())).thenReturn(false);
 
             // When & Then
-            assertThrows(BusinessException.class, () -> {
-                protectedApiController.deleteAccount(password, code);
-            });
+        assertThrows(CompletionException.class, () -> {
+            protectedApiController.deleteAccount(password, code).join();
+        });
 
             verify(accountService, never()).deleteUserAccount(any(), anyInt());
         }
@@ -147,9 +149,9 @@ class DeleteAccountIntegrationTest {
             when(passwordEncoder.matches(password, testUser.getPassword())).thenReturn(true);
 
             // When & Then
-            assertThrows(BusinessException.class, () -> {
-                protectedApiController.deleteAccount(password, code);
-            });
+        assertThrows(CompletionException.class, () -> {
+            protectedApiController.deleteAccount(password, code).join();
+        });
 
             verify(accountService, never()).deleteUserAccount(any(), anyInt());
         }
@@ -166,9 +168,9 @@ class DeleteAccountIntegrationTest {
             when(loginService.getLoginForDeletion("invalid-token")).thenReturn(null);
 
             // When & Then
-            assertThrows(NullPointerException.class, () -> {
-                protectedApiController.deleteAccount(password, code);
-            });
+        assertThrows(CompletionException.class, () -> {
+            protectedApiController.deleteAccount(password, code).join();
+        });
 
             verify(accountService, never()).deleteUserAccount(any(), anyInt());
         }
@@ -186,9 +188,9 @@ class DeleteAccountIntegrationTest {
             when(accountService.findById(1)).thenReturn(null);
 
             // When & Then
-            assertThrows(NullPointerException.class, () -> {
-                protectedApiController.deleteAccount(password, code);
-            });
+        assertThrows(CompletionException.class, () -> {
+            protectedApiController.deleteAccount(password, code).join();
+        });
 
             verify(accountService, never()).deleteUserAccount(any(), anyInt());
         }
@@ -208,7 +210,7 @@ class DeleteAccountIntegrationTest {
             doNothing().when(accountService).deleteUserAccount(1, 123456);
 
             // When
-            ResponseEntity<SimpleMessageDto> response = protectedApiController.deleteAccount(password, code);
+            ResponseEntity<SimpleMessageDto> response = protectedApiController.deleteAccount(password, code).join();
 
             // Then
             assertNotNull(response);
@@ -233,7 +235,7 @@ class DeleteAccountIntegrationTest {
             doNothing().when(accountService).deleteUserAccount(1, 123456);
 
             // When
-            ResponseEntity<SimpleMessageDto> response = protectedApiController.deleteAccount(password, code);
+            ResponseEntity<SimpleMessageDto> response = protectedApiController.deleteAccount(password, code).join();
 
             // Then
             assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -254,7 +256,7 @@ class DeleteAccountIntegrationTest {
             doNothing().when(accountService).deleteUserAccount(1, 123456);
 
             // When
-            ResponseEntity<SimpleMessageDto> response = protectedApiController.deleteAccount(password, code);
+            ResponseEntity<SimpleMessageDto> response = protectedApiController.deleteAccount(password, code).join();
 
             // Then
             assertNotNull(response.getBody());
@@ -278,7 +280,7 @@ class DeleteAccountIntegrationTest {
             doNothing().when(accountService).deleteUserAccount(1, 123456);
 
             // When
-            protectedApiController.deleteAccount(password, code);
+            protectedApiController.deleteAccount(password, code).join();
 
             // Then
             verify(loginService).getLoginForDeletion("valid-token");

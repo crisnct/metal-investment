@@ -24,7 +24,7 @@
   </ul>
 
   The application was deployed to <b>Google Cloud (GCP)</b> byt SQL service is stopped for cost reasons
-  <br>https://metal-investment-635786220311.europe-west1.run.app/actuator/health </br>
+  <br>https://metal-investment-635786220311.europe-west1.run.app</br>
 
 </section>
 
