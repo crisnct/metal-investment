@@ -41,6 +41,7 @@ import com.investment.metal.infrastructure.service.EmailService;
 import com.investment.metal.infrastructure.service.MessageService;
 import com.investment.metal.infrastructure.service.RevolutService;
 import com.investment.metal.infrastructure.validation.ValidationService;
+import com.investment.metal.infrastructure.security.AuthorizationService;
 import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
@@ -140,6 +141,9 @@ public class ProtectedApiController {
 
     @Autowired
     private ValidationService validationService;
+
+    @Autowired
+    private AuthorizationService authorizationService;
 
     @Autowired
     private HttpServletRequest request;
@@ -527,13 +531,15 @@ public class ProtectedApiController {
         final Login loginEntity = this.loginService.getLogin(token);
         Integer userId = loginEntity.getUserId();
 
+        // Enhanced authorization check - verify ownership before any operation
         final boolean matchingUser = this.alertService.findAllByUserId(userId)
                 .stream()
-                .anyMatch(alert -> alert.getId() == alertId);
+                .anyMatch(alert -> alert.getId().equals(alertId));
+        
         if (!matchingUser) {
             throw this.exceptionService
                     .createBuilder(MessageKey.INVALID_REQUEST)
-                    .setArguments("This alert id is not belonging to this user!")
+                    .setArguments("Access denied: This alert does not belong to you")
                     .build();
         }
 
@@ -635,7 +641,7 @@ public class ProtectedApiController {
     @Transactional(noRollbackFor = NoRollbackBusinessException.class)
     @Operation(
             summary = "Notify user",
-            description = "Sends a notification email to a specific user about their account status"
+            description = "Sends a notification email to the authenticated user about their account status"
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User notified successfully",
@@ -645,21 +651,17 @@ public class ProtectedApiController {
             @ApiResponse(responseCode = "401", description = "Unauthorized - invalid token",
                     content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
     })
-    public ResponseEntity<SimpleMessageDto> notifyUser(
-            @Parameter(description = "Username of the user to notify", required = true)
-            @RequestHeader("username") final String username
-    ) {
-        // Validate input parameters to prevent SQL injection
-        this.validationService.validateUsername(username);
-        
+    public ResponseEntity<SimpleMessageDto> notifyUser() {
         String token = Util.getTokenFromRequest(request);
         final Login loginEntity = this.loginService.getLogin(token);
         Objects.requireNonNull(loginEntity);
 
-        Customer user = this.accountService.findByUsername(username);
-        this.notificationService.notifyUser(user.getId());
+        // Users can only notify themselves - no username parameter needed
+        Integer userId = loginEntity.getUserId();
+        this.notificationService.notifyUser(userId);
 
-        SimpleMessageDto dto = new SimpleMessageDto("The user %s was notified by email about his account status.", username);
+        Customer user = this.accountService.findById(userId);
+        SimpleMessageDto dto = new SimpleMessageDto("The user %s was notified by email about their account status.", user.getUsername());
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
