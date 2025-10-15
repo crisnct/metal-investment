@@ -125,20 +125,14 @@ public class AccountService {
         
         // Delete all alerts for this user
         Optional<List<Alert>> userAlerts = alertRepository.findByUserId(userId);
-        if (userAlerts.isPresent()) {
-            alertRepository.deleteAll(userAlerts.get());
-        }
+        userAlerts.ifPresent(alerts -> alertRepository.deleteAll(alerts));
         
         // Delete all purchases for this user
         Optional<List<Purchase>> userPurchases = purchaseRepository.findByUserId(userId);
-        if (userPurchases.isPresent()) {
-            purchaseRepository.deleteAll(userPurchases.get());
-        }
+        userPurchases.ifPresent(purchases -> purchaseRepository.deleteAll(purchases));
         
         // Delete all login sessions for this user
-        if (userLogin.isPresent()) {
-            loginRepository.delete(userLogin.get());
-        }
+        userLogin.ifPresent(login -> loginRepository.delete(login));
         
         // Finally, delete the user account
         customerRepository.delete(user);

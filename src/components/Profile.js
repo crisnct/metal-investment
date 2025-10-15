@@ -135,9 +135,9 @@ const Profile = ({ userInfo }) => {
     }
     
     if (!purchaseData.cost.trim()) {
-      errors.cost = 'Cost is required';
+      errors.cost = 'Cost (RON) is required';
     } else if (isNaN(purchaseData.cost) || parseFloat(purchaseData.cost) <= 0) {
-      errors.cost = 'Cost must be a positive number';
+      errors.cost = 'Cost (RON) must be a positive number';
     }
     
     return errors;
@@ -366,7 +366,10 @@ const Profile = ({ userInfo }) => {
               </div>
               
               <div className="info-item notification-item">
-                <span className="info-label">Notification interval:</span>
+                <div className="info-label">
+                  <span>Investment</span>
+                  <span>Update Frequency:</span>
+                </div>
                 <div className="notification-controls">
                   <input
                     type="number"
@@ -427,11 +430,11 @@ const Profile = ({ userInfo }) => {
                               <thead>
                                 <tr>
                                   <th>Symbol</th>
-                                  <th>Amount</th>
-                                  <th>Cost</th>
-                                  <th>Current Price</th>
-                                  <th>Value</th>
-                                  <th>Profit</th>
+                                  <th>Amount (oz)</th>
+                                  <th>Cost (RON)</th>
+                                  <th>Current Price (RON)</th>
+                                  <th>Value (RON)</th>
+                                  <th>Profit (RON)</th>
                                   <th>Date</th>
                                 </tr>
                               </thead>
@@ -528,14 +531,14 @@ const Profile = ({ userInfo }) => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="purchase-amount">Amount *</label>
+                <label htmlFor="purchase-amount">Amount (oz) *</label>
                 <input
                   type="number"
                   id="purchase-amount"
                   name="amount"
                   value={purchaseData.amount}
                   onChange={(e) => setPurchaseData({ ...purchaseData, amount: e.target.value })}
-                  placeholder="Enter amount (positive integer)"
+                  placeholder="Enter amount"
                   className={purchaseErrors.amount ? 'error' : ''}
                   required
                 />
@@ -545,7 +548,7 @@ const Profile = ({ userInfo }) => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="purchase-cost">Cost *</label>
+                <label htmlFor="purchase-cost">Cost (RON) *</label>
                 <input
                   type="number"
                   step="0.01"
