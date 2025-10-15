@@ -8,28 +8,24 @@ class ApiService {
     this.baseURL = API_BASE_URL;
   }
 
-  // Helper method to get CSRF token from API endpoint
-  async getCsrfToken() {
+  // Helper method to get CSRF token from cookies (Spring Security automatic)
+  getCsrfToken() {
     try {
-      const response = await fetch(`${this.baseURL}/api/csrf-token`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${this.getToken()}`,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        mode: 'cors',
-        credentials: 'include'
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        return data.token;
+      // Spring Security automatically sets XSRF-TOKEN cookie
+      const cookies = document.cookie.split(';');
+      for (let cookie of cookies) {
+        const [name, value] = cookie.trim().split('=');
+        if (name === 'XSRF-TOKEN') {
+          console.log('CSRF token found in cookie');
+          return decodeURIComponent(value);
+        }
       }
+      console.warn('No CSRF token found in cookies');
+      return null;
     } catch (error) {
-      console.warn('Failed to get CSRF token:', error);
+      console.error('Failed to get CSRF token from cookies:', error);
+      return null;
     }
-    return null;
   }
 
   // Helper method to get auth headers (synchronous version without CSRF)
@@ -40,19 +36,23 @@ class ApiService {
     };
   }
 
-  // Helper method to get auth headers with CSRF token (async version)
-  async getAuthHeadersWithCsrf(token) {
+  // Helper method to get auth headers with CSRF token (synchronous version)
+  getAuthHeadersWithCsrf(token) {
     const headers = {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
     };
     
     // Add CSRF token if available
-    const csrfToken = await this.getCsrfToken();
+    const csrfToken = this.getCsrfToken();
     if (csrfToken) {
       headers['X-XSRF-TOKEN'] = csrfToken;
+      console.log('CSRF token added to headers');
+    } else {
+      console.warn('No CSRF token available - request may fail with 403');
     }
     
+    console.log('Final headers for API request:', Object.keys(headers));
     return headers;
   }
 
@@ -67,10 +67,10 @@ class ApiService {
     return token ? this.getAuthHeaders(token) : {};
   }
 
-  // Helper method to get auth headers with CSRF token from storage (async)
-  async getAuthHeadersFromStorageWithCsrf() {
+  // Helper method to get auth headers with CSRF token from storage (synchronous)
+  getAuthHeadersFromStorageWithCsrf() {
     const token = this.getToken();
-    return token ? await this.getAuthHeadersWithCsrf(token) : {};
+    return token ? this.getAuthHeadersWithCsrf(token) : {};
   }
 
   // Safely parse JSON; returns null for empty body, or { message: text } for non-JSON text
@@ -397,7 +397,7 @@ class ApiService {
     const response = await fetch(`${this.baseURL}/api/profit`, {
       method: 'GET',
       headers: {
-        ...await this.getAuthHeadersFromStorageWithCsrf(),
+        ...this.getAuthHeadersFromStorageWithCsrf(),
         'Accept': 'application/json'
       },
       mode: 'cors',
@@ -428,7 +428,7 @@ class ApiService {
     const response = await fetch(`${this.baseURL}/api/addAlert`, {
       method: 'POST',
       headers: {
-        ...await this.getAuthHeadersFromStorageWithCsrf(),
+        ...this.getAuthHeadersFromStorageWithCsrf(),
         'metalSymbol': metalSymbol,
         'expression': expression,
         'frequency': frequency,
@@ -460,7 +460,7 @@ class ApiService {
     const response = await fetch(`${this.baseURL}/api/getAlerts`, {
       method: 'GET',
       headers: {
-        ...await this.getAuthHeadersFromStorageWithCsrf(),
+        ...this.getAuthHeadersFromStorageWithCsrf(),
         'Accept': 'application/json'
       },
       mode: 'cors',
@@ -489,7 +489,7 @@ class ApiService {
     const response = await fetch(`${this.baseURL}/api/purchase`, {
       method: 'POST',
       headers: {
-        ...await this.getAuthHeadersFromStorageWithCsrf(),
+        ...this.getAuthHeadersFromStorageWithCsrf(),
         'metalAmount': metalAmount.toString(),
         'metalSymbol': metalSymbol,
         'cost': cost.toString(),
@@ -589,7 +589,7 @@ class ApiService {
   }
 
   async sellMetal(amount, symbol, price) {
-    const authHeaders = await this.getAuthHeadersFromStorageWithCsrf();
+    const authHeaders = this.getAuthHeadersFromStorageWithCsrf();
     console.log('Sell API - Auth headers:', authHeaders);
     console.log('Sell API - Token from storage:', this.getToken());
     
@@ -620,7 +620,7 @@ class ApiService {
   }
 
   async getNotificationPeriod() {
-    const authHeaders = await this.getAuthHeadersFromStorageWithCsrf();
+    const authHeaders = this.getAuthHeadersFromStorageWithCsrf();
     console.log('Get Notification API - Auth headers:', authHeaders);
     console.log('Get Notification API - Token from storage:', this.getToken());
     
@@ -654,7 +654,7 @@ class ApiService {
     const response = await fetch(`${this.baseURL}/api/setNotificationPeriod`, {
       method: 'PUT',
       headers: {
-        ...await this.getAuthHeadersFromStorageWithCsrf(),
+        ...this.getAuthHeadersFromStorageWithCsrf(),
         'period': days.toString(),
         'Accept': 'application/json'
       },
@@ -680,7 +680,7 @@ class ApiService {
     const response = await fetch(`${this.baseURL}/api/deleteAccountPreparation`, {
       method: 'POST',
       headers: {
-        ...await this.getAuthHeadersFromStorageWithCsrf(),
+        ...this.getAuthHeadersFromStorageWithCsrf(),
         'Accept': 'application/json'
       },
       mode: 'cors',
@@ -704,7 +704,7 @@ class ApiService {
     const response = await fetch(`${this.baseURL}/api/deleteAccount`, {
       method: 'DELETE',
       headers: {
-        ...await this.getAuthHeadersFromStorageWithCsrf(),
+        ...this.getAuthHeadersFromStorageWithCsrf(),
         'password': password,
         'code': code,
         'Accept': 'application/json'
