@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
+import java.util.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +36,9 @@ class KeyGenerator {
 
     public void generateKey(File file) {
         AESEncryptor aesEncryptor = new AESEncryptor(StandardCharsets.UTF_8);
-        aesEncryptor.setKey(MultipleKeysEncoder.AES_KEY);
+        // SECURITY FIX: Use secure key generation instead of hardcoded key
+        String secureKey = getSecureKey();
+        aesEncryptor.setKey(secureKey);
 
         StringBuilder key = new StringBuilder();
         // lines
@@ -59,5 +63,34 @@ class KeyGenerator {
             strReturn.insert((int) (Math.random() * (strReturn.length() + 1)), KeyGenerator.SYMBOLS.charAt(i));
         }
         return strReturn.toString();
+    }
+    
+    /**
+     * Get a secure AES key for encryption.
+     * This method generates a cryptographically secure random key.
+     * 
+     * @return a secure AES key
+     */
+    private String getSecureKey() {
+        // Check for environment variable first
+        String envKey = System.getenv("METAL_INVESTMENT_AES_KEY");
+        if (envKey != null && !envKey.trim().isEmpty()) {
+            LOGGER.info("Using AES key from environment variable");
+            return envKey;
+        }
+        
+        // Generate a secure random key
+        LOGGER.warn("No AES key found in environment variable METAL_INVESTMENT_AES_KEY. " +
+                   "Generating a new key. This should be set in production!");
+        
+        SecureRandom random = new SecureRandom();
+        byte[] keyBytes = new byte[32]; // 256-bit key
+        random.nextBytes(keyBytes);
+        String generatedKey = Base64.getEncoder().encodeToString(keyBytes);
+        
+        LOGGER.warn("Generated AES key: {}. Please set METAL_INVESTMENT_AES_KEY environment variable " +
+                   "with this value for production use.", generatedKey);
+        
+        return generatedKey;
     }
 }

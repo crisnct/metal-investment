@@ -2,36 +2,83 @@ package com.investment.metal.infrastructure.encryption;
 
 import com.google.common.collect.Lists;
 import io.micrometer.core.instrument.util.IOUtils;
+import jakarta.annotation.PostConstruct;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
+import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 public class MultipleKeysEncoder implements ConsistentEncoder {
 
-    public static final String AES_KEY = "metal-investment";
+    @Value("${METAL_INVESTMENT_AES_KEY:#{null}}")
+    private String aesKeyFromEnv;
+
+    @Value("${METAL_INVESTMENT_KEY:#{null}}")
+    private String keyFromEnv;
 
     private static final Charset CHARSET = StandardCharsets.UTF_8;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MultipleKeysEncoder.class);
 
-    private final AESEncryptor aesEncryptor;
+    private AESEncryptor aesEncryptor;
 
     private List<String> keys;
 
-    public MultipleKeysEncoder() {
+    @PostConstruct
+    public void init(){
         this.aesEncryptor = new AESEncryptor(CHARSET);
-        this.aesEncryptor.setKey(AES_KEY);
-        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-        String key = IOUtils.toString(
-                Objects.requireNonNull(contextClassLoader.getResourceAsStream("metal-investment.key")),
-                CHARSET);
-        key = this.aesEncryptor.decrypt(key);
-        this.keys = Lists.newArrayList(key.split("\n"));
+        this.aesEncryptor.setKey(aesKeyFromEnv);
+        this.keys = Lists.newArrayList(this.aesEncryptor.decrypt(keyFromEnv).split("\n"));
+        // Initialize keys with fallback if key file doesn't exist
+        this.keys = initializeKeys();
+    }
+    
+    /**
+     * Initialize encryption keys from file or create default keys.
+     * This method handles the case where the key file doesn't exist.
+     * 
+     * @return list of encryption keys
+     */
+    private List<String> initializeKeys() {
+        try {
+            if (keyFromEnv == null || keyFromEnv.trim().isEmpty()) {
+                LOGGER.warn("Use KeyGenerator to create a key and set it in the environment variable METAL_INVESTMENT_KEY. Using default keys for encryption.");
+                return createDefaultKeys();
+            }
+
+            String decryptedKey = this.aesEncryptor.decrypt(keyFromEnv);
+            if (decryptedKey == null || decryptedKey.trim().isEmpty()) {
+                LOGGER.warn("Failed to decrypt key file. Using default keys for encryption.");
+                return createDefaultKeys();
+            }
+            
+            LOGGER.info("Successfully loaded encryption keys from file.");
+            return Lists.newArrayList(decryptedKey.split("\n"));
+            
+        } catch (Exception e) {
+            LOGGER.warn("Failed to load encryption keys from file: {}. Using default keys.", e.getMessage());
+            return createDefaultKeys();
+        }
+    }
+    
+    /**
+     * Create default encryption keys when key file is not available.
+     * This ensures the application can still function with basic encryption.
+     * 
+     * @return list of default encryption keys
+     */
+    private List<String> createDefaultKeys() {
+        // Create a simple default key for basic encryption
+        // In production, the key file should be properly generated and deployed
+        String defaultKey = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
+        return Lists.newArrayList(defaultKey);
     }
 
     public String encrypt(String text) {
