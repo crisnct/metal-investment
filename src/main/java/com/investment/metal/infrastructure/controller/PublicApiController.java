@@ -131,6 +131,12 @@ public class PublicApiController {
         tokenMap.put("headerName", csrfToken.getHeaderName());
         tokenMap.put("parameterName", csrfToken.getParameterName());
         
+        // Add CORS headers to ensure the token can be accessed by the frontend
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        response.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-XSRF-TOKEN");
+        response.setHeader("Access-Control-Allow-Credentials", "true");
+        
         return new ResponseEntity<>(tokenMap, HttpStatus.OK);
     }
 

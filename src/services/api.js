@@ -28,15 +28,17 @@ class ApiService {
       if (response.ok) {
         const data = await response.json();
         console.log('CSRF token received:', data.token ? 'YES' : 'NO');
+        console.log('CSRF token value:', data.token ? data.token.substring(0, 10) + '...' : 'null');
         return data.token;
       } else {
         const errorText = await response.text();
         console.error('CSRF token request failed:', response.status, errorText);
+        throw new Error(`CSRF token request failed: ${response.status} ${errorText}`);
       }
     } catch (error) {
       console.error('Failed to get CSRF token:', error);
+      throw error;
     }
-    return null;
   }
 
   // Helper method to get auth headers (synchronous version without CSRF)
@@ -58,7 +60,7 @@ class ApiService {
     const csrfToken = await this.getCsrfToken();
     if (csrfToken) {
       headers['X-XSRF-TOKEN'] = csrfToken;
-      console.log('CSRF token added to headers');
+      console.log('CSRF token added to headers:', csrfToken.substring(0, 10) + '...');
     } else {
       console.warn('No CSRF token available - request may fail with 403');
     }
@@ -497,18 +499,49 @@ class ApiService {
   }
 
   async recordPurchase(metalAmount, metalSymbol, cost) {
-    const response = await fetch(`${this.baseURL}/api/purchase`, {
-      method: 'POST',
-      headers: {
-        ...await this.getAuthHeadersFromStorageWithCsrf(),
-        'metalAmount': metalAmount.toString(),
-        'metalSymbol': metalSymbol,
-        'cost': cost.toString(),
-        'Accept': 'application/json'
-      },
-      mode: 'cors',
-      credentials: 'include'
-    });
+    try {
+      console.log('Attempting to record purchase with CSRF protection');
+      const headers = await this.getAuthHeadersFromStorageWithCsrf();
+      console.log('Headers for purchase request:', Object.keys(headers));
+      
+      const response = await fetch(`${this.baseURL}/api/purchase`, {
+        method: 'POST',
+        headers: {
+          ...headers,
+          'metalAmount': metalAmount.toString(),
+          'metalSymbol': metalSymbol,
+          'cost': cost.toString(),
+          'Accept': 'application/json'
+        },
+        mode: 'cors',
+        credentials: 'include'
+      });
+      
+      console.log('Purchase response status:', response.status);
+      
+      if (!response.ok) {
+        const rawText = await response.text();
+        console.error('Purchase failed:', response.status, rawText);
+        let message = rawText;
+        try {
+          if (rawText) {
+            const json = JSON.parse(rawText);
+            message = json.message || json.error || rawText;
+          }
+        } catch (e) {
+          // Keep original message if JSON parsing fails
+        }
+        const error = new Error(message);
+        error.status = response.status;
+        throw error;
+      }
+      
+      return await this.parseJsonSafely(response);
+    } catch (error) {
+      console.error('Purchase request failed:', error);
+      throw error;
+    }
+  }
     if (!response.ok) {
       const rawText = await response.text();
       let message = rawText;
