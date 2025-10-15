@@ -73,7 +73,7 @@ public class AccountService {
         
         // SECURITY FIX: Invalidate all existing sessions when password is changed
         // This prevents session hijacking and ensures old sessions become invalid
-        this.loginService.invalidateAllUserSessionsAndRequireValidation(user.getId());
+        this.loginService.invalidateAllUserSessions(user.getId());
     }
 
     public Customer findByUsername(String username) throws BusinessException {
@@ -146,7 +146,7 @@ public class AccountService {
         
         // SECURITY FIX: Invalidate all sessions before deleting account
         // This ensures no active sessions remain after account deletion
-        this.loginService.invalidateAllUserSessionsAndRequireValidation(userId);
+        this.loginService.invalidateAllUserSessions(userId);
         
         // Delete all login sessions for this user
         userLogin.ifPresent(login -> loginRepository.delete(login));
