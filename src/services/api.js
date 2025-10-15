@@ -8,24 +8,35 @@ class ApiService {
     this.baseURL = API_BASE_URL;
   }
 
-  // Helper method to get CSRF token from cookies (Spring Security automatic)
-  getCsrfToken() {
+  // Helper method to get CSRF token from API endpoint
+  async getCsrfToken() {
     try {
-      // Spring Security automatically sets XSRF-TOKEN cookie
-      const cookies = document.cookie.split(';');
-      for (let cookie of cookies) {
-        const [name, value] = cookie.trim().split('=');
-        if (name === 'XSRF-TOKEN') {
-          console.log('CSRF token found in cookie');
-          return decodeURIComponent(value);
-        }
+      console.log('Fetching CSRF token from /csrf-token endpoint');
+      
+      const response = await fetch(`${this.baseURL}/csrf-token`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        mode: 'cors',
+        credentials: 'include'
+      });
+      
+      console.log('CSRF token response status:', response.status);
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('CSRF token received:', data.token ? 'YES' : 'NO');
+        return data.token;
+      } else {
+        const errorText = await response.text();
+        console.error('CSRF token request failed:', response.status, errorText);
       }
-      console.warn('No CSRF token found in cookies');
-      return null;
     } catch (error) {
-      console.error('Failed to get CSRF token from cookies:', error);
-      return null;
+      console.error('Failed to get CSRF token:', error);
     }
+    return null;
   }
 
   // Helper method to get auth headers (synchronous version without CSRF)
@@ -36,15 +47,15 @@ class ApiService {
     };
   }
 
-  // Helper method to get auth headers with CSRF token (synchronous version)
-  getAuthHeadersWithCsrf(token) {
+  // Helper method to get auth headers with CSRF token (async version)
+  async getAuthHeadersWithCsrf(token) {
     const headers = {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
     };
     
     // Add CSRF token if available
-    const csrfToken = this.getCsrfToken();
+    const csrfToken = await this.getCsrfToken();
     if (csrfToken) {
       headers['X-XSRF-TOKEN'] = csrfToken;
       console.log('CSRF token added to headers');
@@ -67,10 +78,10 @@ class ApiService {
     return token ? this.getAuthHeaders(token) : {};
   }
 
-  // Helper method to get auth headers with CSRF token from storage (synchronous)
-  getAuthHeadersFromStorageWithCsrf() {
+  // Helper method to get auth headers with CSRF token from storage (async)
+  async getAuthHeadersFromStorageWithCsrf() {
     const token = this.getToken();
-    return token ? this.getAuthHeadersWithCsrf(token) : {};
+    return token ? await this.getAuthHeadersWithCsrf(token) : {};
   }
 
   // Safely parse JSON; returns null for empty body, or { message: text } for non-JSON text
@@ -397,7 +408,7 @@ class ApiService {
     const response = await fetch(`${this.baseURL}/api/profit`, {
       method: 'GET',
       headers: {
-        ...this.getAuthHeadersFromStorageWithCsrf(),
+        ...await this.getAuthHeadersFromStorageWithCsrf(),
         'Accept': 'application/json'
       },
       mode: 'cors',
@@ -428,7 +439,7 @@ class ApiService {
     const response = await fetch(`${this.baseURL}/api/addAlert`, {
       method: 'POST',
       headers: {
-        ...this.getAuthHeadersFromStorageWithCsrf(),
+        ...await this.getAuthHeadersFromStorageWithCsrf(),
         'metalSymbol': metalSymbol,
         'expression': expression,
         'frequency': frequency,
@@ -460,7 +471,7 @@ class ApiService {
     const response = await fetch(`${this.baseURL}/api/getAlerts`, {
       method: 'GET',
       headers: {
-        ...this.getAuthHeadersFromStorageWithCsrf(),
+        ...await this.getAuthHeadersFromStorageWithCsrf(),
         'Accept': 'application/json'
       },
       mode: 'cors',
@@ -489,7 +500,7 @@ class ApiService {
     const response = await fetch(`${this.baseURL}/api/purchase`, {
       method: 'POST',
       headers: {
-        ...this.getAuthHeadersFromStorageWithCsrf(),
+        ...await this.getAuthHeadersFromStorageWithCsrf(),
         'metalAmount': metalAmount.toString(),
         'metalSymbol': metalSymbol,
         'cost': cost.toString(),
@@ -589,7 +600,7 @@ class ApiService {
   }
 
   async sellMetal(amount, symbol, price) {
-    const authHeaders = this.getAuthHeadersFromStorageWithCsrf();
+    const authHeaders = await this.getAuthHeadersFromStorageWithCsrf();
     console.log('Sell API - Auth headers:', authHeaders);
     console.log('Sell API - Token from storage:', this.getToken());
     
@@ -620,7 +631,7 @@ class ApiService {
   }
 
   async getNotificationPeriod() {
-    const authHeaders = this.getAuthHeadersFromStorageWithCsrf();
+    const authHeaders = await this.getAuthHeadersFromStorageWithCsrf();
     console.log('Get Notification API - Auth headers:', authHeaders);
     console.log('Get Notification API - Token from storage:', this.getToken());
     
@@ -654,7 +665,7 @@ class ApiService {
     const response = await fetch(`${this.baseURL}/api/setNotificationPeriod`, {
       method: 'PUT',
       headers: {
-        ...this.getAuthHeadersFromStorageWithCsrf(),
+        ...await this.getAuthHeadersFromStorageWithCsrf(),
         'period': days.toString(),
         'Accept': 'application/json'
       },
@@ -680,7 +691,7 @@ class ApiService {
     const response = await fetch(`${this.baseURL}/api/deleteAccountPreparation`, {
       method: 'POST',
       headers: {
-        ...this.getAuthHeadersFromStorageWithCsrf(),
+        ...await this.getAuthHeadersFromStorageWithCsrf(),
         'Accept': 'application/json'
       },
       mode: 'cors',
@@ -704,7 +715,7 @@ class ApiService {
     const response = await fetch(`${this.baseURL}/api/deleteAccount`, {
       method: 'DELETE',
       headers: {
-        ...this.getAuthHeadersFromStorageWithCsrf(),
+        ...await this.getAuthHeadersFromStorageWithCsrf(),
         'password': password,
         'code': code,
         'Accept': 'application/json'

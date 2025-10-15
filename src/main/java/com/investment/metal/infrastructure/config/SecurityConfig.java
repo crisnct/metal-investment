@@ -92,7 +92,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf
                 .csrfTokenRequestHandler(requestHandler)
                 .csrfTokenRepository(csrfTokenRepository)
-                .ignoringRequestMatchers("/login", "/userRegistration", "/validateAccount", "/resetPassword", "/changePassword")
+                .ignoringRequestMatchers("/login", "/userRegistration", "/validateAccount", "/resetPassword", "/changePassword", "/csrf-token")
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint()))
