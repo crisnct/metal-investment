@@ -11,7 +11,10 @@ class ApiService {
   // Helper method to get CSRF token from API endpoint
   async getCsrfToken() {
     try {
+      console.log('=== CSRF TOKEN FETCH START ===');
       console.log('Fetching CSRF token from /csrf-token endpoint');
+      console.log('Base URL:', this.baseURL);
+      console.log('Full URL:', `${this.baseURL}/csrf-token`);
       
       const response = await fetch(`${this.baseURL}/csrf-token`, {
         method: 'GET',
@@ -24,19 +27,24 @@ class ApiService {
       });
       
       console.log('CSRF token response status:', response.status);
+      console.log('CSRF token response headers:', Object.fromEntries(response.headers.entries()));
       
       if (response.ok) {
         const data = await response.json();
+        console.log('CSRF token response data:', data);
         console.log('CSRF token received:', data.token ? 'YES' : 'NO');
         console.log('CSRF token value:', data.token ? data.token.substring(0, 10) + '...' : 'null');
+        console.log('=== CSRF TOKEN FETCH SUCCESS ===');
         return data.token;
       } else {
         const errorText = await response.text();
         console.error('CSRF token request failed:', response.status, errorText);
+        console.log('=== CSRF TOKEN FETCH FAILED ===');
         throw new Error(`CSRF token request failed: ${response.status} ${errorText}`);
       }
     } catch (error) {
       console.error('Failed to get CSRF token:', error);
+      console.log('=== CSRF TOKEN FETCH ERROR ===');
       throw error;
     }
   }
@@ -51,18 +59,30 @@ class ApiService {
 
   // Helper method to get auth headers with CSRF token (async version)
   async getAuthHeadersWithCsrf(token) {
+    console.log('getAuthHeadersWithCsrf called with token:', token ? 'EXISTS' : 'MISSING');
+    
     const headers = {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
     };
     
+    console.log('Base headers created:', Object.keys(headers));
+    
     // Add CSRF token if available
-    const csrfToken = await this.getCsrfToken();
-    if (csrfToken) {
-      headers['X-XSRF-TOKEN'] = csrfToken;
-      console.log('CSRF token added to headers:', csrfToken.substring(0, 10) + '...');
-    } else {
-      console.warn('No CSRF token available - request may fail with 403');
+    console.log('Attempting to fetch CSRF token...');
+    try {
+      const csrfToken = await this.getCsrfToken();
+      console.log('CSRF token fetch result:', csrfToken ? 'SUCCESS' : 'FAILED');
+      
+      if (csrfToken) {
+        headers['X-XSRF-TOKEN'] = csrfToken;
+        console.log('CSRF token added to headers:', csrfToken.substring(0, 10) + '...');
+      } else {
+        console.warn('No CSRF token available - request may fail with 403');
+      }
+    } catch (error) {
+      console.error('Error fetching CSRF token:', error);
+      console.warn('Proceeding without CSRF token - request may fail with 403');
     }
     
     console.log('Final headers for API request:', Object.keys(headers));
@@ -83,7 +103,16 @@ class ApiService {
   // Helper method to get auth headers with CSRF token from storage (async)
   async getAuthHeadersFromStorageWithCsrf() {
     const token = this.getToken();
-    return token ? await this.getAuthHeadersWithCsrf(token) : {};
+    console.log('getAuthHeadersFromStorageWithCsrf - Token from storage:', token ? 'EXISTS' : 'MISSING');
+    console.log('getAuthHeadersFromStorageWithCsrf - Token value:', token ? token.substring(0, 20) + '...' : 'null');
+    
+    if (token) {
+      console.log('User has token, fetching CSRF token...');
+      return await this.getAuthHeadersWithCsrf(token);
+    } else {
+      console.warn('No user token found - user may not be logged in');
+      return {};
+    }
   }
 
   // Safely parse JSON; returns null for empty body, or { message: text } for non-JSON text
@@ -500,24 +529,34 @@ class ApiService {
 
   async recordPurchase(metalAmount, metalSymbol, cost) {
     try {
+      console.log('=== PURCHASE REQUEST START ===');
       console.log('Attempting to record purchase with CSRF protection');
+      console.log('Purchase data:', { metalAmount, metalSymbol, cost });
+      
       const headers = await this.getAuthHeadersFromStorageWithCsrf();
       console.log('Headers for purchase request:', Object.keys(headers));
+      console.log('Headers details:', headers);
+      
+      const fullHeaders = {
+        ...headers,
+        'metalAmount': metalAmount.toString(),
+        'metalSymbol': metalSymbol,
+        'cost': cost.toString(),
+        'Accept': 'application/json'
+      };
+      
+      console.log('Full headers being sent:', fullHeaders);
+      console.log('Request URL:', `${this.baseURL}/api/purchase`);
       
       const response = await fetch(`${this.baseURL}/api/purchase`, {
         method: 'POST',
-        headers: {
-          ...headers,
-          'metalAmount': metalAmount.toString(),
-          'metalSymbol': metalSymbol,
-          'cost': cost.toString(),
-          'Accept': 'application/json'
-        },
+        headers: fullHeaders,
         mode: 'cors',
         credentials: 'include'
       });
       
       console.log('Purchase response status:', response.status);
+      console.log('Purchase response headers:', Object.fromEntries(response.headers.entries()));
       
       if (!response.ok) {
         const rawText = await response.text();
@@ -541,24 +580,6 @@ class ApiService {
       console.error('Purchase request failed:', error);
       throw error;
     }
-  }
-    if (!response.ok) {
-      const rawText = await response.text();
-      let message = rawText;
-      try {
-        if (rawText) {
-          const json = JSON.parse(rawText);
-          message = json?.message || json?.error || rawText;
-        }
-      } catch (_) {}
-      if (response.status === 401 || response.status === 403) {
-        message = 'Please log in to continue.';
-      }
-      const error = new Error(message || 'Request failed');
-      error.status = response.status;
-      throw error;
-    }
-    return await this.parseJsonSafely(response);
   }
 
   async resetPassword(email) {
