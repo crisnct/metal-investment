@@ -97,7 +97,7 @@ class DeleteAccountIntegrationTest {
 
         try (MockedStatic<Util> utilMock = mockStatic(Util.class)) {
             utilMock.when(() -> Util.getTokenFromRequest(any())).thenReturn("valid-token");
-            when(loginService.getLogin("valid-token")).thenReturn(testLogin);
+            when(loginService.getLoginForDeletion("valid-token")).thenReturn(testLogin);
             when(accountService.findById(1)).thenReturn(testUser);
             when(passwordEncoder.matches(password, testUser.getPassword())).thenReturn(true);
             doNothing().when(accountService).deleteUserAccount(1, 123456);
@@ -121,7 +121,7 @@ class DeleteAccountIntegrationTest {
 
         try (MockedStatic<Util> utilMock = mockStatic(Util.class)) {
             utilMock.when(() -> Util.getTokenFromRequest(any())).thenReturn("valid-token");
-            when(loginService.getLogin("valid-token")).thenReturn(testLogin);
+            when(loginService.getLoginForDeletion("valid-token")).thenReturn(testLogin);
             when(accountService.findById(1)).thenReturn(testUser);
             when(passwordEncoder.matches(password, testUser.getPassword())).thenReturn(false);
 
@@ -142,7 +142,7 @@ class DeleteAccountIntegrationTest {
 
         try (MockedStatic<Util> utilMock = mockStatic(Util.class)) {
             utilMock.when(() -> Util.getTokenFromRequest(any())).thenReturn("valid-token");
-            when(loginService.getLogin("valid-token")).thenReturn(testLogin);
+            when(loginService.getLoginForDeletion("valid-token")).thenReturn(testLogin);
             when(accountService.findById(1)).thenReturn(testUser);
             when(passwordEncoder.matches(password, testUser.getPassword())).thenReturn(true);
 
@@ -163,7 +163,7 @@ class DeleteAccountIntegrationTest {
 
         try (MockedStatic<Util> utilMock = mockStatic(Util.class)) {
             utilMock.when(() -> Util.getTokenFromRequest(any())).thenReturn("invalid-token");
-            when(loginService.getLogin("invalid-token")).thenReturn(null);
+            when(loginService.getLoginForDeletion("invalid-token")).thenReturn(null);
 
             // When & Then
             assertThrows(NullPointerException.class, () -> {
@@ -182,7 +182,7 @@ class DeleteAccountIntegrationTest {
 
         try (MockedStatic<Util> utilMock = mockStatic(Util.class)) {
             utilMock.when(() -> Util.getTokenFromRequest(any())).thenReturn("valid-token");
-            when(loginService.getLogin("valid-token")).thenReturn(testLogin);
+            when(loginService.getLoginForDeletion("valid-token")).thenReturn(testLogin);
             when(accountService.findById(1)).thenReturn(null);
 
             // When & Then
@@ -202,7 +202,7 @@ class DeleteAccountIntegrationTest {
 
         try (MockedStatic<Util> utilMock = mockStatic(Util.class)) {
             utilMock.when(() -> Util.getTokenFromRequest(any())).thenReturn("valid-token");
-            when(loginService.getLogin("valid-token")).thenReturn(testLogin);
+            when(loginService.getLoginForDeletion("valid-token")).thenReturn(testLogin);
             when(accountService.findById(1)).thenReturn(testUser);
             when(passwordEncoder.matches(password, testUser.getPassword())).thenReturn(true);
             doNothing().when(accountService).deleteUserAccount(1, 123456);
@@ -227,7 +227,7 @@ class DeleteAccountIntegrationTest {
 
         try (MockedStatic<Util> utilMock = mockStatic(Util.class)) {
             utilMock.when(() -> Util.getTokenFromRequest(any())).thenReturn("valid-token");
-            when(loginService.getLogin("valid-token")).thenReturn(testLogin);
+            when(loginService.getLoginForDeletion("valid-token")).thenReturn(testLogin);
             when(accountService.findById(1)).thenReturn(testUser);
             when(passwordEncoder.matches(password, testUser.getPassword())).thenReturn(true);
             doNothing().when(accountService).deleteUserAccount(1, 123456);
@@ -248,7 +248,7 @@ class DeleteAccountIntegrationTest {
 
         try (MockedStatic<Util> utilMock = mockStatic(Util.class)) {
             utilMock.when(() -> Util.getTokenFromRequest(any())).thenReturn("valid-token");
-            when(loginService.getLogin("valid-token")).thenReturn(testLogin);
+            when(loginService.getLoginForDeletion("valid-token")).thenReturn(testLogin);
             when(accountService.findById(1)).thenReturn(testUser);
             when(passwordEncoder.matches(password, testUser.getPassword())).thenReturn(true);
             doNothing().when(accountService).deleteUserAccount(1, 123456);
@@ -272,7 +272,7 @@ class DeleteAccountIntegrationTest {
 
         try (MockedStatic<Util> utilMock = mockStatic(Util.class)) {
             utilMock.when(() -> Util.getTokenFromRequest(any())).thenReturn("valid-token");
-            when(loginService.getLogin("valid-token")).thenReturn(testLogin);
+            when(loginService.getLoginForDeletion("valid-token")).thenReturn(testLogin);
             when(accountService.findById(1)).thenReturn(testUser);
             when(passwordEncoder.matches(password, testUser.getPassword())).thenReturn(true);
             doNothing().when(accountService).deleteUserAccount(1, 123456);
@@ -281,7 +281,7 @@ class DeleteAccountIntegrationTest {
             protectedApiController.deleteAccount(password, code);
 
             // Then
-            verify(loginService).getLogin("valid-token");
+            verify(loginService).getLoginForDeletion("valid-token");
             verify(accountService).findById(1);
             verify(passwordEncoder).matches(password, testUser.getPassword());
             verify(accountService).deleteUserAccount(1, 123456);

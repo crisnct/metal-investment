@@ -727,9 +727,9 @@ public class ProtectedApiController {
             @Parameter(description = "Confirmation code for account deletion", required = true)
             @RequestHeader("code") final String code
     ) {
-        // Extract authenticated user from JWT token
+        // Extract authenticated user from JWT token (bypass validation for account deletion)
         String token = Util.getTokenFromRequest(request);
-        final Login loginEntity = this.loginService.getLogin(token);
+        final Login loginEntity = this.loginService.getLoginForDeletion(token);
         Objects.requireNonNull(loginEntity, "User must be authenticated");
 
         // Get user details

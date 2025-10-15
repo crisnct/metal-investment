@@ -207,4 +207,26 @@ public class LoginService extends AbstractService {
         return this.loginRepository.findByUserId(userId).orElse(null);
     }
 
+    /**
+     * Get login entity by token without validation checks.
+     * Used for account deletion where validation status should not matter.
+     * 
+     * @param rawToken the raw JWT token
+     * @return Login entity if found, null otherwise
+     */
+    public Login getLoginForDeletion(String rawToken) {
+        Optional<Login> loginOp = this.loginRepository.findByLoginToken(encryptionService.encrypt(rawToken));
+        if (loginOp.isPresent()) {
+            Login login = loginOp.get();
+            // Check if token is expired
+            Timestamp currentTime = new Timestamp(System.currentTimeMillis());
+            if (login.getTokenExpireTime() != null && login.getTokenExpireTime().before(currentTime)) {
+                throw exceptionService.createException(MessageKey.EXPIRED_TOKEN);
+            }
+            return login;
+        } else {
+            throw exceptionService.createException(MessageKey.WRONG_TOKEN);
+        }
+    }
+
 }
