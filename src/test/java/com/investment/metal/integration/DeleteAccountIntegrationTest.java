@@ -8,6 +8,7 @@ import com.investment.metal.infrastructure.persistence.entity.Login;
 import com.investment.metal.infrastructure.service.AccountService;
 import com.investment.metal.infrastructure.service.LoginService;
 import com.investment.metal.infrastructure.exception.ExceptionService;
+import com.investment.metal.infrastructure.validation.ValidationService;
 import com.investment.metal.infrastructure.util.Util;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,6 +37,7 @@ class DeleteAccountIntegrationTest {
     private LoginService loginService;
     private PasswordEncoder passwordEncoder;
     private ExceptionService exceptionService;
+    private ValidationService validationService;
     private Customer testUser;
     private Login testLogin;
 
@@ -49,6 +51,7 @@ class DeleteAccountIntegrationTest {
         loginService = mock(LoginService.class);
         passwordEncoder = mock(PasswordEncoder.class);
         exceptionService = mock(ExceptionService.class);
+        validationService = mock(ValidationService.class);
 
         // Inject dependencies using reflection
         try {
@@ -67,6 +70,10 @@ class DeleteAccountIntegrationTest {
             java.lang.reflect.Field exceptionServiceField = ProtectedApiController.class.getDeclaredField("exceptionService");
             exceptionServiceField.setAccessible(true);
             exceptionServiceField.set(protectedApiController, exceptionService);
+
+            java.lang.reflect.Field validationServiceField = ProtectedApiController.class.getDeclaredField("validationService");
+            validationServiceField.setAccessible(true);
+            validationServiceField.set(protectedApiController, validationService);
         } catch (Exception e) {
             fail("Failed to inject dependencies: " + e.getMessage());
         }
@@ -89,6 +96,10 @@ class DeleteAccountIntegrationTest {
             }
             return null;
         }).when(exceptionService).check(anyBoolean(), any(), any());
+
+        // Configure ValidationService mock to not throw exceptions for valid inputs
+        doNothing().when(validationService).validatePassword(anyString());
+        doNothing().when(validationService).validateString(anyString(), anyInt(), anyString());
     }
 
     @Test

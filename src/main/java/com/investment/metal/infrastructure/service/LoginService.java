@@ -17,6 +17,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service for managing user login and authentication operations.
+ * Handles JWT token generation, validation, and user session management.
+ * 
+ * @author cristian.tone
+ */
 @Service
 public class LoginService extends AbstractService {
 

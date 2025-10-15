@@ -17,6 +17,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Service for managing user accounts and related operations.
+ * Handles user registration, authentication, and account management.
+ * 
+ * @author cristian.tone
+ */
 @Service
 public class AccountService {
 

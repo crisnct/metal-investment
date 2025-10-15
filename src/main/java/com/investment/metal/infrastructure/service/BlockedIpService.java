@@ -13,6 +13,12 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service for managing blocked IP addresses and IP-based security.
+ * Handles IP blocking, unblocking, and IP-based access control.
+ * 
+ * @author cristian.tone
+ */
 @Service
 public class BlockedIpService extends AbstractService {
 

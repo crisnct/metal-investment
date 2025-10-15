@@ -43,6 +43,8 @@ import org.springframework.web.bind.annotation.RestController;
  * REST Controller for public API endpoints that don't require authentication.
  * Handles user registration, login, password reset, and account validation.
  * Follows Clean Architecture principles by keeping controller concerns separate.
+ * 
+ * @author cristian.tone
  */
 @RestController
 @Tag(name = "Public API", description = "Public endpoints with no authentication")
