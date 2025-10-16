@@ -59,6 +59,9 @@ public class SecurityConfig {
 
     // CustomAuthenticationProvider is discovered as a @Component
 
+    @Value("${metalinvestment.csrf.cookie-samesite:Strict}")
+    private String csrfCookieSameSite;
+
     @Bean
     public CookieCsrfTokenRepository cookieCsrfTokenRepository() {
         CookieCsrfTokenRepository repository = CookieCsrfTokenRepository.withHttpOnlyFalse();
@@ -66,7 +69,12 @@ public class SecurityConfig {
         repository.setCookieName("XSRF-TOKEN");
         repository.setHeaderName("X-XSRF-TOKEN");
         repository.setParameterName("_csrf");
-        repository.setCookieCustomizer(cookie -> cookie.secure(csrfCookieSecure).sameSite("Strict"));
+        repository.setCookieCustomizer(cookie -> {
+            cookie.path("/");
+            cookie.sameSite(csrfCookieSameSite);
+            boolean secureFlag = csrfCookieSecure || "None".equalsIgnoreCase(csrfCookieSameSite);
+            cookie.secure(secureFlag);
+        });
         return repository;
     }
 
