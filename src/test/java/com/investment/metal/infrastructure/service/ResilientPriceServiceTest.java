@@ -2,8 +2,7 @@ package com.investment.metal.infrastructure.service;
 
 import com.investment.metal.domain.model.CurrencyType;
 import com.investment.metal.domain.model.MetalType;
-import com.investment.metal.infrastructure.persistence.entity.MetalPrice;
-import com.investment.metal.infrastructure.persistence.repository.MetalPriceRepository;
+import com.investment.metal.domain.repository.MetalPriceRepository;
 import com.investment.metal.infrastructure.service.price.ExternalMetalPriceReader;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
@@ -50,6 +49,7 @@ class ResilientPriceServiceTest {
     private PriceFallbackService fallbackService;
 
     private MetalType testMetalType;
+
     private final double expectedPrice = 2000.0;
 
     @BeforeEach

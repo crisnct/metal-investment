@@ -2,19 +2,18 @@ package com.investment.metal.application.service;
 
 import com.investment.metal.application.dto.UserMetalInfoDto;
 import com.investment.metal.domain.model.CurrencyType;
+import com.investment.metal.domain.model.MetalPrice;
+import com.investment.metal.domain.model.MetalPurchase;
 import com.investment.metal.domain.model.MetalType;
+import com.investment.metal.domain.repository.MetalPriceRepository;
 import com.investment.metal.infrastructure.persistence.entity.Currency;
-import com.investment.metal.infrastructure.persistence.entity.MetalPrice;
-import com.investment.metal.infrastructure.persistence.entity.Purchase;
-import com.investment.metal.infrastructure.persistence.repository.MetalPriceRepository;
 import com.investment.metal.infrastructure.service.CurrencyService;
 import com.investment.metal.infrastructure.service.ResilientPriceService;
 import com.investment.metal.infrastructure.service.RevolutService;
-import com.investment.metal.infrastructure.service.price.ExternalMetalPriceReader;
 import com.investment.metal.infrastructure.util.Util;
 import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.util.ArrayList;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -35,7 +34,6 @@ public class MetalPriceService {
     // Threshold for cleaning up old price entries (14 days)
     public static final long THRESHOLD_TOO_OLD_ENTITIES = TimeUnit.DAYS.toMillis(14);
 
-    private final ExternalMetalPriceReader priceReader;
     private final ResilientPriceService resilientPriceService;
     private final MetalPriceRepository metalPriceRepository;
     private final RevolutService revolutService;
@@ -93,9 +91,7 @@ public class MetalPriceService {
      * @return the latest metal price entity or null if not found
      */
     public MetalPrice getMetalPrice(MetalType metalType) {
-        Optional<List<MetalPrice>> price = this.metalPriceRepository
-            .findByMetalSymbol(metalType.getSymbol());
-        return price.map(metalPrices -> metalPrices.get(0)).orElse(null);
+        return this.metalPriceRepository.findLatestByMetalType(metalType).orElse(null);
     }
 
     /**
@@ -105,7 +101,8 @@ public class MetalPriceService {
      * @return optional list of metal prices
      */
     public Optional<List<MetalPrice>> getMetalPriceAll(MetalType metalType) {
-        return this.metalPriceRepository.findByMetalSymbol(metalType.getSymbol());
+        List<MetalPrice> prices = this.metalPriceRepository.findAllByMetalType(metalType);
+        return prices.isEmpty() ? Optional.empty() : Optional.of(prices);
     }
 
     /**
@@ -114,7 +111,7 @@ public class MetalPriceService {
      * @param purchase the purchase to calculate profit for
      * @return user metal info DTO with profit calculations
      */
-    public UserMetalInfoDto calculatesUserProfit(Purchase purchase) {
+    public UserMetalInfoDto calculatesUserProfit(MetalPurchase purchase) {
         CurrencyType currencyType = this.resilientPriceService.getCurrencyType();
         Currency currency = this.currencyService.findBySymbol(currencyType);
         double currencyToRonRate = currency.getRon();
@@ -126,14 +123,15 @@ public class MetalPriceService {
         // Calculate current value with Revolut markup
         double revolutGoldPriceKg = metalPriceNowKg * (revolutProfitPercentages + 1) * currencyToRonRate;
         double revolutGoldPriceOunce = revolutGoldPriceKg * Util.OUNCE;
-        double costNowUser = revolutGoldPriceOunce * purchase.getAmount();
-        double profitRevolut = costNowUser - purchase.getCost();
+        double amountPurchased = purchase.getAmount().doubleValue();
+        double costNowUser = revolutGoldPriceOunce * amountPurchased;
+        double profitRevolut = costNowUser - purchase.getCost().doubleValue();
         
         return UserMetalInfoDto
                 .builder()
-                .metalSymbol(purchase.getMetalSymbol())
-                .amountPurchased(purchase.getAmount())
-                .costPurchased(purchase.getCost())
+                .metalSymbol(purchase.getMetalType().getSymbol())
+                .amountPurchased(amountPurchased)
+                .costPurchased(purchase.getCost().doubleValue())
                 .costNow(costNowUser)
                 .profit(profitRevolut)
                 .build();
@@ -146,8 +144,10 @@ public class MetalPriceService {
      * @param profit the desired profit amount
      * @return the calculated Revolut price per unit
      */
-    public double calculatesRevolutPrice(Purchase purchase, double profit) {
-        return (profit + purchase.getCost()) / purchase.getAmount();
+    public double calculatesRevolutPrice(MetalPurchase purchase, double profit) {
+        double cost = purchase.getCost().doubleValue();
+        double amount = purchase.getAmount().doubleValue();
+        return (profit + cost) / amount;
     }
 
     /**
@@ -157,30 +157,26 @@ public class MetalPriceService {
      * @param price the price to save
      */
     public void save(MetalType metalType, double price) {
-        // Clean up old entries (older than 14 days)
-        Timestamp timeThreshold = new Timestamp(
-            System.currentTimeMillis() - THRESHOLD_TOO_OLD_ENTITIES
-        );
-        
-        List<MetalPrice> tooOldEntities = this.metalPriceRepository
-                .findByMetalSymbol(metalType.getSymbol())
-                .orElse(new ArrayList<>())
-                .stream()
-                .filter(p -> p.getTime().before(timeThreshold))
+        LocalDateTime cutoff = LocalDateTime.now().minus(Duration.ofMillis(THRESHOLD_TOO_OLD_ENTITIES));
+
+        List<MetalPrice> existingPrices = this.metalPriceRepository.findAllByMetalType(metalType);
+        List<MetalPrice> tooOldEntities = existingPrices.stream()
+                .filter(p -> p.getTimestamp() != null && p.getTimestamp().isBefore(cutoff))
                 .collect(Collectors.toList());
-                
+
         if (!tooOldEntities.isEmpty()) {
             this.metalPriceRepository.deleteAll(tooOldEntities);
-            log.debug("Cleaned up {} old price entries for {}", 
-                     tooOldEntities.size(), metalType);
+            log.debug("Cleaned up {} old price entries for {}",
+                    tooOldEntities.size(), metalType);
         }
 
-        // Save new price entry
-        MetalPrice entity = new MetalPrice();
-        entity.setMetalSymbol(metalType.getSymbol());
-        entity.setPrice(price);
-        entity.setTime(new Timestamp(System.currentTimeMillis()));
-        this.metalPriceRepository.save(entity);
+        MetalPrice metalPrice = MetalPrice.builder()
+                .metalType(metalType)
+                .price(BigDecimal.valueOf(price))
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        this.metalPriceRepository.save(metalPrice);
         
         log.debug("Saved price for {}: {}", metalType, price);
     }

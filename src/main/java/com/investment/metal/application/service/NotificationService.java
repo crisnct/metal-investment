@@ -4,18 +4,15 @@ import com.investment.metal.MessageKey;
 import com.investment.metal.application.dto.UserMetalInfoDto;
 import com.investment.metal.domain.exception.BusinessException;
 import com.investment.metal.domain.model.MetalPurchase;
+import com.investment.metal.domain.model.Notification;
 import com.investment.metal.domain.model.User;
+import com.investment.metal.domain.repository.NotificationRepository;
 import com.investment.metal.infrastructure.exception.ExceptionService;
-import com.investment.metal.infrastructure.mapper.MetalPurchaseMapper;
 import com.investment.metal.infrastructure.mapper.UserMapper;
 import com.investment.metal.infrastructure.persistence.entity.Customer;
-import com.investment.metal.infrastructure.persistence.entity.Notification;
-import com.investment.metal.infrastructure.persistence.entity.Purchase;
-import com.investment.metal.infrastructure.persistence.repository.NotificationRepository;
 import com.investment.metal.infrastructure.service.AccountService;
 import com.investment.metal.infrastructure.service.EmailService;
-import java.sql.Timestamp;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,12 +38,6 @@ public class NotificationService {
     @Autowired
     private UserMapper userMapper;
 
-    /**
-     * Mapper for converting between metal purchase domain models and entities
-     */
-    @Autowired
-    private MetalPurchaseMapper metalPurchaseMapper;
-
     public static final long MIN_NOTIFICATION_PERIOD = TimeUnit.DAYS.toMillis(1);
 
     @Autowired
@@ -65,13 +56,12 @@ public class NotificationService {
     private NotificationRepository notificationRepository;
 
     public void save(Integer userId, int period) {
-        Notification entity = this.notificationRepository
+        Notification notification = this.notificationRepository
                 .findByUserId(userId)
-                .orElse(new Notification());
-        entity.setUserId(userId);
-        entity.setFrequency(period);
-        entity.setLastTimeNotified(new Timestamp(System.currentTimeMillis()));
-        this.notificationRepository.save(entity);
+                .orElseGet(() -> Notification.builder().userId(userId).build());
+        notification.setFrequency(period);
+        notification.setLastTimeNotified(LocalDateTime.now());
+        this.notificationRepository.save(notification);
     }
 
     public void notifyUser(Integer userId) {
@@ -90,9 +80,7 @@ public class NotificationService {
         } else {
             Map<String, UserMetalInfoDto> userProfit = new HashMap<>();
             for (MetalPurchase purchase : purchases) {
-                // Convert domain model to entity for the service that still expects entities
-                Purchase purchaseEntity = this.metalPurchaseMapper.toEntity(purchase);
-                final UserMetalInfoDto info = this.metalPricesService.calculatesUserProfit(purchaseEntity);
+                final UserMetalInfoDto info = this.metalPricesService.calculatesUserProfit(purchase);
                 userProfit.put(info.getMetalSymbol(), info);
             }
             // Convert User domain model to Customer entity for email service
@@ -110,10 +98,8 @@ public class NotificationService {
     }
 
     private void checkNotification(Notification notification) {
-        final Instant currentTime = (new Timestamp(System.currentTimeMillis())).toInstant();
-        Instant notificationLastTime = notification.getLastTimeNotified().toInstant();
-        Instant nextTimeNotify = notificationLastTime.plusMillis(notification.getFrequency());
-        if (nextTimeNotify.isBefore(currentTime)) {
+        if (notification.getLastTimeNotified() == null ||
+                notification.getLastTimeNotified().plusDays(notification.getFrequency()).isBefore(LocalDateTime.now())) {
             try {
                 this.notifyUser(notification.getUserId());
                 this.save(notification.getUserId(), notification.getFrequency());
@@ -126,11 +112,7 @@ public class NotificationService {
     public int getNotificationFrequency(Integer userId) {
         final Notification notification = this.notificationRepository
                 .findByUserId(userId)
-                .orElseGet(() -> {
-                    Notification empty = new Notification();
-                    empty.setFrequency(0);
-                    return empty;
-                });
+                .orElseGet(() -> Notification.builder().frequency(0).build());
         return notification.getFrequency();
     }
 }

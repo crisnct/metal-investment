@@ -24,12 +24,10 @@ import com.investment.metal.infrastructure.dto.AppStatusInfoDto;
 import com.investment.metal.infrastructure.dto.SimpleMessageDto;
 import com.investment.metal.infrastructure.exception.ExceptionService;
 import com.investment.metal.infrastructure.mapper.DtoMapper;
-import com.investment.metal.infrastructure.mapper.MetalPurchaseMapper;
 import com.investment.metal.infrastructure.persistence.entity.Currency;
 import com.investment.metal.infrastructure.persistence.entity.Customer;
 import com.investment.metal.infrastructure.persistence.entity.Login;
-import com.investment.metal.infrastructure.persistence.entity.MetalPrice;
-import com.investment.metal.infrastructure.persistence.entity.Purchase;
+import com.investment.metal.domain.model.MetalPrice;
 import com.investment.metal.infrastructure.security.AuthorizationService;
 import com.investment.metal.infrastructure.service.AccountService;
 import com.investment.metal.infrastructure.service.BannedAccountsService;
@@ -112,9 +110,6 @@ public class ProtectedApiController {
 
     @Autowired
     private NotificationService notificationService;
-
-    @Autowired
-    private MetalPurchaseMapper metalPurchaseMapper;
 
     @Autowired
     private MetalPriceService metalPriceService;
@@ -402,11 +397,7 @@ public class ProtectedApiController {
         final ProfitDto dto = new ProfitDto(user.getUsername());
         List<MetalPurchase> metalPurchases = this.purchaseService.getAllPurchase(loginEntity.getUserId());
         metalPurchases.stream()
-                .map(metalPurchase -> {
-                    // Convert domain model to entity for the service that still expects entities
-                    Purchase purchaseEntity = this.metalPurchaseMapper.toEntity(metalPurchase);
-                    return this.metalPriceService.calculatesUserProfit(purchaseEntity);
-                })
+                .map(this.metalPriceService::calculatesUserProfit)
                 .forEach(dto::addInfo);
 
         return new ResponseEntity<>(dto, HttpStatus.OK);
@@ -605,9 +596,7 @@ public class ProtectedApiController {
         MetalPurchase metalPurchase = this.purchaseService.getPurchase(loginEntity.getUserId(), metalSymbol);
         this.exceptionService.check(metalPurchase == null, MessageKey.INVALID_REQUEST, "the user didn't purchase " + metalSymbol);
 
-        // Convert domain model to entity for the service that still expects entities
-        Purchase purchaseEntity = this.metalPurchaseMapper.toEntity(metalPurchase);
-        double revPrice = this.metalPriceService.calculatesRevolutPrice(purchaseEntity, profit);
+        double revPrice = this.metalPriceService.calculatesRevolutPrice(metalPurchase, profit);
 
         SimpleMessageDto dto = new SimpleMessageDto("If you ant to be notified by Revolut when your profit is %.2f for %s then you would need to set an alert in your Revolut account for %.2f RON",
                 profit, metalSymbol, revPrice);
@@ -766,10 +755,14 @@ public class ProtectedApiController {
         dto.setMetalCurrencyType(this.metalPriceBean.getCurrencyType());
         for (MetalType metalType : MetalType.values()) {
             MetalPrice price = this.metalPriceService.getMetalPrice(metalType);
-            double price1kg = price.getPrice();
+            if (price == null || price.getPrice() == null) {
+                log.warn("Missing price information for metal type {}", metalType);
+                continue;
+            }
+            double price1kg = price.getPrice().doubleValue();
             double ozq = price1kg * Util.OUNCE;
             double revProfit = this.revolutService.getRevolutProfitFor(metalType);
-            double ozqRon = ozq * this.currencyService.findBySymbol(CurrencyType.USD).getRon();
+            double ozqRon = ozq * currency.getRon();
             double revPriceOz = ozqRon * (1 + revProfit);
             final MetalInfoDto mp = MetalInfoDto.builder()
                     .symbol(metalType.getSymbol())

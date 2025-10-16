@@ -2,7 +2,7 @@ package com.investment.metal.infrastructure.service;
 
 import com.investment.metal.domain.model.CurrencyType;
 import com.investment.metal.infrastructure.persistence.entity.Currency;
-import com.investment.metal.infrastructure.persistence.repository.CurrencyRepository;
+import com.investment.metal.infrastructure.persistence.repository.CurrencyJpaRepository;
 import java.sql.Timestamp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 public class CurrencyService extends AbstractService {
 
     @Autowired
-    private CurrencyRepository currencyRepository;
+    private CurrencyJpaRepository currencyRepository;
 
     /**
      * Find currency by symbol.

@@ -4,15 +4,13 @@ import com.investment.metal.application.dto.UserMetalInfoDto;
 import com.investment.metal.domain.model.MetalPurchase;
 import com.investment.metal.domain.model.MetalType;
 import com.investment.metal.infrastructure.exception.ExceptionService;
-import com.investment.metal.infrastructure.mapper.MetalPurchaseMapper;
 import com.investment.metal.infrastructure.persistence.entity.Alert;
 import com.investment.metal.infrastructure.persistence.entity.Customer;
-import com.investment.metal.infrastructure.persistence.entity.MetalPrice;
-import com.investment.metal.infrastructure.persistence.entity.Purchase;
 import com.investment.metal.infrastructure.service.AccountService;
 import com.investment.metal.infrastructure.service.EmailService;
 import com.investment.metal.infrastructure.service.UserProfit;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -46,9 +44,6 @@ public class AlertsTrigger {
 
     @Autowired
     private EmailService emailService;
-
-    @Autowired
-    private MetalPurchaseMapper metalPurchaseMapper;
 
     public void triggerAlerts(MetalType metalType) {
         final Map<Integer, UserProfit> usersProfit = this.calculateUsersProfit(metalType);
@@ -92,25 +87,26 @@ public class AlertsTrigger {
     }
 
     private boolean getIncremental(MetalType metalType, int days, double eps) {
-        Optional<List<MetalPrice>> pricesOp = this.metalPricesService.getMetalPriceAll(metalType);
+        Optional<List<com.investment.metal.domain.model.MetalPrice>> pricesOp = this.metalPricesService.getMetalPriceAll(metalType);
         boolean isInc = false;
         if (pricesOp.isPresent()) {
-            final Timestamp ts = new Timestamp(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(days));
-            List<MetalPrice> prices = pricesOp.get()
+            final LocalDateTime threshold = LocalDateTime.now().minusDays(days);
+            List<com.investment.metal.domain.model.MetalPrice> prices = pricesOp.get()
                     .stream()
-                    .filter(m -> m.getTime().after(ts))
-                    .sorted(Comparator.comparing(MetalPrice::getTime))
+                    .filter(m -> m.getTimestamp() != null && m.getTimestamp().isAfter(threshold))
+                    .sorted(Comparator.comparing(com.investment.metal.domain.model.MetalPrice::getTimestamp))
                     .collect(Collectors.toList());
             double prevPrice = -Double.MAX_VALUE;
             if (prices.size() > 1) {
                 isInc = true;
-                for (MetalPrice price : prices) {
+                for (com.investment.metal.domain.model.MetalPrice price : prices) {
+                    double currentPrice = price.getPrice().doubleValue();
                     double epsPrice = prevPrice * eps / 100.0d;
-                    if (price.getPrice() < prevPrice - epsPrice) {
+                    if (currentPrice < prevPrice - epsPrice) {
                         isInc = false;
                         break;
                     }
-                    prevPrice = price.getPrice();
+                    prevPrice = currentPrice;
                 }
             }
         }
@@ -135,9 +131,7 @@ public class AlertsTrigger {
             double totalCostNow = 0;
             double totalAmount = 0;
             if (metalPurchase != null) {
-                // Convert domain model to entity for the service that still expects entities
-                Purchase purchaseEntity = this.metalPurchaseMapper.toEntity(metalPurchase);
-                final UserMetalInfoDto info = this.metalPricesService.calculatesUserProfit(purchaseEntity);
+                final UserMetalInfoDto info = this.metalPricesService.calculatesUserProfit(metalPurchase);
                 totalProfit += info.getProfit();
                 totalCost += metalPurchase.getCost().doubleValue();
                 totalAmount += metalPurchase.getAmount().doubleValue();

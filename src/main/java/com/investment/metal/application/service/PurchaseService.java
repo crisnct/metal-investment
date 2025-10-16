@@ -4,42 +4,27 @@ import com.investment.metal.MessageKey;
 import com.investment.metal.domain.exception.BusinessException;
 import com.investment.metal.domain.model.MetalPurchase;
 import com.investment.metal.domain.model.MetalType;
-import com.investment.metal.infrastructure.exception.ExceptionService;
-import com.investment.metal.infrastructure.mapper.MetalPurchaseMapper;
-import com.investment.metal.infrastructure.persistence.entity.Purchase;
-import com.investment.metal.infrastructure.persistence.repository.PurchaseRepository;
+import com.investment.metal.domain.repository.PurchaseRepository;
 import java.math.BigDecimal;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
  * Application service for managing metal purchases and sales.
  * Handles business logic for purchasing and selling precious metals.
- * Follows Clean Architecture principles by orchestrating domain and infrastructure concerns.
+ * Follows Domain-Driven Design principles by orchestrating domain aggregates via repositories.
  */
 @Service
 public class PurchaseService {
 
-    /**
-     * Repository for managing purchase data persistence
-     */
-    @Autowired
-    private PurchaseRepository purchaseRepo;
+    private static final int BAD_REQUEST = 400;
 
-    /**
-     * Exception service for handling business exceptions
-     */
-    @Autowired
-    private ExceptionService exceptionService;
+    private final PurchaseRepository purchaseRepository;
 
-    /**
-     * Mapper for converting between domain models and infrastructure entities
-     */
-    @Autowired
-    private MetalPurchaseMapper metalPurchaseMapper;
+    public PurchaseService(PurchaseRepository purchaseRepository) {
+        this.purchaseRepository = purchaseRepository;
+    }
 
     /**
      * Record a new metal purchase for a user.
@@ -51,29 +36,21 @@ public class PurchaseService {
      * @param cost the total cost of the purchase
      */
     public void purchase(Integer userId, double metalAmount, MetalType metalType, double cost) {
-        Optional<Purchase> purchaseOp = this.purchaseRepo.findByUserIdAndMetalSymbol(userId, metalType.getSymbol());
-        final MetalPurchase metalPurchase;
-        if (purchaseOp.isPresent()) {
-            // User already has purchases of this metal type - accumulate amounts and costs
-            MetalPurchase existingPurchase = metalPurchaseMapper.toDomainModel(purchaseOp.get());
-            metalPurchase = existingPurchase.toBuilder()
-                    .amount(existingPurchase.getAmount().add(BigDecimal.valueOf(metalAmount)))
-                    .cost(existingPurchase.getCost().add(BigDecimal.valueOf(cost)))
-                    .build();
-        } else {
-            // First purchase of this metal type for the user
-            metalPurchase = MetalPurchase.builder()
-                    .userId(userId)
-                    .metalType(metalType)
-                    .amount(BigDecimal.valueOf(metalAmount))
-                    .cost(BigDecimal.valueOf(cost))
-                    .purchaseTime(java.time.LocalDateTime.now())
-                    .build();
-        }
-        
-        // Convert domain model to entity and save
-        Purchase purchaseEntity = metalPurchaseMapper.toEntity(metalPurchase);
-        this.purchaseRepo.save(purchaseEntity);
+        MetalPurchase metalPurchase = purchaseRepository
+                .findByUserIdAndMetalSymbol(userId, metalType.getSymbol())
+                .map(existing -> existing.toBuilder()
+                        .amount(existing.getAmount().add(BigDecimal.valueOf(metalAmount)))
+                        .cost(existing.getCost().add(BigDecimal.valueOf(cost)))
+                        .build())
+                .orElseGet(() -> MetalPurchase.builder()
+                        .userId(userId)
+                        .metalType(metalType)
+                        .amount(BigDecimal.valueOf(metalAmount))
+                        .cost(BigDecimal.valueOf(cost))
+                        .purchaseTime(LocalDateTime.now())
+                        .build());
+
+        purchaseRepository.save(metalPurchase);
     }
 
     /**
@@ -88,29 +65,28 @@ public class PurchaseService {
      * @throws BusinessException if the user tries to sell more metal than they own
      */
     public void sell(Integer userId, double metalAmount, MetalType metalType, double price) throws BusinessException {
-        @SuppressWarnings("OptionalGetWithoutIsPresent") final Purchase purchase = this.purchaseRepo.findByUserIdAndMetalSymbol(userId, metalType.getSymbol()).get();
-        
-        // Business rule: User cannot sell more metal than they own
-        this.exceptionService.check(metalAmount > purchase.getAmount(), MessageKey.SELL_MORE_THAN_YOU_HAVE, metalType.getSymbol(), purchase.getAmount());
+        MetalPurchase purchase = purchaseRepository
+                .findByUserIdAndMetalSymbol(userId, metalType.getSymbol())
+                .orElseThrow(() -> new BusinessException(BAD_REQUEST,
+                        MessageKey.INVALID_REQUEST.name() + ": purchase not found"));
 
-        double amount = purchase.getAmount();
-        double newAmount = amount - metalAmount;
-
-        // Calculate the proportional cost reduction based on the amount being sold
-        // This maintains accurate cost basis for remaining holdings
-        double costPerUnit = purchase.getCost() / purchase.getAmount();
-        double costOfSoldAmount = costPerUnit * metalAmount;
-        double newCost = purchase.getCost() - costOfSoldAmount;
-        
-        // Ensure cost never goes negative (safety check)
-        if (newCost < 0) {
-            newCost = 0;
+        if (purchase.getAmount().doubleValue() < metalAmount) {
+            throw new BusinessException(BAD_REQUEST,
+                    MessageKey.SELL_MORE_THAN_YOU_HAVE.name());
         }
-        
-        // Update the purchase record with new amounts
-        purchase.setAmount(newAmount);
-        purchase.setCost(newCost);
-        this.purchaseRepo.save(purchase);
+
+        BigDecimal remainingAmount = purchase.getAmount().subtract(BigDecimal.valueOf(metalAmount));
+        BigDecimal costPerUnit = purchase.getCost()
+                .divide(purchase.getAmount(), 8, java.math.RoundingMode.HALF_UP);
+        BigDecimal costOfSoldAmount = costPerUnit.multiply(BigDecimal.valueOf(metalAmount));
+        BigDecimal remainingCost = purchase.getCost().subtract(costOfSoldAmount).max(BigDecimal.ZERO);
+
+        MetalPurchase updated = purchase.toBuilder()
+                .amount(remainingAmount)
+                .cost(remainingCost)
+                .build();
+
+        purchaseRepository.save(updated);
     }
 
     /**
@@ -121,10 +97,7 @@ public class PurchaseService {
      * @return list of all metal purchases for the user, or empty list if none found
      */
     public List<MetalPurchase> getAllPurchase(Integer userId) {
-        List<Purchase> purchaseEntities = this.purchaseRepo.findByUserId(userId).orElse(new ArrayList<>());
-        return purchaseEntities.stream()
-                .map(metalPurchaseMapper::toDomainModel)
-                .collect(java.util.stream.Collectors.toList());
+        return purchaseRepository.findByUserId(userId);
     }
 
     /**
@@ -135,8 +108,7 @@ public class PurchaseService {
      * @return the metal purchase domain model, or null if not found
      */
     public MetalPurchase getPurchase(Integer userId, String metalSymbol) {
-        Optional<Purchase> purchaseEntity = this.purchaseRepo.findByUserIdAndMetalSymbol(userId, metalSymbol);
-        return purchaseEntity.map(metalPurchaseMapper::toDomainModel).orElse(null);
+        return purchaseRepository.findByUserIdAndMetalSymbol(userId, metalSymbol).orElse(null);
     }
 
 }

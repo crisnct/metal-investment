@@ -8,10 +8,10 @@ import com.investment.metal.infrastructure.persistence.entity.Customer;
 import com.investment.metal.infrastructure.persistence.entity.Login;
 import com.investment.metal.infrastructure.persistence.entity.Purchase;
 import com.investment.metal.infrastructure.persistence.repository.AlertRepository;
-import com.investment.metal.infrastructure.persistence.repository.NotificationRepository;
+import com.investment.metal.infrastructure.persistence.repository.NotificationJpaRepository;
 import com.investment.metal.infrastructure.persistence.repository.CustomerRepository;
 import com.investment.metal.infrastructure.persistence.repository.LoginRepository;
-import com.investment.metal.infrastructure.persistence.repository.PurchaseRepository;
+import com.investment.metal.infrastructure.persistence.repository.PurchaseJpaRepository;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,10 +34,10 @@ public class AccountService {
     private AlertRepository alertRepository;
 
     @Autowired
-    private NotificationRepository notificationRepository;
+    private NotificationJpaRepository notificationRepository;
 
     @Autowired
-    private PurchaseRepository purchaseRepository;
+    private PurchaseJpaRepository purchaseRepository;
 
     @Autowired
     private LoginRepository loginRepository;
