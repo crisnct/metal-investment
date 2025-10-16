@@ -54,6 +54,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.HashMap;
@@ -69,6 +70,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -151,6 +153,9 @@ public class ProtectedApiController {
 
     @Autowired
     private HttpServletRequest request;
+
+    @Autowired
+    private CookieCsrfTokenRepository csrfTokenRepository;
 
 
     /**
@@ -241,12 +246,23 @@ public class ProtectedApiController {
             @ApiResponse(responseCode = "401", description = "Unauthorized - invalid token",
                     content = @Content(schema = @Schema(implementation = SimpleMessageDto.class)))
     })
-    public ResponseEntity<SimpleMessageDto> logout() {
+    public ResponseEntity<SimpleMessageDto> logout(HttpServletResponse response) {
         String token = Util.getTokenFromRequest(request);
         final Login loginEntity = this.loginService.getLogin(token);
         
         // SECURITY FIX: Invalidate all sessions for enhanced security
         this.loginService.invalidateAllUserSessions(loginEntity.getUserId());
+
+        // Remove security cookies (CSRF + session) upon logout
+        this.csrfTokenRepository.saveToken(null, request, response);
+
+        Cookie sessionCookie = new Cookie("JSESSIONID", null);
+        sessionCookie.setPath("/");
+        sessionCookie.setMaxAge(0);
+        sessionCookie.setHttpOnly(true);
+        boolean secureRequest = request.isSecure() || "https".equalsIgnoreCase(request.getHeader("X-Forwarded-Proto"));
+        sessionCookie.setSecure(secureRequest);
+        response.addCookie(sessionCookie);
 
         Customer user = this.accountService.findById(loginEntity.getUserId());
         SimpleMessageDto dto = new SimpleMessageDto("The user %s has been logged out from all devices! Please login again.", user.getUsername());
@@ -919,3 +935,4 @@ public class ProtectedApiController {
         return SecureRandomGenerator.generateConfirmationCode();
     }
 }
+
