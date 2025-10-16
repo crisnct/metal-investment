@@ -5,7 +5,9 @@ import com.investment.metal.infrastructure.persistence.entity.Login;
 import com.investment.metal.infrastructure.service.AccountService;
 import com.investment.metal.infrastructure.service.LoginService;
 import com.investment.metal.infrastructure.security.JwtService;
+import com.investment.metal.domain.exception.BusinessException;
 import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.AbstractUserDetailsAuthenticationProvider;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Component;
  * Follows Clean Architecture principles by keeping security infrastructure concerns separate.
  */
 @Component
+@Slf4j
 public class CustomAuthenticationProvider extends AbstractUserDetailsAuthenticationProvider {
 
     @Autowired
@@ -82,6 +85,9 @@ public class CustomAuthenticationProvider extends AbstractUserDetailsAuthenticat
             User user = new User(customer.getUsername(), customer.getPassword(), true, true, true, true,
                     AuthorityUtils.createAuthorityList("USER"));
             return Optional.of(user);
+        } catch (BusinessException ex) {
+            log.error("Business exception while building user from login record: {}", ex.getMessage());
+            return Optional.empty();
         } catch (Exception ex) {
             return Optional.empty();
         }

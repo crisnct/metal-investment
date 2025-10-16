@@ -15,6 +15,7 @@ import com.investment.metal.infrastructure.persistence.entity.Customer;
 import com.investment.metal.infrastructure.persistence.entity.Login;
 import com.investment.metal.infrastructure.persistence.entity.Purchase;
 import com.investment.metal.infrastructure.persistence.repository.AlertRepository;
+import com.investment.metal.infrastructure.persistence.repository.NotificationRepository;
 import com.investment.metal.infrastructure.persistence.repository.CustomerRepository;
 import com.investment.metal.infrastructure.persistence.repository.LoginRepository;
 import com.investment.metal.infrastructure.persistence.repository.PurchaseRepository;
@@ -46,6 +47,9 @@ class AccountServiceTest {
 
     @Mock
     private LoginRepository loginRepository;
+
+    @Mock
+    private NotificationRepository notificationRepository;
 
     @Mock
     private ExceptionService exceptionService;
@@ -115,6 +119,7 @@ class AccountServiceTest {
         verify(alertRepository).deleteAll(userAlerts);
         verify(purchaseRepository).deleteAll(userPurchases);
         verify(loginRepository).delete(testLogin);
+        verify(notificationRepository).deleteByUserId(userId);
         verify(loginService).invalidateAllUserSessions(userId);
         verify(customerRepository).delete(testUser);
     }
@@ -154,6 +159,7 @@ class AccountServiceTest {
         verify(alertRepository, never()).deleteAll(any());
         verify(purchaseRepository, never()).deleteAll(any());
         verify(loginRepository, never()).delete(any());
+        verify(notificationRepository).deleteByUserId(userId);
         verify(loginService).invalidateAllUserSessions(userId);
         verify(customerRepository).delete(testUser);
     }
@@ -180,6 +186,7 @@ class AccountServiceTest {
         verify(alertRepository).deleteAll(userAlerts);
         verify(purchaseRepository).deleteAll(userPurchases);
         verify(loginRepository, never()).delete(any());
+        verify(notificationRepository).deleteByUserId(userId);
         verify(loginService).invalidateAllUserSessions(userId);
         verify(customerRepository).delete(testUser);
     }
@@ -203,6 +210,7 @@ class AccountServiceTest {
         verify(alertRepository, never()).deleteAll(any());
         verify(purchaseRepository, never()).deleteAll(any());
         verify(loginRepository).delete(testLogin);
+        verify(notificationRepository).deleteByUserId(userId);
         verify(loginService).invalidateAllUserSessions(userId);
         verify(customerRepository).delete(testUser);
     }
@@ -243,6 +251,7 @@ class AccountServiceTest {
         verify(alertRepository).deleteAll(userAlerts);
         verify(purchaseRepository).deleteAll(userPurchases);
         verify(loginRepository).delete(testLogin);
+        verify(notificationRepository).deleteByUserId(userId);
         verify(loginService).invalidateAllUserSessions(userId);
         verify(customerRepository).delete(testUser);
     }

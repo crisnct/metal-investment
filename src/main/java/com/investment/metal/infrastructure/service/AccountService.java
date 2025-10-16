@@ -6,7 +6,6 @@ import com.investment.metal.infrastructure.exception.ExceptionService;
 import com.investment.metal.infrastructure.persistence.entity.Alert;
 import com.investment.metal.infrastructure.persistence.entity.Customer;
 import com.investment.metal.infrastructure.persistence.entity.Login;
-import com.investment.metal.infrastructure.persistence.entity.Notification;
 import com.investment.metal.infrastructure.persistence.entity.Purchase;
 import com.investment.metal.infrastructure.persistence.repository.AlertRepository;
 import com.investment.metal.infrastructure.persistence.repository.NotificationRepository;
@@ -150,8 +149,7 @@ public class AccountService {
         userPurchases.ifPresent(purchases -> purchaseRepository.deleteAll(purchases));
 
         // Delete notification preferences for this user
-        Optional<Notification> notification = notificationRepository.findByUserId(userId);
-        notification.ifPresent(not -> notificationRepository.delete(not));
+        notificationRepository.deleteByUserId(userId);
 
         // SECURITY FIX: Invalidate all sessions before deleting account
         // This ensures no active sessions remain after account deletion

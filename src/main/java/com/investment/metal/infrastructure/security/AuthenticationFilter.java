@@ -1,6 +1,7 @@
 package com.investment.metal.infrastructure.security;
 
 import com.investment.metal.infrastructure.util.Util;
+import jakarta.servlet.DispatcherType;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,6 +29,15 @@ public class AuthenticationFilter extends AbstractAuthenticationProcessingFilter
         String token = Util.getTokenFromRequest(httpServletRequest);
         Authentication requestAuthentication = new UsernamePasswordAuthenticationToken(token, token);
         return getAuthenticationManager().authenticate(requestAuthentication);
+    }
+
+    @Override
+    protected boolean requiresAuthentication(HttpServletRequest request, HttpServletResponse response) {
+        // Skip re-authentication for async dispatch so the original request can finish even if the token was revoked
+        if (request.getDispatcherType() == DispatcherType.ASYNC) {
+            return false;
+        }
+        return super.requiresAuthentication(request, response);
     }
 
     @Override
