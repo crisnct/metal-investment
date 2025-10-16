@@ -2,6 +2,7 @@ package com.investment.metal.infrastructure.service;
 
 import com.google.common.base.Charsets;
 import io.micrometer.core.instrument.util.IOUtils;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -21,9 +22,19 @@ public class MailParameterBuilder {
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         for (MailTemplates templateType : MailTemplates.values()) {
             final String template;
-            template = IOUtils.toString(
-                    Objects.requireNonNull(contextClassLoader.getResourceAsStream("mail-templates/" + templateType.getFilename())),
-                    Charsets.UTF_8);
+            final String path = "mail-templates/" + templateType.getFilename();
+            try (InputStream is = contextClassLoader.getResourceAsStream(path)) {
+                if (is == null) {
+                    LOGGER.error("Mail template not found on classpath: {}", path);
+                    mailTemplates.put(templateType, "");
+                    continue;
+                }
+                template = IOUtils.toString(is, Charsets.UTF_8);
+            } catch (Exception ex) {
+                LOGGER.error("Failed to load mail template {}", path, ex);
+                mailTemplates.put(templateType, "");
+                continue;
+            }
             MailParameterBuilder.mailTemplates.put(templateType, template);
         }
     }
@@ -37,7 +48,11 @@ public class MailParameterBuilder {
     }
 
     public static MailParameterBuilder newInstance(MailTemplates template) {
-        return new MailParameterBuilder(MailParameterBuilder.mailTemplates.get(template));
+        String templateText = MailParameterBuilder.mailTemplates.get(template);
+        if (templateText == null || templateText.isEmpty()) {
+            throw new IllegalStateException("Mail template not loaded: " + template);
+        }
+        return new MailParameterBuilder(templateText);
     }
 
     public MailParameterBuilder replace(String name, Object value) {

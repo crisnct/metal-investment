@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class RestErrorHandler {
 
     @ExceptionHandler(BusinessException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public Object processValidationError(BusinessException ex) {
         return new ExceptionDto(ex.getStatusCode(), ex.getMessage());
