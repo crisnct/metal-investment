@@ -5,12 +5,10 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.codec.binary.Base64;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class AESEncryptor {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AESEncryptor.class);
 
     private static final String AES_INIT_VECTOR = "GoldSilverPlatin";
 
@@ -39,7 +37,7 @@ public class AESEncryptor {
             byte[] encrypted = cipher.doFinal(value.getBytes());
             return Base64.encodeBase64String(encrypted);
         } catch (Exception ex) {
-            LOGGER.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         }
         return null;
     }
@@ -55,7 +53,7 @@ public class AESEncryptor {
 
             return new String(original);
         } catch (Exception ex) {
-            LOGGER.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         }
         return null;
     }

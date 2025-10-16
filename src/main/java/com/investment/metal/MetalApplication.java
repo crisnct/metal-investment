@@ -19,8 +19,6 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.logging.log4j.LogManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -33,7 +31,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class MetalApplication {
     
     public static final String APPLICATION_PROPERTIES = "application.properties";
-    private static final Logger LOGGER = LoggerFactory.getLogger(MetalApplication.class);
 
     /**
      * Main entry point for the Metal Investment application.
@@ -106,11 +103,11 @@ public class MetalApplication {
         try {
             File applicationPropFile = new File(APPLICATION_PROPERTIES);
             if (!applicationPropFile.exists()) {
-                LOGGER.warn("{} is missing", APPLICATION_PROPERTIES);
+                log.warn("{} is missing", APPLICATION_PROPERTIES);
                 return;
             }
 
-            LOGGER.info("Updating {}", APPLICATION_PROPERTIES);
+            log.info("Updating {}", APPLICATION_PROPERTIES);
             
             // Load current properties from file system
             PropertyFile currentFileWorkDir = new PropertyFile();
@@ -140,9 +137,9 @@ public class MetalApplication {
             }
 
             sourceCodeProperties.save(new FileWriter(APPLICATION_PROPERTIES));
-            LOGGER.info("Properties updated successfully");
+            log.info("Properties updated successfully");
         } catch (Exception e) {
-            LOGGER.error("Cannot update {} file", APPLICATION_PROPERTIES, e);
+            log.error("Cannot update {} file", APPLICATION_PROPERTIES, e);
         } finally {
             Util.sleep(2000);
         }
@@ -176,9 +173,9 @@ public class MetalApplication {
             sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
             HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
             
-            LOGGER.warn("SSL certificate validation has been disabled - SECURITY RISK!");
+            log.warn("SSL certificate validation has been disabled - SECURITY RISK!");
         } catch (Throwable e) {
-            LOGGER.error("Failed to disable SSL check", e);
+            log.error("Failed to disable SSL check", e);
         }
     }
 

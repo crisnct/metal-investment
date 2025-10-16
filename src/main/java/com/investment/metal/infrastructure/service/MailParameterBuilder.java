@@ -6,15 +6,14 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Infrastructure service for building mail parameters.
  * Follows Clean Architecture principles by keeping mail infrastructure concerns separate.
  */
+@Slf4j
 public class MailParameterBuilder {
-    private static final Logger LOGGER = LoggerFactory.getLogger(MailParameterBuilder.class);
 
     private static final Map<MailTemplates, String> mailTemplates = new HashMap<>();
 
@@ -25,13 +24,13 @@ public class MailParameterBuilder {
             final String path = "mail-templates/" + templateType.getFilename();
             try (InputStream is = classLoader.getResourceAsStream(path)) {
                 if (is == null) {
-                    LOGGER.error("Mail template not found on classpath: {}", path);
+                    log.error("Mail template not found on classpath: {}", path);
                     mailTemplates.put(templateType, "");
                     continue;
                 }
                 template = IOUtils.toString(is, Charsets.UTF_8);
             } catch (Exception ex) {
-                LOGGER.error("Failed to load mail template {}", path, ex);
+                log.error("Failed to load mail template {}", path, ex);
                 mailTemplates.put(templateType, "");
                 continue;
             }

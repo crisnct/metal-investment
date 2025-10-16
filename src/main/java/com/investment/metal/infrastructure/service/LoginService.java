@@ -12,10 +12,9 @@ import com.investment.metal.infrastructure.util.SecureRandomGenerator;
 import java.sql.Timestamp;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Service for managing user login and authentication operations.
@@ -24,9 +23,8 @@ import org.springframework.stereotype.Service;
  * @author cristian.tone
  */
 @Service
+@Slf4j
 public class LoginService extends AbstractService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(LoginService.class);
 
     private static final long BANNED_LOGIN_ATTEMPTS = 24 * 3600 * 1000;
 
@@ -212,7 +210,7 @@ public class LoginService extends AbstractService {
      * @param requireRevalidation whether the user must re-validate after logout
      */
     public void invalidateAllUserSessions(Integer userId, boolean requireRevalidation) {
-        LOGGER.info("Invalidating all sessions for user ID: {} (requireRevalidation: {})", userId, requireRevalidation);
+        log.info("Invalidating all sessions for user ID: {} (requireRevalidation: {})", userId, requireRevalidation);
 
         Optional<Login> loginOpt = this.loginRepository.findByUserId(userId);
         if (loginOpt.isPresent()) {
@@ -221,7 +219,7 @@ public class LoginService extends AbstractService {
             login.setResetPasswordToken("");
             login.setLoggedIn(0);
             this.loginRepository.save(login);
-            LOGGER.info("All sessions invalidated for user ID: {}", userId);
+            log.info("All sessions invalidated for user ID: {}", userId);
         }
     }
 
@@ -234,7 +232,7 @@ public class LoginService extends AbstractService {
      * @param currentToken the current valid token to keep active
      */
     public void invalidateAllOtherUserSessions(Integer userId, String currentToken) {
-        LOGGER.info("Invalidating all other sessions for user ID: {} (keeping current session)", userId);
+        log.info("Invalidating all other sessions for user ID: {} (keeping current session)", userId);
         
         Optional<Login> loginOpt = this.loginRepository.findByUserId(userId);
         if (loginOpt.isPresent()) {
@@ -246,7 +244,7 @@ public class LoginService extends AbstractService {
                 login.setResetPasswordToken("");
                 login.setLoggedIn(0);
                 this.loginRepository.save(login);
-                LOGGER.info("All other sessions invalidated for user ID: {}", userId);
+                log.info("All other sessions invalidated for user ID: {}", userId);
             }
         }
     }

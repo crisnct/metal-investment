@@ -25,8 +25,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -42,6 +40,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * REST Controller for public API endpoints that don't require authentication.
@@ -52,9 +51,8 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @Tag(name = "Public API", description = "Public endpoints with no authentication")
+@Slf4j
 public class PublicApiController {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(PublicApiController.class);
 
     /**
      * Domain service for account-related business logic

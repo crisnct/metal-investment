@@ -9,14 +9,13 @@ import com.investment.metal.infrastructure.persistence.repository.RevolutProfitR
 import com.investment.metal.infrastructure.service.price.ExternalMetalPriceReader;
 import com.investment.metal.infrastructure.util.Util;
 import java.sql.Timestamp;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class RevolutService extends AbstractService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RevolutService.class);
 
     @Autowired
     private RevolutProfitRepository revolutRepository;

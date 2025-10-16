@@ -10,12 +10,11 @@ import com.investment.metal.infrastructure.service.RSSFeedParser;
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Transactional;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Scheduler configuration for automated tasks.
@@ -23,9 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Configuration
 @EnableScheduling
+@Slf4j
 public class Scheduler {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(Scheduler.class);
     
     // Scheduling intervals (in milliseconds)
     private static final long METAL_PRICE_UPDATE_INTERVAL = 3600 * 1000; // 1 hour
@@ -69,7 +67,7 @@ public class Scheduler {
      */
     @PostConstruct
     public void init() {
-        LOGGER.info("Initializing scheduler - fetching initial data");
+        log.info("Initializing scheduler - fetching initial data");
         this.fetchCurrencyValues();
         this.updateAllMetalPrices();
     }
@@ -81,7 +79,7 @@ public class Scheduler {
     @Transactional
     @Scheduled(fixedDelay = METAL_PRICE_UPDATE_INTERVAL)
     public void fetchMetalPrices() {
-        LOGGER.info("Starting scheduled metal price update");
+        log.info("Starting scheduled metal price update");
         this.updateAllMetalPrices();
     }
 
@@ -96,9 +94,9 @@ public class Scheduler {
                 this.metalPricesService.save(type, metalPrice);
                 this.alertsTrigger.triggerAlerts(type);
                 
-                LOGGER.debug("Successfully updated price for {}: {}", type, metalPrice);
+                log.debug("Successfully updated price for {}: {}", type, metalPrice);
             } catch (Exception e) {
-                LOGGER.error("Failed to read metal prices for {}", type, e);
+                log.error("Failed to read metal prices for {}", type, e);
             }
         }
     }
@@ -110,7 +108,7 @@ public class Scheduler {
     @Transactional
     @Scheduled(fixedDelay = CURRENCY_UPDATE_INTERVAL)
     public void fetchCurrencyValues() {
-        LOGGER.info("Starting scheduled currency update");
+        log.info("Starting scheduled currency update");
         
         try {
             Map<CurrencyType, Double> currenciesValues = 
@@ -122,15 +120,15 @@ public class Scheduler {
             for (CurrencyType currency : CurrencyType.values()) {
                 Double value = currenciesValues.get(currency);
                 if (value == null) {
-                    LOGGER.warn("Currency {} missing from RSS feed", currency);
+                    log.warn("Currency {} missing from RSS feed", currency);
                     continue;
                 }
                 this.currencyService.save(currency, value);
             }
             
-            LOGGER.info("Successfully updated currency values");
+            log.info("Successfully updated currency values");
         } catch (IOException e) {
-            LOGGER.error("Failed to read currency values from RSS feed", e);
+            log.error("Failed to read currency values from RSS feed", e);
         }
     }
 
@@ -140,7 +138,7 @@ public class Scheduler {
      */
     @Scheduled(fixedDelay = NOTIFICATION_CHECK_INTERVAL)
     public void checkNotifications() {
-        LOGGER.debug("Starting scheduled notification check");
+        log.debug("Starting scheduled notification check");
         this.notificationService.checkNotifications();
     }
 }

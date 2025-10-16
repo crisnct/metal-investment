@@ -8,19 +8,17 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Base64;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Generate the key file for MultipleKeysEncoder
  *
  * @author cristian.tone
  */
+@Slf4j
 class KeyGenerator {
 
     public static final String SYMBOLS = "v$ ?J<#uy,'9Ak6hFVW(1nLb[2`gQ>Yt!GP^\"OI}lMri-_\\USd4{]R/KZHE)fsX.=|N*DBpw%5~qe@x&3c:+;z0TCo78maj"; //$NON-NLS-1$
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(KeyGenerator.class);
 
     private final int keySize;
 
@@ -32,7 +30,7 @@ class KeyGenerator {
     public static void main(String[] args) {
         KeyGenerator gen = new KeyGenerator(255);
         gen.generateKey(new File("metal-investment.key"));
-        LOGGER.info("key was created");
+        log.info("key was created");
     }
 
     public void generateKey(File file) {
@@ -54,7 +52,7 @@ class KeyGenerator {
             writer.write(aesEncryptor.encrypt(key.toString()));
             writer.close();
         } catch (IOException e) {
-            LOGGER.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -79,12 +77,12 @@ class KeyGenerator {
         // Check for environment variable first
         String envKey = System.getenv("METAL_INVESTMENT_AES_KEY");
         if (envKey != null && !envKey.trim().isEmpty()) {
-            LOGGER.info("Using AES key from environment variable");
+            log.info("Using AES key from environment variable");
             return envKey;
         }
         
         // Generate a secure random key
-        LOGGER.warn("No AES key found in environment variable METAL_INVESTMENT_AES_KEY. " +
+        log.warn("No AES key found in environment variable METAL_INVESTMENT_AES_KEY. " +
                    "Generating a new key. This should be set in production!");
         
         SecureRandom random = new SecureRandom();
@@ -92,7 +90,7 @@ class KeyGenerator {
         random.nextBytes(keyBytes);
         String generatedKey = Base64.getEncoder().encodeToString(keyBytes);
         
-        LOGGER.warn("Generated AES key: {}. Please set METAL_INVESTMENT_AES_KEY environment variable " +
+        log.warn("Generated AES key: {}. Please set METAL_INVESTMENT_AES_KEY environment variable " +
                    "with this value for production use.", generatedKey);
         
         return generatedKey;

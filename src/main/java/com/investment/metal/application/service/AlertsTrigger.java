@@ -21,15 +21,13 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.script.ScriptException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
+@Slf4j
 public class AlertsTrigger {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AlertsTrigger.class);
 
     @Autowired
     protected ExceptionService exceptionService;
@@ -89,7 +87,7 @@ public class AlertsTrigger {
                 this.emailService.sendMailWithProfit(userProfit, alert);
             }
         } catch (ScriptException e) {
-            LOGGER.error("Invalid expression: " + expression, e);
+            log.error("Invalid expression: " + expression, e);
         }
     }
 

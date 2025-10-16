@@ -6,12 +6,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class ExpressionEvaluator {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ExpressionEvaluator.class);
 
     private static final Pattern VARIABLES_REGEXP = Pattern.compile("([a-z])\\w+");
 

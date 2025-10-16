@@ -20,13 +20,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class NotificationService {
 
     /**
@@ -48,8 +48,6 @@ public class NotificationService {
     private MetalPurchaseMapper metalPurchaseMapper;
 
     public static final long MIN_NOTIFICATION_PERIOD = TimeUnit.DAYS.toMillis(1);
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(NotificationService.class);
 
     @Autowired
     private com.investment.metal.application.service.MetalPriceService metalPricesService;
@@ -120,7 +118,7 @@ public class NotificationService {
                 this.notifyUser(notification.getUserId());
                 this.save(notification.getUserId(), notification.getFrequency());
             } catch (BusinessException e) {
-                LOGGER.error(e.getMessage(), e);
+                log.error(e.getMessage(), e);
             }
         }
     }

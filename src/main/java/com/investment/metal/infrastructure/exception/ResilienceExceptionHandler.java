@@ -7,14 +7,13 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Global exception handler for Resilience4j violations.
@@ -22,9 +21,8 @@ import org.springframework.web.context.request.WebRequest;
  * proper HTTP responses for flooding attack protection.
  */
 @RestControllerAdvice
+@Slf4j
 public class ResilienceExceptionHandler {
-
-    private static final Logger logger = LoggerFactory.getLogger(ResilienceExceptionHandler.class);
     
     @Autowired
     private FloodingMonitorService floodingMonitorService;
@@ -43,7 +41,7 @@ public class ResilienceExceptionHandler {
         String clientIp = getClientIpAddress(request);
         String endpoint = request.getDescription(false).replace("uri=", "");
         
-        logger.warn("Bulkhead violation detected - too many concurrent requests from IP: {}", clientIp);
+        log.warn("Bulkhead violation detected - too many concurrent requests from IP: {}", clientIp);
         
         // Record the violation for monitoring
         floodingMonitorService.recordBulkheadViolation(clientIp, endpoint);
@@ -72,7 +70,7 @@ public class ResilienceExceptionHandler {
         String clientIp = getClientIpAddress(request);
         String endpoint = request.getDescription(false).replace("uri=", "");
         
-        logger.warn("Rate limiter violation detected - too many requests from IP: {}", clientIp);
+        log.warn("Rate limiter violation detected - too many requests from IP: {}", clientIp);
         
         // Record the violation for monitoring
         floodingMonitorService.recordRateLimiterViolation(clientIp, endpoint);
@@ -101,7 +99,7 @@ public class ResilienceExceptionHandler {
         String clientIp = getClientIpAddress(request);
         String endpoint = request.getDescription(false).replace("uri=", "");
         
-        logger.warn("Time limiter violation detected - request timeout from IP: {}", clientIp);
+        log.warn("Time limiter violation detected - request timeout from IP: {}", clientIp);
         
         Map<String, Object> response = new HashMap<>();
         response.put("timestamp", LocalDateTime.now());

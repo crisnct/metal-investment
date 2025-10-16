@@ -5,19 +5,17 @@ import com.investment.metal.infrastructure.persistence.entity.MetalPrice;
 import com.investment.metal.infrastructure.persistence.repository.MetalPriceRepository;
 import java.util.List;
 import java.util.Optional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Fallback service for providing cached metal prices when external APIs are unavailable.
  * Implements fallback strategy for circuit breaker scenarios.
  */
 @Service
+@Slf4j
 public class PriceFallbackService {
-
-    private static final Logger logger = LoggerFactory.getLogger(PriceFallbackService.class);
 
     @Autowired
     private MetalPriceRepository metalPriceRepository;
@@ -36,14 +34,14 @@ public class PriceFallbackService {
             if (prices.isPresent() && !prices.get().isEmpty()) {
                 // Get the most recent price (assuming they are ordered by time)
                 MetalPrice latestPrice = prices.get().get(0);
-                logger.info("Using cached price for {}: {}", metalType, latestPrice.getPrice());
+                log.info("Using cached price for {}: {}", metalType, latestPrice.getPrice());
                 return latestPrice.getPrice();
             } else {
-                logger.warn("No cached price data available for {}", metalType);
+                log.warn("No cached price data available for {}", metalType);
                 return 0.0;
             }
         } catch (Exception e) {
-            logger.error("Error retrieving cached price for {}: {}", metalType, e.getMessage());
+            log.error("Error retrieving cached price for {}: {}", metalType, e.getMessage());
             return 0.0;
         }
     }
@@ -59,7 +57,7 @@ public class PriceFallbackService {
             Optional<List<MetalPrice>> prices = metalPriceRepository.findByMetalSymbol(metalType.getSymbol());
             return prices.isPresent() && !prices.get().isEmpty();
         } catch (Exception e) {
-            logger.error("Error checking cached price availability for {}: {}", metalType, e.getMessage());
+            log.error("Error checking cached price availability for {}: {}", metalType, e.getMessage());
             return false;
         }
     }
@@ -77,12 +75,12 @@ public class PriceFallbackService {
             if (prices.isPresent() && !prices.get().isEmpty()) {
                 MetalPrice latestPrice = prices.get().get(0);
                 long age = System.currentTimeMillis() - latestPrice.getTime().getTime();
-                logger.debug("Cached price age for {}: {} ms", metalType, age);
+                log.debug("Cached price age for {}: {} ms", metalType, age);
                 return age;
             }
             return -1;
         } catch (Exception e) {
-            logger.error("Error calculating cached price age for {}: {}", metalType, e.getMessage());
+            log.error("Error calculating cached price age for {}: {}", metalType, e.getMessage());
             return -1;
         }
     }

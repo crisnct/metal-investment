@@ -6,19 +6,17 @@ import com.investment.metal.infrastructure.service.price.ExternalMetalPriceReade
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import java.util.concurrent.CompletableFuture;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Resilient wrapper service for external price API calls.
  * Implements circuit breaker pattern to handle external API failures gracefully.
  */
 @Service
+@Slf4j
 public class ResilientPriceService {
-
-    private static final Logger logger = LoggerFactory.getLogger(ResilientPriceService.class);
     private static final String CIRCUIT_BREAKER_NAME = "price-api";
 
     @Autowired
@@ -40,22 +38,22 @@ public class ResilientPriceService {
     public double fetchPrice(MetalType metalType) {
         CircuitBreaker circuitBreaker = circuitBreakerRegistry.circuitBreaker(CIRCUIT_BREAKER_NAME);
         
-        logger.info("Fetching price for {} with circuit breaker state: {}", 
+        log.info("Fetching price for {} with circuit breaker state: {}", 
                    metalType, circuitBreaker.getState());
 
         try {
             return circuitBreaker.executeSupplier(() -> {
                 try {
                     double price = priceReader.fetchPrice(metalType);
-                    logger.info("Successfully fetched price for {}: {}", metalType, price);
+                    log.info("Successfully fetched price for {}: {}", metalType, price);
                     return price;
                 } catch (Exception e) {
-                    logger.error("Failed to fetch price for {}: {}", metalType, e.getMessage());
+                    log.error("Failed to fetch price for {}: {}", metalType, e.getMessage());
                     throw e;
                 }
             });
         } catch (Exception e) {
-            logger.warn("Circuit breaker protection triggered for {}. Attempting fallback to cached price.", metalType);
+            log.warn("Circuit breaker protection triggered for {}. Attempting fallback to cached price.", metalType);
             return getFallbackPrice(metalType);
         }
     }
@@ -70,11 +68,11 @@ public class ResilientPriceService {
         if (fallbackService.hasCachedPrice(metalType)) {
             double cachedPrice = fallbackService.getCachedPrice(metalType);
             long age = fallbackService.getCachedPriceAge(metalType);
-            logger.info("Using fallback cached price for {}: {} (age: {} ms)", 
+            log.info("Using fallback cached price for {}: {} (age: {} ms)", 
                        metalType, cachedPrice, age);
             return cachedPrice;
         } else {
-            logger.error("No fallback price available for {}", metalType);
+            log.error("No fallback price available for {}", metalType);
             return 0.0;
         }
     }

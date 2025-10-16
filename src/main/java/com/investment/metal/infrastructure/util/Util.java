@@ -9,14 +9,14 @@ import java.util.regex.Pattern;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Infrastructure utility class for common operations.
  * Provides static utility methods for various infrastructure concerns.
  * Follows Clean Architecture principles by keeping infrastructure utilities separate.
  */
+@Slf4j
 public class Util {
     
     /**
@@ -35,7 +35,6 @@ public class Util {
     /**
      * Logger instance for this utility class
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(Util.class);
 
     /**
      * Random number generator for generating random values.
@@ -74,7 +73,7 @@ public class Util {
         try {
             Thread.sleep(duration);
         } catch (InterruptedException e) {
-            LOGGER.error("Thread sleep interrupted: {}", e.getMessage(), e);
+            log.error("Thread sleep interrupted: {}", e.getMessage(), e);
             // Restore interrupted status
             Thread.currentThread().interrupt();
         }

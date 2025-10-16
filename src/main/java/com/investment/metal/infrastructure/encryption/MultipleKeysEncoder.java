@@ -5,12 +5,12 @@ import jakarta.annotation.PostConstruct;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
+@Slf4j
 public class MultipleKeysEncoder implements ConsistentEncoder {
 
     @Value("${METAL_INVESTMENT_AES_KEY:#{null}}")
@@ -20,8 +20,6 @@ public class MultipleKeysEncoder implements ConsistentEncoder {
     private String keyFromEnv;
 
     private static final Charset CHARSET = StandardCharsets.UTF_8;
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(MultipleKeysEncoder.class);
 
     private AESEncryptor aesEncryptor;
 
@@ -45,21 +43,21 @@ public class MultipleKeysEncoder implements ConsistentEncoder {
     private List<String> initializeKeys() {
         try {
             if (keyFromEnv == null || keyFromEnv.trim().isEmpty()) {
-                LOGGER.warn("Use KeyGenerator to create a key and set it in the environment variable METAL_INVESTMENT_KEY. Using default keys for encryption.");
+                log.warn("Use KeyGenerator to create a key and set it in the environment variable METAL_INVESTMENT_KEY. Using default keys for encryption.");
                 return createDefaultKeys();
             }
 
             String decryptedKey = this.aesEncryptor.decrypt(keyFromEnv);
             if (decryptedKey == null || decryptedKey.trim().isEmpty()) {
-                LOGGER.warn("Failed to decrypt key file. Using default keys for encryption.");
+                log.warn("Failed to decrypt key file. Using default keys for encryption.");
                 return createDefaultKeys();
             }
             
-            LOGGER.info("Successfully loaded encryption keys from file.");
+            log.info("Successfully loaded encryption keys from file.");
             return Lists.newArrayList(decryptedKey.split("\n"));
             
         } catch (Exception e) {
-            LOGGER.warn("Failed to load encryption keys from file: {}. Using default keys.", e.getMessage());
+            log.warn("Failed to load encryption keys from file: {}. Using default keys.", e.getMessage());
             return createDefaultKeys();
         }
     }

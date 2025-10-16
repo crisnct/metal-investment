@@ -2,16 +2,14 @@ package com.investment.metal.infrastructure.encryption;
 
 import com.investment.metal.domain.exception.BusinessException;
 import com.investment.metal.infrastructure.service.BlockedIpService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Profile("prod")
+@Slf4j
 public class HandShakeEncryptorProd extends AbstractHandShakeEncryptor {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(HandShakeEncryptorProd.class);
 
     private static final int TIME_THRESHOLD = 60 * 1000;
 
@@ -29,7 +27,7 @@ public class HandShakeEncryptorProd extends AbstractHandShakeEncryptor {
                 throw new IllegalArgumentException("Invalid handshake token");
             }
         } catch (NullPointerException | IllegalArgumentException e) {
-            LOGGER.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             this.blockIp();
         }
     }

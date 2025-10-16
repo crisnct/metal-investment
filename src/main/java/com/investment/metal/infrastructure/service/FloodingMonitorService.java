@@ -3,19 +3,17 @@ package com.investment.metal.infrastructure.service;
 import java.time.LocalDateTime;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Service for monitoring and detecting potential flooding attacks.
  * Tracks request patterns and provides alerting for suspicious activity.
  */
 @Service
+@Slf4j
 public class FloodingMonitorService {
-
-    private static final Logger logger = LoggerFactory.getLogger(FloodingMonitorService.class);
     
     // Thresholds for flooding detection
     private static final int MAX_REQUESTS_PER_MINUTE = 60;
@@ -52,7 +50,7 @@ public class FloodingMonitorService {
         boolean isFlooding = checkForFloodingPattern(tracker, ipAddress);
         
         if (isFlooding) {
-            logger.warn("Potential flooding attack detected from IP: {} - Requests: {}/min, {}/hour", 
+            log.warn("Potential flooding attack detected from IP: {} - Requests: {}/min, {}/hour", 
                        ipAddress, tracker.getRequestsLastMinute(), tracker.getRequestsLastHour());
             
             // Send alert to administrators
@@ -73,7 +71,7 @@ public class FloodingMonitorService {
     public void recordBulkheadViolation(String ipAddress, String endpoint) {
         int violations = bulkheadViolations.incrementAndGet();
         
-        logger.warn("Bulkhead violation from IP: {} on endpoint: {} (Total violations: {})", 
+        log.warn("Bulkhead violation from IP: {} on endpoint: {} (Total violations: {})", 
                    ipAddress, endpoint, violations);
         
         if (violations >= BULKHEAD_VIOLATIONS_THRESHOLD) {
@@ -90,7 +88,7 @@ public class FloodingMonitorService {
     public void recordRateLimiterViolation(String ipAddress, String endpoint) {
         int violations = rateLimiterViolations.incrementAndGet();
         
-        logger.warn("Rate limiter violation from IP: {} on endpoint: {} (Total violations: {})", 
+        log.warn("Rate limiter violation from IP: {} on endpoint: {} (Total violations: {})", 
                    ipAddress, endpoint, violations);
         
         if (violations >= RATE_LIMITER_VIOLATIONS_THRESHOLD) {
@@ -108,14 +106,14 @@ public class FloodingMonitorService {
     private boolean checkForFloodingPattern(RequestTracker tracker, String ipAddress) {
         // Check per-minute threshold
         if (tracker.getRequestsLastMinute() > MAX_REQUESTS_PER_MINUTE) {
-            logger.error("Flooding attack detected: IP {} exceeded {} requests per minute", 
+            log.error("Flooding attack detected: IP {} exceeded {} requests per minute", 
                         ipAddress, MAX_REQUESTS_PER_MINUTE);
             return true;
         }
         
         // Check per-hour threshold
         if (tracker.getRequestsLastHour() > MAX_REQUESTS_PER_HOUR) {
-            logger.error("Flooding attack detected: IP {} exceeded {} requests per hour", 
+            log.error("Flooding attack detected: IP {} exceeded {} requests per hour", 
                         ipAddress, MAX_REQUESTS_PER_HOUR);
             return true;
         }
@@ -149,7 +147,7 @@ public class FloodingMonitorService {
             emailService.sendEmail("admin@metalinvestment.com", subject, message);
             
         } catch (Exception e) {
-            logger.error("Failed to send flooding alert: {}", e.getMessage());
+            log.error("Failed to send flooding alert: {}", e.getMessage());
         }
     }
     
@@ -176,7 +174,7 @@ public class FloodingMonitorService {
             emailService.sendEmail("admin@metalinvestment.com", subject, message);
             
         } catch (Exception e) {
-            logger.error("Failed to send bulkhead alert: {}", e.getMessage());
+            log.error("Failed to send bulkhead alert: {}", e.getMessage());
         }
     }
     
@@ -203,7 +201,7 @@ public class FloodingMonitorService {
             emailService.sendEmail("admin@metalinvestment.com", subject, message);
             
         } catch (Exception e) {
-            logger.error("Failed to send rate limiter alert: {}", e.getMessage());
+            log.error("Failed to send rate limiter alert: {}", e.getMessage());
         }
     }
     

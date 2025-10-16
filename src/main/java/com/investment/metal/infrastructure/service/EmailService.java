@@ -10,17 +10,16 @@ import com.investment.metal.infrastructure.util.Util;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class EmailService extends AbstractService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(EmailService.class);
 
     @Value("${spring.application.name}")
     private String appName;
@@ -120,13 +119,13 @@ public class EmailService extends AbstractService {
         try {
             sendMail(toEmail, subject, message);
         } catch (BusinessException e) {
-            LOGGER.error("Failed to send email to {}: {}", toEmail, e.getMessage());
+            log.error("Failed to send email to {}: {}", toEmail, e.getMessage());
         }
     }
 
     private void sendMail(String toEmail, String subject, String message) throws BusinessException {
         Exception cause = null;
-        LOGGER.info("Trying to send email from " + emailFrom + " to " + toEmail + " on host " + host + ":" + port);
+        log.info("Trying to send email from " + emailFrom + " to " + toEmail + " on host " + host + ":" + port);
         for (int i = 0; i < 3; i++) {
             try {
                 MimeMessage msg = this.mailSender.createMimeMessage();
@@ -144,7 +143,7 @@ public class EmailService extends AbstractService {
             }
         }
         if (cause != null) {
-            LOGGER.error(cause.getMessage(), cause);
+            log.error(cause.getMessage(), cause);
             throw this.exceptionService
                     .createBuilder(MessageKey.FAIL_TO_SEND_EMAIL)
                     .setExceptionCause(cause)
