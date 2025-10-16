@@ -19,11 +19,11 @@ public class MailParameterBuilder {
     private static final Map<MailTemplates, String> mailTemplates = new HashMap<>();
 
     static {
-        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+        ClassLoader classLoader = MailParameterBuilder.class.getClassLoader();
         for (MailTemplates templateType : MailTemplates.values()) {
             final String template;
             final String path = "mail-templates/" + templateType.getFilename();
-            try (InputStream is = contextClassLoader.getResourceAsStream(path)) {
+            try (InputStream is = classLoader.getResourceAsStream(path)) {
                 if (is == null) {
                     LOGGER.error("Mail template not found on classpath: {}", path);
                     mailTemplates.put(templateType, "");
