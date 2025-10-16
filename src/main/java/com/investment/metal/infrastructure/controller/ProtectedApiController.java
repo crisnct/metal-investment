@@ -55,7 +55,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -66,6 +69,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -904,6 +909,46 @@ public class ProtectedApiController {
     }
 
     /**
+     * Get CSRF token for frontend requests.
+     * This endpoint provides the CSRF token needed for secure API requests.
+     * It's a public endpoint that doesn't require authentication.
+     *
+     * @return ResponseEntity containing the CSRF token
+     */
+    @RequestMapping(value = "/csrf-token", method = RequestMethod.GET)
+    @Operation(
+        summary = "Get CSRF token",
+        description = "Retrieves the CSRF token required for secure API requests"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "CSRF token retrieved successfully",
+            content = @Content(schema = @Schema(implementation = Map.class)))
+    })
+    public ResponseEntity<Map<String, String>> getCsrfToken(HttpServletRequest request, HttpServletResponse response) {
+      // Generate CSRF token using Spring Security's repository
+      CookieCsrfTokenRepository tokenRepository = new CookieCsrfTokenRepository();
+      tokenRepository.setCookieHttpOnly(false);
+      tokenRepository.setCookiePath("/");
+      tokenRepository.setHeaderName("X-XSRF-TOKEN");
+
+      CsrfToken csrfToken = tokenRepository.generateToken(request);
+      tokenRepository.saveToken(csrfToken, request, response);
+
+      Map<String, String> tokenMap = new HashMap<>();
+      tokenMap.put("token", csrfToken.getToken());
+      tokenMap.put("headerName", csrfToken.getHeaderName());
+      tokenMap.put("parameterName", csrfToken.getParameterName());
+
+      // Add CORS headers to ensure the token can be accessed by the frontend
+      response.setHeader("Access-Control-Allow-Origin", "*");
+      response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+      response.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-XSRF-TOKEN");
+      response.setHeader("Access-Control-Allow-Credentials", "true");
+
+      return new ResponseEntity<>(tokenMap, HttpStatus.OK);
+    }
+
+  /**
      * Generate a secure random confirmation code for account deletion.
      * Uses cryptographically secure random number generation to prevent
      * predictable patterns and ensure proper entropy for security-sensitive operations.

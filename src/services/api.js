@@ -61,7 +61,7 @@ class ApiService {
   async forceRefreshCsrfToken() {
     try {
       console.log('=== FORCE REFRESH CSRF TOKEN ===');
-      const response = await fetch(`${this.baseURL}/csrf-token`, {
+      const response = await fetch(`${this.baseURL}/api/csrf-token`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -100,9 +100,9 @@ class ApiService {
     this.csrfRefreshPromise = (async () => {
       try {
         console.log('=== REFRESHING CSRF TOKEN ===');
-        console.log('Calling /csrf-token endpoint...');
+        console.log('Calling /api/csrf-token endpoint...');
         
-        const response = await fetch(`${this.baseURL}/csrf-token`, {
+        const response = await fetch(`${this.baseURL}/api/csrf-token`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -144,7 +144,7 @@ class ApiService {
   async testCsrfEndpoint() {
     try {
       console.log('=== TESTING CSRF ENDPOINT ===');
-      const response = await fetch(`${this.baseURL}/csrf-token`, {
+      const response = await fetch(`${this.baseURL}/api/csrf-token`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
