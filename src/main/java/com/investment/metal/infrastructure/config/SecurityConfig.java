@@ -43,6 +43,12 @@ public class SecurityConfig {
     @Value("${METAL_INVESTMENT_ENCODER_SECRETE}")
     private String encoderSecret;
 
+    @Value("${metalinvestment.cors.allowed-origins:http://localhost:3000,https://metal-investment-635786220311.europe-west1.run.app}")
+    private String allowedOriginsConfig;
+
+    @Value("${metalinvestment.csrf.cookie-secure:false}")
+    private boolean csrfCookieSecure;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         Pbkdf2PasswordEncoder encoder = new Pbkdf2PasswordEncoder(encoderSecret, 16, 255, SecretKeyFactoryAlgorithm.PBKDF2WithHmacSHA256);
@@ -60,6 +66,7 @@ public class SecurityConfig {
         repository.setCookieName("XSRF-TOKEN");
         repository.setHeaderName("X-XSRF-TOKEN");
         repository.setParameterName("_csrf");
+        repository.setCookieCustomizer(cookie -> cookie.secure(csrfCookieSecure).sameSite("Strict"));
         return repository;
     }
 
@@ -71,7 +78,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+        configuration.setAllowedOrigins(Arrays.stream(allowedOriginsConfig.split(","))
+                .map(String::trim)
+                .filter(origin -> !origin.isEmpty())
+                .toList());
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
