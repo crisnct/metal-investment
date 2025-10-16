@@ -118,7 +118,7 @@ public class NotificationService {
                 this.notifyUser(notification.getUserId());
                 this.save(notification.getUserId(), notification.getFrequency());
             } catch (BusinessException e) {
-                log.error(e.getMessage(), e);
+                log.error("Failed to notify user {} during scheduled notification check", notification.getUserId(), e);
             }
         }
     }

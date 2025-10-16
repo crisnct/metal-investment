@@ -52,7 +52,7 @@ class KeyGenerator {
             writer.write(aesEncryptor.encrypt(key.toString()));
             writer.close();
         } catch (IOException e) {
-            log.error(e.getMessage(), e);
+            log.error("Failed to write generated encryption key to {}", file, e);
         }
     }
 

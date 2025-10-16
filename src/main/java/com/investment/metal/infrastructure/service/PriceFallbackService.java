@@ -41,7 +41,7 @@ public class PriceFallbackService {
                 return 0.0;
             }
         } catch (Exception e) {
-            log.error("Error retrieving cached price for {}: {}", metalType, e.getMessage());
+            log.error("Error retrieving cached price for {}", metalType, e);
             return 0.0;
         }
     }
@@ -57,7 +57,7 @@ public class PriceFallbackService {
             Optional<List<MetalPrice>> prices = metalPriceRepository.findByMetalSymbol(metalType.getSymbol());
             return prices.isPresent() && !prices.get().isEmpty();
         } catch (Exception e) {
-            log.error("Error checking cached price availability for {}: {}", metalType, e.getMessage());
+            log.error("Error checking cached price availability for {}", metalType, e);
             return false;
         }
     }
@@ -80,7 +80,7 @@ public class PriceFallbackService {
             }
             return -1;
         } catch (Exception e) {
-            log.error("Error calculating cached price age for {}: {}", metalType, e.getMessage());
+            log.error("Error calculating cached price age for {}", metalType, e);
             return -1;
         }
     }

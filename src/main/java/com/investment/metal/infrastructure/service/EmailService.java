@@ -119,7 +119,7 @@ public class EmailService extends AbstractService {
         try {
             sendMail(toEmail, subject, message);
         } catch (BusinessException e) {
-            log.error("Failed to send email to {}: {}", toEmail, e.getMessage());
+            log.error("Failed to send email to {}", toEmail, e);
         }
     }
 
@@ -143,7 +143,7 @@ public class EmailService extends AbstractService {
             }
         }
         if (cause != null) {
-            log.error(cause.getMessage(), cause);
+            log.error("Failed to send email to {} after retry attempts", toEmail, cause);
             throw this.exceptionService
                     .createBuilder(MessageKey.FAIL_TO_SEND_EMAIL)
                     .setExceptionCause(cause)

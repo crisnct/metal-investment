@@ -147,7 +147,7 @@ public class FloodingMonitorService {
             emailService.sendEmail("admin@metalinvestment.com", subject, message);
             
         } catch (Exception e) {
-            log.error("Failed to send flooding alert: {}", e.getMessage());
+            log.error("Failed to send flooding alert", e);
         }
     }
     
@@ -174,7 +174,7 @@ public class FloodingMonitorService {
             emailService.sendEmail("admin@metalinvestment.com", subject, message);
             
         } catch (Exception e) {
-            log.error("Failed to send bulkhead alert: {}", e.getMessage());
+            log.error("Failed to send bulkhead alert", e);
         }
     }
     
@@ -201,7 +201,7 @@ public class FloodingMonitorService {
             emailService.sendEmail("admin@metalinvestment.com", subject, message);
             
         } catch (Exception e) {
-            log.error("Failed to send rate limiter alert: {}", e.getMessage());
+            log.error("Failed to send rate limiter alert", e);
         }
     }
     

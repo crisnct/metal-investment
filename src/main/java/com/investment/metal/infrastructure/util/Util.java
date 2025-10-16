@@ -73,7 +73,7 @@ public class Util {
         try {
             Thread.sleep(duration);
         } catch (InterruptedException e) {
-            log.error("Thread sleep interrupted: {}", e.getMessage(), e);
+            log.error("Thread sleep interrupted", e);
             // Restore interrupted status
             Thread.currentThread().interrupt();
         }

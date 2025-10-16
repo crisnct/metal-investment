@@ -86,7 +86,7 @@ public class CustomAuthenticationProvider extends AbstractUserDetailsAuthenticat
                     AuthorityUtils.createAuthorityList("USER"));
             return Optional.of(user);
         } catch (BusinessException ex) {
-            log.error("Business exception while building user from login record: {}", ex.getMessage());
+            log.error("Business exception while building user from login record", ex);
             return Optional.empty();
         } catch (Exception ex) {
             return Optional.empty();

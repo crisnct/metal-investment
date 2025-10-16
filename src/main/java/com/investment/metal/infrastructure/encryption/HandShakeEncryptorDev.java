@@ -25,7 +25,7 @@ public class HandShakeEncryptorDev extends AbstractHandShakeEncryptor {
                 throw new IllegalArgumentException("Invalid handshake token");
             }
         } catch (NullPointerException | IllegalArgumentException e) {
-            log.error(e.getMessage(), e);
+            log.error("Invalid handshake token received in dev profile", e);
             throw exceptionService
                     .createBuilder(MessageKey.INVALID_REQUEST)
                     .setArguments("The request was not placed from an unauthorized source")

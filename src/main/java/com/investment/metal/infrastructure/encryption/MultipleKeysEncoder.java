@@ -57,7 +57,7 @@ public class MultipleKeysEncoder implements ConsistentEncoder {
             return Lists.newArrayList(decryptedKey.split("\n"));
             
         } catch (Exception e) {
-            log.warn("Failed to load encryption keys from file: {}. Using default keys.", e.getMessage());
+            log.warn("Failed to load encryption keys from file. Using default keys.", e);
             return createDefaultKeys();
         }
     }

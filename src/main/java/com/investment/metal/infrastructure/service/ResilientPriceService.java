@@ -48,7 +48,7 @@ public class ResilientPriceService {
                     log.info("Successfully fetched price for {}: {}", metalType, price);
                     return price;
                 } catch (Exception e) {
-                    log.error("Failed to fetch price for {}: {}", metalType, e.getMessage());
+                    log.error("Failed to fetch price for {}", metalType, e);
                     throw e;
                 }
             });

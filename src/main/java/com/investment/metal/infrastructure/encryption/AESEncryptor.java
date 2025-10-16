@@ -37,7 +37,7 @@ public class AESEncryptor {
             byte[] encrypted = cipher.doFinal(value.getBytes());
             return Base64.encodeBase64String(encrypted);
         } catch (Exception ex) {
-            log.error(ex.getMessage(), ex);
+            log.error("Failed to encrypt value with AES", ex);
         }
         return null;
     }
@@ -53,7 +53,7 @@ public class AESEncryptor {
 
             return new String(original);
         } catch (Exception ex) {
-            log.error(ex.getMessage(), ex);
+            log.error("Failed to decrypt value with AES", ex);
         }
         return null;
     }

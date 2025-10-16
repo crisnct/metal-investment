@@ -27,7 +27,7 @@ public class HandShakeEncryptorProd extends AbstractHandShakeEncryptor {
                 throw new IllegalArgumentException("Invalid handshake token");
             }
         } catch (NullPointerException | IllegalArgumentException e) {
-            log.error(e.getMessage(), e);
+            log.error("Invalid handshake token detected", e);
             this.blockIp();
         }
     }
