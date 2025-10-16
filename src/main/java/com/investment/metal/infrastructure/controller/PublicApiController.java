@@ -4,6 +4,7 @@ import com.investment.metal.MessageKey;
 import com.investment.metal.application.dto.UserLoginDto;
 import com.investment.metal.domain.dto.ResetPasswordDto;
 import com.investment.metal.domain.exception.NoRollbackBusinessException;
+import com.investment.metal.domain.exception.BusinessException;
 import com.investment.metal.infrastructure.dto.SimpleMessageDto;
 import com.investment.metal.infrastructure.exception.ExceptionService;
 import com.investment.metal.infrastructure.persistence.entity.Customer;
@@ -187,8 +188,13 @@ public class PublicApiController {
 
             SimpleMessageDto dto = new SimpleMessageDto("An email was sent to %s with a code. Call validation request with that code", email);
             return new ResponseEntity<>(dto, HttpStatus.OK);
+        } catch (BusinessException e) {
+            log.warn("User registration failed due to business validation: {}", e.getMessage());
+            SimpleMessageDto dto = new SimpleMessageDto(e.getMessage());
+            return new ResponseEntity<>(dto, HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-            SimpleMessageDto dto = new SimpleMessageDto("Error: " + e.getMessage());
+            log.error("Unexpected error during user registration", e);
+            SimpleMessageDto dto = new SimpleMessageDto("Internal server error");
             return new ResponseEntity<>(dto, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

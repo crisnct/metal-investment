@@ -16,19 +16,17 @@ public class InputValidator {
     // Regex patterns for validation
     private static final Pattern IP_PATTERN = Pattern.compile("^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$");
     private static final Pattern USERNAME_PATTERN = Pattern.compile("^[a-zA-Z0-9_]{3,50}$");
-    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");;
     private static final Pattern METAL_SYMBOL_PATTERN = Pattern.compile("^[A-Z]{2,20}$");
     private static final Pattern EXPRESSION_PATTERN = Pattern.compile("^[a-zA-Z0-9+\\-*/().\\s]+$");
     private static final Pattern FREQUENCY_PATTERN = Pattern.compile("^(DAILY|WEEKLY|MONTHLY)$");
     private static final Pattern REASON_PATTERN = Pattern.compile("^[a-zA-Z0-9\\s.,!?-]{1,200}$");
-    
-    // SQL injection patterns to detect and reject
-    private static final Pattern SQL_INJECTION_PATTERN = Pattern.compile(
-        "(?i)(union|select|insert|update|delete|drop|create|alter|exec|execute|script|javascript|vbscript|onload|onerror|onclick|onmouseover|--|/\\*|\\*/|xp_|sp_|'|;|\\||&|\\$|%|#|@|\\*|\\+|\\-|\\/|\\\\|\\^|\\~|\\`|\\[|\\]|\\{|\\}|\\(|\\)|<|>|\\?|\\!|\\:|\\;|\\s+or\\s+|\\s+and\\s+)",
+    private static final Pattern SQL_INJECTION_PATTERN =Pattern.compile(
+        "(?i)(\\b(SELECT|UPDATE|DELETE|INSERT|DROP|UNION|ALTER|TRUNCATE)\\b|--|;|/\\*|\\*/|'\\s*or\\s+'|\"\\s*or\\s+\" )",
         Pattern.CASE_INSENSITIVE
     );
 
-    /**
+  /**
      * Validates IP address format and prevents SQL injection.
      * 
      * @param ip the IP address to validate
@@ -79,13 +77,14 @@ public class InputValidator {
             return false;
         }
         
-        // Check for SQL injection patterns
-        if (containsSqlInjection(email)) {
+        String trimmed = email.trim();
+        // Validate email format
+        if (!EMAIL_PATTERN.matcher(trimmed).matches()) {
             return false;
         }
         
-        // Validate email format
-        return EMAIL_PATTERN.matcher(email.trim()).matches();
+        // Additional protection: reject obvious SQL keywords
+        return !containsSqlInjection(trimmed);
     }
 
     /**
