@@ -21,6 +21,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -32,6 +34,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -93,6 +97,37 @@ public class PublicApiController {
      */
     @Autowired
     private ValidationService validationService;
+
+    @Autowired
+    private CookieCsrfTokenRepository csrfTokenRepository;
+
+
+    /**
+     * Get CSRF token for frontend requests.
+     * Provides the CSRF token needed for secure state-changing API calls.
+     *
+     * @return ResponseEntity containing the CSRF token metadata
+     */
+    @GetMapping("/csrf-token")
+    @Operation(
+            summary = "Get CSRF token",
+            description = "Retrieves the CSRF token required for secure API requests"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "CSRF token retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = Map.class)))
+    })
+    public ResponseEntity<Map<String, String>> getCsrfToken(HttpServletRequest request, HttpServletResponse response) {
+        CsrfToken csrfToken = csrfTokenRepository.generateToken(request);
+        csrfTokenRepository.saveToken(csrfToken, request, response);
+
+        Map<String, String> tokenMap = new HashMap<>();
+        tokenMap.put("token", csrfToken.getToken());
+        tokenMap.put("headerName", csrfToken.getHeaderName());
+        tokenMap.put("parameterName", csrfToken.getParameterName());
+
+        return new ResponseEntity<>(tokenMap, HttpStatus.OK);
+    }
 
 
     /**

@@ -7,6 +7,56 @@ class ApiService {
   constructor() {
     this.baseURL = API_BASE_URL;
     this.csrfRefreshPromise = null;
+    this.csrfHeaderName = 'X-XSRF-TOKEN';
+    this.csrfCookieName = 'XSRF-TOKEN';
+    this.csrfToken = null;
+  }
+
+  getCookieValue(name) {
+    if (typeof document === 'undefined' || !document.cookie) {
+      return null;
+    }
+    const cookies = document.cookie.split(';');
+    for (const cookie of cookies) {
+      const trimmed = cookie.trim();
+      if (trimmed.startsWith(`${name}=`)) {
+        return decodeURIComponent(trimmed.substring(name.length + 1));
+      }
+    }
+    return null;
+  }
+
+  syncCsrfFromCookies() {
+    const tokenFromCookie =
+      this.getCookieValue(this.csrfCookieName) ||
+      this.getCookieValue('X-XSRF-TOKEN') ||
+      this.getCookieValue('_csrf');
+    if (tokenFromCookie) {
+      this.csrfToken = tokenFromCookie;
+    }
+    return this.csrfToken;
+  }
+
+  updateCsrfMetadata(data) {
+    if (data && data.headerName) {
+      this.csrfHeaderName = data.headerName;
+    }
+    if (data && data.token) {
+      this.csrfToken = data.token;
+    }
+    return this.syncCsrfFromCookies();
+  }
+
+  async ensureCsrfToken() {
+    const existingToken = this.syncCsrfFromCookies();
+    if (existingToken) {
+      return existingToken;
+    }
+    const refreshed = await this.refreshCsrfToken();
+    if (refreshed) {
+      return this.syncCsrfFromCookies();
+    }
+    return this.csrfToken;
   }
 
   // Helper method to get CSRF token from cookies
@@ -14,34 +64,12 @@ class ApiService {
     try {
       console.log('=== CSRF TOKEN FROM COOKIES ===');
       console.log('All cookies:', document.cookie);
-      
-      // Get CSRF token from cookies
-      const cookies = document.cookie.split(';');
-      let csrfToken = null;
-      
-      // Check for different possible cookie names
-      for (let cookie of cookies) {
-        const trimmedCookie = cookie.trim();
-        console.log('Checking cookie:', trimmedCookie);
-        
-        if (trimmedCookie.startsWith('XSRF-TOKEN=')) {
-          csrfToken = decodeURIComponent(trimmedCookie.substring('XSRF-TOKEN='.length));
-          console.log('Found XSRF-TOKEN cookie');
-          break;
-        } else if (trimmedCookie.startsWith('X-XSRF-TOKEN=')) {
-          csrfToken = decodeURIComponent(trimmedCookie.substring('X-XSRF-TOKEN='.length));
-          console.log('Found X-XSRF-TOKEN cookie');
-          break;
-        } else if (trimmedCookie.startsWith('_csrf=')) {
-          csrfToken = decodeURIComponent(trimmedCookie.substring('_csrf='.length));
-          console.log('Found _csrf cookie');
-          break;
-        }
-      }
-      
+
+      const csrfToken = this.syncCsrfFromCookies();
+
       console.log('CSRF token from cookies:', csrfToken ? 'FOUND' : 'NOT FOUND');
       console.log('CSRF token value:', csrfToken ? csrfToken.substring(0, 10) + '...' : 'null');
-      
+
       if (csrfToken) {
         console.log('=== CSRF TOKEN FROM COOKIES SUCCESS ===');
         return csrfToken;
@@ -61,7 +89,7 @@ class ApiService {
   async forceRefreshCsrfToken() {
     try {
       console.log('=== FORCE REFRESH CSRF TOKEN ===');
-      const response = await fetch(`${this.baseURL}/api/csrf-token`, {
+      const response = await fetch(`${this.baseURL}/csrf-token`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -78,6 +106,7 @@ class ApiService {
         const data = await response.json();
         console.log('Force refresh response data:', data);
         console.log('Cookies after force refresh:', document.cookie);
+        this.updateCsrfMetadata(data);
         return true;
       } else {
         const errorText = await response.text();
@@ -100,9 +129,9 @@ class ApiService {
     this.csrfRefreshPromise = (async () => {
       try {
         console.log('=== REFRESHING CSRF TOKEN ===');
-        console.log('Calling /api/csrf-token endpoint...');
+        console.log('Calling /csrf-token endpoint...');
         
-        const response = await fetch(`${this.baseURL}/api/csrf-token`, {
+        const response = await fetch(`${this.baseURL}/csrf-token`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -119,6 +148,7 @@ class ApiService {
           const data = await response.json();
           console.log('CSRF token refresh response data:', data);
           console.log('CSRF token refreshed successfully');
+          this.updateCsrfMetadata(data);
           
           // Check if cookies were set
           console.log('Cookies after CSRF token request:', document.cookie);
@@ -140,38 +170,6 @@ class ApiService {
     return this.csrfRefreshPromise;
   }
 
-  // Test method to check if CSRF endpoint is accessible
-  async testCsrfEndpoint() {
-    try {
-      console.log('=== TESTING CSRF ENDPOINT ===');
-      const response = await fetch(`${this.baseURL}/api/csrf-token`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        mode: 'cors',
-        credentials: 'include'
-      });
-      
-      console.log('CSRF endpoint test - Status:', response.status);
-      console.log('CSRF endpoint test - Headers:', Object.fromEntries(response.headers.entries()));
-      
-      if (response.ok) {
-        const data = await response.json();
-        console.log('CSRF endpoint test - Response:', data);
-        return true;
-      } else {
-        const errorText = await response.text();
-        console.log('CSRF endpoint test - Error:', errorText);
-        return false;
-      }
-    } catch (error) {
-      console.error('CSRF endpoint test - Exception:', error);
-      return false;
-    }
-  }
-
   // Helper method to get auth headers (synchronous version without CSRF)
   getAuthHeaders(token) {
     return {
@@ -191,20 +189,18 @@ class ApiService {
     
     console.log('Base headers created:', Object.keys(headers));
     
-    // Add CSRF token if available
-    console.log('Attempting to get CSRF token from cookies...');
     try {
-      const csrfToken = this.getCsrfToken();
+      const csrfToken = await this.ensureCsrfToken();
       console.log('CSRF token result:', csrfToken ? 'SUCCESS' : 'FAILED');
       
       if (csrfToken) {
-        headers['X-XSRF-TOKEN'] = csrfToken;
-        console.log('CSRF token added to headers:', csrfToken.substring(0, 10) + '...');
+        headers[this.csrfHeaderName] = csrfToken;
+        console.log(`CSRF token added to headers (${this.csrfHeaderName}):`, csrfToken.substring(0, 10) + '...');
       } else {
         console.warn('No CSRF token available - request may fail with 403');
       }
     } catch (error) {
-      console.error('Error getting CSRF token:', error);
+      console.error('Error ensuring CSRF token:', error);
       console.warn('Proceeding without CSRF token - request may fail with 403');
     }
     
@@ -229,27 +225,12 @@ class ApiService {
     console.log('getAuthHeadersFromStorageWithCsrf - Token from storage:', token ? 'EXISTS' : 'MISSING');
     console.log('getAuthHeadersFromStorageWithCsrf - Token value:', token ? token.substring(0, 20) + '...' : 'null');
     
-    if (token) {
-      console.log('User has token, getting CSRF token from cookies...');
-      
-      // First, try to get CSRF token from cookies
-      let csrfToken = this.getCsrfToken();
-      
-      // If no CSRF token in cookies, try to fetch one from the server
-      if (!csrfToken) {
-        console.log('No CSRF token in cookies, fetching from server...');
-        const refreshSuccess = await this.refreshCsrfToken();
-        if (refreshSuccess) {
-          csrfToken = this.getCsrfToken();
-          console.log('CSRF token fetched from server:', csrfToken ? 'SUCCESS' : 'FAILED');
-        }
-      }
-      
-      return await this.getAuthHeadersWithCsrf(token);
-    } else {
+    if (!token) {
       console.warn('No user token found - user may not be logged in');
       return {};
     }
+
+    return await this.getAuthHeadersWithCsrf(token);
   }
 
   // Safely parse JSON; returns null for empty body, or { message: text } for non-JSON text
@@ -280,9 +261,9 @@ class ApiService {
       };
       
       // Add CSRF token if available
-      const csrfToken = await this.getCsrfToken();
+      const csrfToken = await this.ensureCsrfToken();
       if (csrfToken) {
-        headers['X-XSRF-TOKEN'] = csrfToken;
+        headers[this.csrfHeaderName] = csrfToken;
       }
       
       const response = await fetch(`${this.baseURL}/userRegistration`, {
@@ -670,10 +651,6 @@ class ApiService {
       console.log('Attempting to record purchase with CSRF protection');
       console.log('Purchase data:', { metalAmount, metalSymbol, cost });
       
-      // Test CSRF endpoint first
-      console.log('Testing CSRF endpoint accessibility...');
-      await this.testCsrfEndpoint();
-      
       // Force refresh CSRF token before making the request
       console.log('Force refreshing CSRF token...');
       await this.forceRefreshCsrfToken();
@@ -692,8 +669,9 @@ class ApiService {
       
       console.log('Full headers being sent:', fullHeaders);
       console.log('Request URL:', `${this.baseURL}/api/purchase`);
-      console.log('CSRF token in headers:', fullHeaders['X-XSRF-TOKEN'] ? 'PRESENT' : 'MISSING');
-      console.log('CSRF token value:', fullHeaders['X-XSRF-TOKEN'] ? fullHeaders['X-XSRF-TOKEN'].substring(0, 20) + '...' : 'null');
+      const csrfHeader = this.csrfHeaderName;
+      console.log('CSRF token in headers:', fullHeaders[csrfHeader] ? 'PRESENT' : 'MISSING');
+      console.log('CSRF token value:', fullHeaders[csrfHeader] ? fullHeaders[csrfHeader].substring(0, 20) + '...' : 'null');
       console.log('Authorization header:', fullHeaders['Authorization'] ? 'PRESENT' : 'MISSING');
       
       const response = await fetch(`${this.baseURL}/api/purchase`, {
@@ -722,7 +700,8 @@ class ApiService {
             // Retry the request with refreshed CSRF token
             const retryHeaders = await this.getAuthHeadersFromStorageWithCsrf();
             console.log('Retry headers:', Object.keys(retryHeaders));
-            console.log('Retry CSRF token:', retryHeaders['X-XSRF-TOKEN'] ? retryHeaders['X-XSRF-TOKEN'].substring(0, 20) + '...' : 'null');
+            const retryCsrfHeader = this.csrfHeaderName;
+            console.log('Retry CSRF token:', retryHeaders[retryCsrfHeader] ? retryHeaders[retryCsrfHeader].substring(0, 20) + '...' : 'null');
             
             const retryResponse = await fetch(`${this.baseURL}/api/purchase`, {
               method: 'POST',

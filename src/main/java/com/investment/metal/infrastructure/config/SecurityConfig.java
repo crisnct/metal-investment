@@ -8,6 +8,7 @@ import java.util.Arrays;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -53,6 +54,16 @@ public class SecurityConfig {
     // CustomAuthenticationProvider is discovered as a @Component
 
     @Bean
+    public CookieCsrfTokenRepository cookieCsrfTokenRepository() {
+        CookieCsrfTokenRepository repository = CookieCsrfTokenRepository.withHttpOnlyFalse();
+        repository.setCookiePath("/");
+        repository.setCookieName("XSRF-TOKEN");
+        repository.setHeaderName("X-XSRF-TOKEN");
+        repository.setParameterName("_csrf");
+        return repository;
+    }
+
+    @Bean
     public AuthenticationEntryPoint authenticationEntryPoint() {
         return new HttpStatusEntryPoint(org.springframework.http.HttpStatus.UNAUTHORIZED);
     }
@@ -72,9 +83,16 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, CustomAuthenticationProvider customAuthenticationProvider, SecurityHeadersFilter securityHeadersFilter) throws Exception {
+    public SecurityFilterChain filterChain(
+            HttpSecurity http,
+            CustomAuthenticationProvider customAuthenticationProvider,
+            SecurityHeadersFilter securityHeadersFilter,
+            CookieCsrfTokenRepository csrfTokenRepository) throws Exception {
         // Create AuthenticationFilter directly in the filter chain to avoid circular dependency
-        AuthenticationFilter authFilter = new AuthenticationFilter(request -> request.getRequestURI().startsWith("/api/"));
+        AuthenticationFilter authFilter = new AuthenticationFilter(request -> {
+            String uri = request.getRequestURI();
+            return uri.startsWith("/api/");
+        });
         AuthenticationManager localAuthManager = new ProviderManager(customAuthenticationProvider);
         authFilter.setAuthenticationManager(localAuthManager);
         
@@ -83,20 +101,12 @@ public class SecurityConfig {
         CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
         requestHandler.setCsrfRequestAttributeName("_csrf");
         
-        // Custom CSRF configuration for stateless JWT authentication
-        CookieCsrfTokenRepository csrfTokenRepository = new CookieCsrfTokenRepository();
-        csrfTokenRepository.setCookieHttpOnly(false); // Allow JavaScript access for SPA
-        csrfTokenRepository.setCookiePath("/");
-        csrfTokenRepository.setHeaderName("X-XSRF-TOKEN");
-        csrfTokenRepository.setCookieName("XSRF-TOKEN"); // Explicitly set cookie name
-        csrfTokenRepository.setParameterName("_csrf"); // Set parameter name for forms
-        
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf
                 .csrfTokenRequestHandler(requestHandler)
                 .csrfTokenRepository(csrfTokenRepository)
-                .ignoringRequestMatchers("/login", "/userRegistration", "/validateAccount", "/resetPassword", "/changePassword", "/api/csrf-token")
+                .ignoringRequestMatchers("/login", "/userRegistration", "/validateAccount", "/resetPassword", "/changePassword", "/csrf-token")
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
             .exceptionHandling(ex -> ex
@@ -106,6 +116,7 @@ public class SecurityConfig {
             .addFilterBefore(securityHeadersFilter, AnonymousAuthenticationFilter.class)
             .addFilterBefore(authFilter, AnonymousAuthenticationFilter.class)
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.GET, "/csrf-token").permitAll()
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll()
             );
