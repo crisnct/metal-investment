@@ -236,7 +236,7 @@ const Profile = ({ userInfo }) => {
   };
 
   const handleSetNotification = async () => {
-    if (!notificationPeriod || isNaN(notificationPeriod) || parseInt(notificationPeriod) < 0) {
+    if (!notificationPeriod || isNaN(notificationPeriod) || parseInt(notificationPeriod, 10) < 0) {
       setNotificationMessage('Please enter a valid number of days');
       return;
     }
@@ -244,16 +244,14 @@ const Profile = ({ userInfo }) => {
     try {
       setNotificationLoading(true);
       setNotificationMessage('');
-      
-      // Send days directly to backend
-      await ApiService.setNotificationPeriod(parseInt(notificationPeriod));
+
+      await ApiService.forceRefreshCsrfToken();
+      await ApiService.setNotificationPeriod(parseInt(notificationPeriod, 10));
       setNotificationMessage('Notification period updated successfully!');
-      
-      // Clear message after 3 seconds
+
       setTimeout(() => {
         setNotificationMessage('');
       }, 3000);
-      
     } catch (error) {
       setNotificationMessage(error.data?.message || error.message || 'Failed to update notification period');
     } finally {
@@ -274,6 +272,7 @@ const Profile = ({ userInfo }) => {
       setDeleteAccountLoading(true);
       setDeleteAccountMessage('');
       
+      await ApiService.forceRefreshCsrfToken();
       // Call the preparation API to send email with code
       await ApiService.deleteAccountPreparation();
       
@@ -326,6 +325,7 @@ const Profile = ({ userInfo }) => {
     try {
       setDeleteAccountLoading(true);
       
+      await ApiService.forceRefreshCsrfToken();
       // Call the delete account API
       await ApiService.deleteAccount(deleteAccountData.password, deleteAccountData.code);
       
@@ -812,3 +812,4 @@ const Profile = ({ userInfo }) => {
 };
 
 export default Profile;
+
