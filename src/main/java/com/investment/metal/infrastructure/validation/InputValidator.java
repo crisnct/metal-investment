@@ -1,8 +1,8 @@
 package com.investment.metal.infrastructure.validation;
 
-import org.springframework.stereotype.Component;
-import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.springframework.stereotype.Component;
 
 /**
  * Input validation utility to prevent SQL injection and other security vulnerabilities.

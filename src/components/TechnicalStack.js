@@ -102,6 +102,16 @@ const TechnicalStack = () => {
               </div>
             ))}
           </div>
+          <div className="tech-cta">
+            <a
+              href="https://metal-investment-635786220311.europe-west1.run.app/swagger-ui.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="tech-button"
+            >
+              Swagger UI
+            </a>
+          </div>
         </div>
       </div>
     </section>

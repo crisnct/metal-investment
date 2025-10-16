@@ -6,7 +6,6 @@ import com.investment.metal.domain.model.MetalType;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import lombok.Data;
-import lombok.Getter;
 
 @Data
 public class AppStatusInfoDto {

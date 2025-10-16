@@ -18,17 +18,6 @@ const Hero = () => {
               so your profit would match a logical expression that you provided, then the application would 
               notify you by email. Also the users could check whenever they want their profit by calling an API.
             </p>
-
-            <div className="hero-cta">
-              <a 
-                href="https://metal-investment-635786220311.europe-west1.run.app/swagger-ui.html" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="cta-button"
-              >
-                Swagger UI
-              </a>
-            </div>
           </div>
         </div>
       </div>

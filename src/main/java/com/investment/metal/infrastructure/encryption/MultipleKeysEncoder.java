@@ -1,14 +1,10 @@
 package com.investment.metal.infrastructure.encryption;
 
 import com.google.common.collect.Lists;
-import io.micrometer.core.instrument.util.IOUtils;
 import jakarta.annotation.PostConstruct;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.security.SecureRandom;
-import java.util.Base64;
 import java.util.List;
-import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;

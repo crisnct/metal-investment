@@ -4,7 +4,6 @@ import com.investment.metal.MessageKey;
 import com.investment.metal.domain.exception.BusinessException;
 import com.investment.metal.infrastructure.persistence.entity.BannedAccount;
 import com.investment.metal.infrastructure.persistence.repository.BannedRepository;
-import com.investment.metal.infrastructure.service.AbstractService;
 import java.sql.Timestamp;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;

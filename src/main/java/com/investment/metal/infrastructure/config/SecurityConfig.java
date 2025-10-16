@@ -3,6 +3,8 @@ package com.investment.metal.infrastructure.config;
 import com.investment.metal.infrastructure.security.AuthenticationFilter;
 import com.investment.metal.infrastructure.security.CustomAuthenticationProvider;
 import com.investment.metal.infrastructure.security.SecurityHeadersFilter;
+import jakarta.servlet.http.HttpServletResponse;
+import java.util.Arrays;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,18 +18,16 @@ import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder.SecretKeyFactoryAlgorithm;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
-import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.csrf.InvalidCsrfTokenException;
 import org.springframework.security.web.csrf.MissingCsrfTokenException;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import jakarta.servlet.http.HttpServletResponse;
-import java.util.Arrays;
 
 /**
  * Security configuration following Single Responsibility Principle.

@@ -1,12 +1,12 @@
 package com.investment.metal.infrastructure.encryption;
 
+import com.investment.metal.infrastructure.util.SecureRandomGenerator;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
-import com.investment.metal.infrastructure.util.SecureRandomGenerator;
 import java.util.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

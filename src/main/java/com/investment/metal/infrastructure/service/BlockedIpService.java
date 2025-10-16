@@ -4,7 +4,6 @@ import com.investment.metal.MessageKey;
 import com.investment.metal.domain.exception.BusinessException;
 import com.investment.metal.infrastructure.persistence.entity.BanIp;
 import com.investment.metal.infrastructure.persistence.repository.BanIpRepository;
-import com.investment.metal.infrastructure.service.AbstractService;
 import com.investment.metal.infrastructure.util.Util;
 import jakarta.servlet.http.HttpServletRequest;
 import java.sql.Timestamp;

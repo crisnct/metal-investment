@@ -17,6 +17,34 @@
   margin-bottom: 3rem;
 }
 
+.tech-cta {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.tech-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.9rem 2.5rem;
+  border-radius: 9999px;
+  background: linear-gradient(45deg, #4F871B, #74C627);
+  color: #0f172a;
+  font-weight: 600;
+  font-size: 1.05rem;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 18px rgba(116, 198, 39, 0.35);
+}
+
+.tech-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(116, 198, 39, 0.45);
+  color: white;
+  text-decoration: none;
+}
+
 .tech-card {
   background: rgba(255, 255, 255, 0.8);
   border-radius: 16px;
@@ -119,6 +147,10 @@
   .tech-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
+  }
+
+  .tech-cta {
+    margin-top: 1.5rem;
   }
   
   .tech-card {

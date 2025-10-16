@@ -3,13 +3,12 @@ package com.investment.metal.infrastructure.service;
 import com.investment.metal.domain.model.MetalType;
 import com.investment.metal.infrastructure.persistence.entity.MetalPrice;
 import com.investment.metal.infrastructure.persistence.repository.MetalPriceRepository;
+import java.util.List;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
 
 /**
  * Fallback service for providing cached metal prices when external APIs are unavailable.
