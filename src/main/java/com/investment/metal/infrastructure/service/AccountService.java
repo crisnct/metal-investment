@@ -6,8 +6,10 @@ import com.investment.metal.infrastructure.exception.ExceptionService;
 import com.investment.metal.infrastructure.persistence.entity.Alert;
 import com.investment.metal.infrastructure.persistence.entity.Customer;
 import com.investment.metal.infrastructure.persistence.entity.Login;
+import com.investment.metal.infrastructure.persistence.entity.Notification;
 import com.investment.metal.infrastructure.persistence.entity.Purchase;
 import com.investment.metal.infrastructure.persistence.repository.AlertRepository;
+import com.investment.metal.infrastructure.persistence.repository.NotificationRepository;
 import com.investment.metal.infrastructure.persistence.repository.CustomerRepository;
 import com.investment.metal.infrastructure.persistence.repository.LoginRepository;
 import com.investment.metal.infrastructure.persistence.repository.PurchaseRepository;
@@ -31,6 +33,9 @@ public class AccountService {
 
     @Autowired
     private AlertRepository alertRepository;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     @Autowired
     private PurchaseRepository purchaseRepository;
@@ -143,7 +148,11 @@ public class AccountService {
         // Delete all purchases for this user
         Optional<List<Purchase>> userPurchases = purchaseRepository.findByUserId(userId);
         userPurchases.ifPresent(purchases -> purchaseRepository.deleteAll(purchases));
-        
+
+        // Delete notification preferences for this user
+        Optional<Notification> notification = notificationRepository.findByUserId(userId);
+        notification.ifPresent(not -> notificationRepository.delete(not));
+
         // SECURITY FIX: Invalidate all sessions before deleting account
         // This ensures no active sessions remain after account deletion
         this.loginService.invalidateAllUserSessions(userId);
