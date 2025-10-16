@@ -135,6 +135,7 @@ public class SecurityConfig {
             .addFilterBefore(authFilter, AnonymousAuthenticationFilter.class)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.GET, "/csrf-token").permitAll()
+                .requestMatchers(HttpMethod.OPTIONS, "/api/**").permitAll()
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll()
             );
