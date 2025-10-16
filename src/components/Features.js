@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bell, TrendingUp, BarChart3, Smartphone, Globe, Mail } from 'lucide-react';
+import { Bell, TrendingUp, BarChart3, ShieldCheck, Globe, Mail } from 'lucide-react';
 import './Features.css';
 
 const Features = () => {
@@ -33,9 +33,9 @@ const Features = () => {
       gradient: "linear-gradient(135deg, #8B5CF6, #7C3AED)"
     },
     {
-      icon: <Smartphone className="feature-icon" />,
-      title: "Mobile Ready",
-      description: "Responsive design that works perfectly on all devices - desktop, tablet, and mobile.",
+      icon: <ShieldCheck className="feature-icon" />,
+      title: "Enterprise-Grade Security",
+      description: "CSRF protection, JWT auth, secure cookies, strict CORS, CSP, and Resilience4j bulkhead/rate-limit/time-limit guards keep the platform locked down.",
       color: "#EF4444",
       gradient: "linear-gradient(135deg, #EF4444, #DC2626)"
     },
@@ -82,3 +82,4 @@ const Features = () => {
 };
 
 export default Features;
+
