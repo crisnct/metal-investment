@@ -21,8 +21,8 @@ public class InputValidator {
     private static final Pattern EXPRESSION_PATTERN = Pattern.compile("^[a-zA-Z0-9+\\-*/().\\s]+$");
     private static final Pattern FREQUENCY_PATTERN = Pattern.compile("^(DAILY|WEEKLY|MONTHLY)$");
     private static final Pattern REASON_PATTERN = Pattern.compile("^[a-zA-Z0-9\\s.,!?-]{1,200}$");
-    private static final Pattern SQL_INJECTION_PATTERN =Pattern.compile(
-        "(?i)(\\b(SELECT|UPDATE|DELETE|INSERT|DROP|UNION|ALTER|TRUNCATE)\\b|--|;|/\\*|\\*/|'\\s*or\\s+'|\"\\s*or\\s+\" )",
+    private static final Pattern SQL_INJECTION_PATTERN = Pattern.compile(
+        "(?i)(union|select|insert|update|delete|drop|create|alter|exec|execute|script|javascript|vbscript|onload|onerror|onclick|onmouseover|--|/\\*|\\*/|xp_|sp_|'|;|\\||&|\\$|%|#|@|\\*|\\+|\\-|/|\\\\|\\^|\\~|`|\\[|\\]|\\{|\\}|\\(|\\)|<|>|\\?|\\!|\\:|\\;|\\s+or\\s+|\\s+and\\s+)",
         Pattern.CASE_INSENSITIVE
     );
 

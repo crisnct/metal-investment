@@ -4,6 +4,7 @@ import com.investment.metal.infrastructure.persistence.entity.Customer;
 import com.investment.metal.infrastructure.persistence.entity.Login;
 import com.investment.metal.infrastructure.service.AccountService;
 import com.investment.metal.infrastructure.service.LoginService;
+import com.investment.metal.infrastructure.security.JwtService;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,6 +29,9 @@ public class CustomAuthenticationProvider extends AbstractUserDetailsAuthenticat
     @Autowired
     private LoginService loginService;
 
+    @Autowired
+    private JwtService jwtService;
+
     @Override
     protected void additionalAuthenticationChecks(UserDetails userDetails, UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken) throws AuthenticationException {
         //
@@ -44,14 +48,42 @@ public class CustomAuthenticationProvider extends AbstractUserDetailsAuthenticat
     }
 
     private Optional<User> findByToken(String rawToken) {
-        Optional<User> result = Optional.empty();
-        Optional<Login> login = this.loginService.findByToken(rawToken);
-        if (login.isPresent()) {
-            Customer customer = this.accountService.findById(login.get().getUserId());
+        Optional<Login> loginOpt = this.loginService.findByToken(rawToken);
+        if (loginOpt.isPresent()) {
+            return buildUser(loginOpt.get());
+        }
+
+        try {
+            if (!this.jwtService.isTokenValid(rawToken) || !this.jwtService.isAccessToken(rawToken)) {
+                return Optional.empty();
+            }
+            Integer userId = this.jwtService.extractUserId(rawToken);
+            Login loginRecord = this.loginService.findByUserId(userId);
+            if (loginRecord != null && loginRecord.getLoggedIn() != null && loginRecord.getLoggedIn() == 1) {
+                return buildUser(loginRecord);
+            }
+            Customer customer = this.accountService.findById(userId);
+            if (customer != null) {
+                return Optional.of(new User(customer.getUsername(), customer.getPassword(), true, true, true, true,
+                        AuthorityUtils.createAuthorityList("USER")));
+            }
+        } catch (Exception ex) {
+            return Optional.empty();
+        }
+        return Optional.empty();
+    }
+
+    private Optional<User> buildUser(Login login) {
+        try {
+            Customer customer = this.accountService.findById(login.getUserId());
+            if (customer == null) {
+                return Optional.empty();
+            }
             User user = new User(customer.getUsername(), customer.getPassword(), true, true, true, true,
                     AuthorityUtils.createAuthorityList("USER"));
-            result = Optional.of(user);
+            return Optional.of(user);
+        } catch (Exception ex) {
+            return Optional.empty();
         }
-        return result;
     }
 }

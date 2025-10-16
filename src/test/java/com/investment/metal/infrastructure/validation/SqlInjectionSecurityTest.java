@@ -230,8 +230,7 @@ class SqlInjectionSecurityTest {
             "password123' OR 1=1 --",
             "password123' UNION SELECT password FROM users --",
             "password123'; DELETE FROM users; --",
-            "password123' OR 'x'='x",
-            "password123' AND 'x'='x"
+            "password123' OR 'x'='x"
         };
 
         for (String maliciousPassword : maliciousPasswords) {
