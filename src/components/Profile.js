@@ -179,7 +179,7 @@ const Profile = ({ userInfo }) => {
     
     try {
       const response = await ApiService.recordPurchase(
-        parseInt(purchaseData.amount),
+        parseFloat(purchaseData.amount),
         purchaseData.symbol,
         parseFloat(purchaseData.cost)
       );
