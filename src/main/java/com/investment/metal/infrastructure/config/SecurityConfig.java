@@ -109,7 +109,9 @@ public class SecurityConfig {
         // Create AuthenticationFilter directly in the filter chain to avoid circular dependency
         AuthenticationFilter authFilter = new AuthenticationFilter(request -> {
             String uri = request.getRequestURI();
-            return uri.startsWith("/api/");
+            String contextPath = request.getContextPath() != null ? request.getContextPath() : "";
+            String path = uri.startsWith(contextPath) ? uri.substring(contextPath.length()) : uri;
+            return path.startsWith("/api/") && !"/api/ui-banner".equals(path);
         });
         AuthenticationManager localAuthManager = new ProviderManager(customAuthenticationProvider);
         authFilter.setAuthenticationManager(localAuthManager);
