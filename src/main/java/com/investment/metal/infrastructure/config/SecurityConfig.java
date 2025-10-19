@@ -124,7 +124,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf
                 .csrfTokenRequestHandler(requestHandler)
                 .csrfTokenRepository(csrfTokenRepository)
-                .ignoringRequestMatchers("/login", "/userRegistration", "/validateAccount", "/resetPassword", "/changePassword", "/csrf-token")
+                .ignoringRequestMatchers("/login", "/userRegistration", "/validateAccount", "/resetPassword", "/changePassword", "/csrf-token", "/api/ui-banner")
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
             .exceptionHandling(ex -> ex

@@ -49,7 +49,7 @@ public class SpringDocConfig {
     public GroupedOpenApi publicApi() {
         return GroupedOpenApi.builder()
                 .group("public")
-                .pathsToMatch("/userRegistration", "/validateAccount", "/login", "/resetPassword", "/changePassword", "/checkUserPendingValidation", "/resendValidationEmail", "/health", "/")
+                .pathsToMatch("/userRegistration", "/validateAccount", "/login", "/resetPassword", "/changePassword", "/checkUserPendingValidation", "/resendValidationEmail", "/api/health", "/api/ui-banner", "/")
                 .packagesToScan("com.investment.metal.infrastructure.controller")
                 .build();
     }
