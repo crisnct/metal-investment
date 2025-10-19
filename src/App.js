@@ -14,6 +14,7 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userToken, setUserToken] = useState(null);
   const [userInfo, setUserInfo] = useState({ username: '', email: '' });
+  const [bannerMessage, setBannerMessage] = useState('');
 
   useEffect(() => {
     // Check if user is logged in (check localStorage for token and user info)
@@ -29,6 +30,28 @@ function App() {
         email: storedEmail || '' 
       });
     }
+
+    let isMounted = true;
+
+    const fetchBannerMessage = async () => {
+      try {
+        const message = await ApiService.getUiBanner();
+        if (isMounted) {
+          setBannerMessage(message || '');
+        }
+      } catch (error) {
+        console.error('Failed to load UI banner message:', error);
+        if (isMounted) {
+          setBannerMessage('');
+        }
+      }
+    };
+
+    fetchBannerMessage();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleLogin = async (username, password) => {
@@ -80,6 +103,11 @@ function App() {
         onLogin={handleLogin} 
         onLogout={handleLogout}
       />
+      {bannerMessage && (
+        <div className="app-banner">
+          {bannerMessage}
+        </div>
+      )}
       <Hero />
       {isLoggedIn && <Profile userInfo={userInfo} />}
       <Features />

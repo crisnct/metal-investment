@@ -12,6 +12,35 @@ class ApiService {
     this.csrfToken = null;
   }
 
+  async getUiBanner() {
+    try {
+      const response = await fetch(`${this.baseURL}/api/ui-banner`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        },
+        mode: 'cors',
+        credentials: 'include'
+      });
+
+      if (response.status === 204) {
+        return '';
+      }
+
+      if (!response.ok) {
+        console.warn('Failed to fetch UI banner:', response.status);
+        return '';
+      }
+
+      const data = await this.parseJsonSafely(response);
+      const message = data && typeof data.message === 'string' ? data.message.trim() : '';
+      return message;
+    } catch (error) {
+      console.error('Error while fetching UI banner:', error);
+      return '';
+    }
+  }
+
   getCookieValue(name) {
     if (typeof document === 'undefined' || !document.cookie) {
       return null;

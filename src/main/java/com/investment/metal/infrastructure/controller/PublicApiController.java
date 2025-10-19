@@ -27,6 +27,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -100,6 +101,9 @@ public class PublicApiController {
     @Autowired
     private CookieCsrfTokenRepository csrfTokenRepository;
 
+    @Value("${metalinvestment.ui.banner-message:}")
+    private String uiBannerMessage;
+
 
     /**
      * Get CSRF token for frontend requests.
@@ -126,6 +130,23 @@ public class PublicApiController {
         tokenMap.put("parameterName", csrfToken.getParameterName());
 
         return new ResponseEntity<>(tokenMap, HttpStatus.OK);
+    }
+
+    @GetMapping("/api/ui-banner")
+    @Operation(summary = "Retrieve UI banner message", description = "Returns the configured banner text that should be displayed in the UI when available")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Banner message found",
+                    content = @Content(schema = @Schema(implementation = Map.class))),
+            @ApiResponse(responseCode = "204", description = "No banner configured")
+    })
+    public ResponseEntity<Map<String, String>> getUiBannerMessage() {
+        String banner = uiBannerMessage != null ? uiBannerMessage.trim() : "";
+        if (banner.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        Map<String, String> response = new HashMap<>();
+        response.put("message", banner);
+        return ResponseEntity.ok(response);
     }
 
 
