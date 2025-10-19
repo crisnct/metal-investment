@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="Metal Investment App icon">
+  <!-- Colors -->
+  <!-- bg-navy: #0F1420; gold: #F6C543; silver: #BFC3C8; platinum-ish shadow: #AEB3B8 -->
+  <defs>
+    <linearGradient id="goldShine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFD978"/>
+      <stop offset="100%" stop-color="#F6C543"/>
+    </linearGradient>
+    <linearGradient id="silverShine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#D9DCE0"/>
+      <stop offset="100%" stop-color="#BFC3C8"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Circular background -->
+  <circle cx="512" cy="512" r="448" fill="#0F1420"/>
+
+  <!-- Silver/Platinum bar (bottom) -->
+  <rect x="256" y="636" rx="36" ry="36" width="512" height="116" fill="url(#silverShine)"/>
+  <!-- subtle underside/shadow of silver -->
+  <path d="M292 748h440c18 0 32 14 32 32 0 6-2 12-5 17a36 36 0 0 1-27 15H292a36 36 0 0 1-32-32c0-18 14-32 32-32z" fill="#AEB3B8" opacity=".35"/>
+
+  <!-- Gold bar (middle) -->
+  <rect x="308" y="536" rx="36" ry="36" width="408" height="116" fill="url(#goldShine)"/>
+
+  <!-- Upward trend arrow -->
+  <!-- Built from a polyline with rounded caps, then an arrowhead path -->
+  <g fill="none" stroke="url(#goldShine)" stroke-width="44" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="270,470 404,378 530,466 690,334" />
+  </g>
+  <path d="M690 334 L760 320 L724 388 Z" fill="url(#goldShine)"/>
+
+</svg>

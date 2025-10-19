@@ -98,16 +98,17 @@ npm run build:deploy
 ```
 src/main/resources/static/
 ├── asset-manifest.json
-├── favicon.ico
 ├── index.html
 └── static/
     ├── css/
     │   ├── main.[hash].css
     │   └── main.[hash].css.map
     └── js/
-        ├── main.[hash].js
-        ├── main.[hash].js.LICENSE.txt
-        └── main.[hash].js.map
+    │   ├── main.[hash].js
+    │   ├── main.[hash].js.LICENSE.txt
+    │   └── main.[hash].js.map
+    └── images/        
+        └── metal-investment-icon.svg
 ```
 
 **Usage**: Always use `npm run build:deploy` for production deployments to ensure clean file management.

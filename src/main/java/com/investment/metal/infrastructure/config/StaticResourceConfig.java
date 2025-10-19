@@ -24,7 +24,7 @@ public class StaticResourceConfig implements WebMvcConfigurer {
                 .setCachePeriod(0);
 
         // General static resources (favicon, manifest, etc.)
-        registry.addResourceHandler("/favicon.ico", "/asset-manifest.json")
+        registry.addResourceHandler("/images/metal-investment-icon.svg", "/asset-manifest.json")
                 .addResourceLocations("classpath:/static/")
                 .setCachePeriod(0);
     }

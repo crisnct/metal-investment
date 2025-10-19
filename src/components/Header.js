@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { TrendingUp, Menu, X, User, LogIn, LogOut } from 'lucide-react';
+import { Menu, X, User, LogIn, LogOut } from 'lucide-react';
 import './Header.css';
 import ApiService from '../services/api';
 
@@ -26,6 +26,9 @@ const Header = ({ isLoggedIn, onLogin, onLogout }) => {
   const [resetPasswordMessage, setResetPasswordMessage] = useState('');
   const [resetPasswordToken, setResetPasswordToken] = useState(null);
   const [resetPasswordEmail, setResetPasswordEmail] = useState('');
+  const publicUrl = process.env.PUBLIC_URL || '';
+  const normalizedPublicUrl = publicUrl.endsWith('/') ? publicUrl.slice(0, -1) : publicUrl;
+  const logoSrc = `${normalizedPublicUrl}/static/images/metal-investment-icon.svg`;
 
   // Handle escape key to close modals
   useEffect(() => {
@@ -444,7 +447,7 @@ const Header = ({ isLoggedIn, onLogin, onLogout }) => {
       <div className="container">
         <div className="header-content">
           <div className="logo">
-            <TrendingUp className="logo-icon" />
+            <img src={logoSrc} alt="Metal Investment logo" className="logo-icon" />
             <span className="logo-text">Metal Investment</span>
           </div>
           

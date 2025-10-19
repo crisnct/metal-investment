@@ -23,7 +23,10 @@
 }
 
 .logo-icon {
-  color: #fbbf24;
+  width: 2rem;
+  height: 2rem;
+  display: block;
+  object-fit: contain;
 }
 
 .logo-text {
