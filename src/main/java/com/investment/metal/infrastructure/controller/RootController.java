@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -35,17 +36,13 @@ public class RootController {
 
   private static final long DEFAULT_DB_HEALTH_TIMEOUT_MS = 1000;
 
-  private final DataSource dataSource;
-  private final long dbHealthTimeoutMs;
-  private final ExecutorService healthCheckExecutor;
+  @Autowired(required = false)
+  private DataSource dataSource;
 
-  public RootController(@Autowired(required = false) DataSource dataSource) {
-    this(dataSource, DEFAULT_DB_HEALTH_TIMEOUT_MS);
-  }
+  private ExecutorService healthCheckExecutor;
 
-  RootController(DataSource dataSource, long dbHealthTimeoutMs) {
-    this.dataSource = dataSource;
-    this.dbHealthTimeoutMs = dbHealthTimeoutMs;
+  @PostConstruct
+  private void init(){
     this.healthCheckExecutor = Executors.newCachedThreadPool(new HealthThreadFactory());
   }
 
@@ -129,7 +126,7 @@ public class RootController {
             this.healthCheckExecutor);
 
     try {
-      return future.get(this.dbHealthTimeoutMs, TimeUnit.MILLISECONDS);
+      return future.get(DEFAULT_DB_HEALTH_TIMEOUT_MS, TimeUnit.MILLISECONDS);
     } catch (TimeoutException ex) {
       future.cancel(true);
       return "DOWN";
