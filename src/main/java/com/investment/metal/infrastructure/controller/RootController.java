@@ -18,6 +18,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import javax.sql.DataSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
@@ -38,7 +39,7 @@ public class RootController {
   private final long dbHealthTimeoutMs;
   private final ExecutorService healthCheckExecutor;
 
-  public RootController(DataSource dataSource) {
+  public RootController(@Autowired(required = false) DataSource dataSource) {
     this(dataSource, DEFAULT_DB_HEALTH_TIMEOUT_MS);
   }
 
@@ -110,7 +111,7 @@ public class RootController {
 
   private String determineDatabaseStatus() {
     if (this.dataSource == null) {
-      return "UNKNOWN";
+      return "DOWN";
     }
 
     CompletableFuture<String> future =
