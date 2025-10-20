@@ -3,6 +3,7 @@ package com.investment.metal;
 import com.investment.metal.infrastructure.controller.PublicApiController;
 import com.investment.metal.infrastructure.controller.ProtectedApiController;
 import com.investment.metal.infrastructure.controller.RootController;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -19,9 +20,16 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(MockitoExtension.class)
 class BasicApiTest {
 
-    private final PublicApiController publicApiController = new PublicApiController();
-    private final ProtectedApiController protectedApiController = new ProtectedApiController();
-    private final RootController rootController = new RootController(null);
+    private PublicApiController publicApiController;
+    private ProtectedApiController protectedApiController;
+    private RootController rootController;
+
+    @BeforeEach
+    void setUp() {
+        publicApiController = new PublicApiController();
+        protectedApiController = new ProtectedApiController();
+        rootController = new RootController();
+    }
 
     @Test
     void testHealthCheck() {

@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -18,6 +17,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -36,14 +36,18 @@ public class RootController {
 
   private static final long DEFAULT_DB_HEALTH_TIMEOUT_MS = 1000;
 
-  @Autowired(required = false)
   private DataSource dataSource;
 
   private ExecutorService healthCheckExecutor;
 
   @PostConstruct
-  private void init(){
+  public void init(){
     this.healthCheckExecutor = Executors.newCachedThreadPool(new HealthThreadFactory());
+  }
+
+  @Autowired(required = false)
+  public void setDataSource(DataSource dataSource) {
+    this.dataSource = dataSource;
   }
 
   @GetMapping("/")
@@ -108,7 +112,7 @@ public class RootController {
 
   private String determineDatabaseStatus() {
     if (this.dataSource == null) {
-      return "DOWN";
+      return "UNKNOWN";
     }
 
     CompletableFuture<String> future =

@@ -26,7 +26,7 @@ class ControllerIntegrationTest {
         // Create controller instances directly without Spring Boot context
         publicApiController = new PublicApiController();
         protectedApiController = new ProtectedApiController();
-        rootController = new RootController(null);
+        rootController = new RootController();
     }
 
     @Test
