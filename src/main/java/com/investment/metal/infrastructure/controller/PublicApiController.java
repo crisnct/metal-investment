@@ -29,10 +29,7 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
@@ -154,7 +151,6 @@ public class PublicApiController {
     /**
      * Register a new user account.
      * Creates a new user account with the provided credentials and sends a validation email.
-     * 
      * Business Rules:
      * - Email must be in valid format
      * - IP address must not be blocked
@@ -386,11 +382,6 @@ public class PublicApiController {
             Customer user = this.accountService.findByUsername(username);
             this.bannedAccountsService.checkBanned(user.getId());
             
-            // Check if user exists and email matches
-            if (user == null) {
-                return new ResponseEntity<>(new SimpleMessageDto("User does not exist"), HttpStatus.BAD_REQUEST);
-            }
-            
             if (!user.getEmail().equals(email)) {
                 return new ResponseEntity<>(new SimpleMessageDto("User does not exist"), HttpStatus.BAD_REQUEST);
             }
@@ -441,7 +432,7 @@ public class PublicApiController {
             this.bannedAccountsService.checkBanned(user.getId());
             
             // Check if user exists and email matches
-            if (user == null || !user.getEmail().equals(email)) {
+            if (!user.getEmail().equals(email)) {
                 return new ResponseEntity<>(new SimpleMessageDto("User not found"), HttpStatus.NOT_FOUND);
             }
             
@@ -460,59 +451,4 @@ public class PublicApiController {
         }
     }
 
-    @GetMapping("/")
-    @Operation(
-            summary = "Serve React application",
-            description = "Serves the main React application HTML page"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "React app served successfully",
-                    content = @Content(mediaType = "text/html")),
-            @ApiResponse(responseCode = "404", description = "React app not found")
-    })
-    public ResponseEntity<Resource> serveReactApp() {
-      try {
-        Resource resource = new ClassPathResource("static/index.html");
-        return ResponseEntity.ok()
-            .contentType(MediaType.TEXT_HTML)
-            .body(resource);
-      } catch (Exception e) {
-        return ResponseEntity.notFound().build();
-      }
-    }
-
-    @GetMapping("/health")
-    @Operation(
-            summary = "Health check",
-            description = "Returns the health status of the application"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Application is healthy",
-                    content = @Content(schema = @Schema(implementation = Map.class)))
-    })
-    public Map<String, String> health() {
-      Map<String, String> response = new HashMap<>();
-      response.put("status", "UP");
-      response.put("service", "Metal Investment API");
-      response.put("version", "1.0.0");
-      return response;
-    }
-
-    @GetMapping("/api/health")
-    @Operation(
-            summary = "API health check",
-            description = "Returns the health status of the API with additional information"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "API is healthy",
-                    content = @Content(schema = @Schema(implementation = Map.class)))
-    })
-    public Map<String, String> apiHealth() {
-      Map<String, String> response = new HashMap<>();
-      response.put("status", "UP");
-      response.put("api", "Metal Investment API");
-      response.put("swagger", "/swagger-ui.html");
-      response.put("docs", "/api-docs");
-      return response;
-    }
 }
