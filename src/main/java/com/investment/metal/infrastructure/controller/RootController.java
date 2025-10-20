@@ -5,10 +5,18 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.annotation.PreDestroy;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import javax.sql.DataSource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -24,10 +32,20 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class RootController {
 
+  private static final long DEFAULT_DB_HEALTH_TIMEOUT_MS = 1000;
+
   private final DataSource dataSource;
+  private final long dbHealthTimeoutMs;
+  private final ExecutorService healthCheckExecutor;
 
   public RootController(DataSource dataSource) {
+    this(dataSource, DEFAULT_DB_HEALTH_TIMEOUT_MS);
+  }
+
+  RootController(DataSource dataSource, long dbHealthTimeoutMs) {
     this.dataSource = dataSource;
+    this.dbHealthTimeoutMs = dbHealthTimeoutMs;
+    this.healthCheckExecutor = Executors.newCachedThreadPool(new HealthThreadFactory());
   }
 
   @GetMapping("/")
@@ -94,14 +112,47 @@ public class RootController {
     if (this.dataSource == null) {
       return "UNKNOWN";
     }
-    try (Connection connection = this.dataSource.getConnection()) {
-      if (connection != null && connection.isValid(2)) {
-        return "UP";
-      }
+
+    CompletableFuture<String> future =
+        CompletableFuture.supplyAsync(
+            () -> {
+              try (Connection connection = this.dataSource.getConnection()) {
+                if (connection != null && connection.isValid(1)) {
+                  return "UP";
+                }
+                return "DOWN";
+              } catch (SQLException ex) {
+                return "DOWN";
+              }
+            },
+            this.healthCheckExecutor);
+
+    try {
+      return future.get(this.dbHealthTimeoutMs, TimeUnit.MILLISECONDS);
+    } catch (TimeoutException ex) {
+      future.cancel(true);
       return "DOWN";
-    } catch (SQLException ex) {
+    } catch (InterruptedException ex) {
+      Thread.currentThread().interrupt();
+      return "DOWN";
+    } catch (ExecutionException ex) {
       return "DOWN";
     }
   }
 
+  @PreDestroy
+  void shutdownHealthExecutor() {
+    this.healthCheckExecutor.shutdownNow();
+  }
+
+  private static class HealthThreadFactory implements ThreadFactory {
+
+    @Override
+    public Thread newThread(Runnable runnable) {
+      Thread thread = new Thread(runnable);
+      thread.setName("health-check-" + thread.getId());
+      thread.setDaemon(true);
+      return thread;
+    }
+  }
 }
