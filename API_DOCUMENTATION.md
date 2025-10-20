@@ -300,7 +300,7 @@ The API documentation is available through Swagger UI at:
 curl -X POST "https://metal-investment-635786220311.europe-west1.run.app/userRegistration" \
   -H "username: nelucristian" \
   -H "password: test123" \
-  -H "email: nelucristian2005@gmail.com"
+  -H "email: hello@cristiantone.me"
 ```
 
 ### 2. Login

@@ -42,8 +42,8 @@ const Footer = () => {
             <div className="contact-info">
               <p><strong>Cristian Țone</strong></p>
               <p>
-                <a href="mailto:nelucristian2005@gmail.com" className="contact-link">
-                  nelucristian2005@gmail.com
+                <a href="mailto:hello@cristiantone.me" className="contact-link">
+                  hello@cristiantone.me
                 </a>
               </p>
               <p>

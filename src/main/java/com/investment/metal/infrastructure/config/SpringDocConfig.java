@@ -27,7 +27,7 @@ public class SpringDocConfig {
                         .version("1.0.0")
                         .contact(new Contact()
                                 .name("Cristian Țone")
-                                .email("nelucristian2005@gmail.com"))
+                                .email("hello@cristiantone.me"))
                         .license(new License()
                                 .name("MIT License")
                                 .url("https://opensource.org/licenses/MIT")))
