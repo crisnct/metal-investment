@@ -2,6 +2,7 @@ package com.investment.metal.integration;
 
 import com.investment.metal.infrastructure.controller.PublicApiController;
 import com.investment.metal.infrastructure.controller.ProtectedApiController;
+import com.investment.metal.infrastructure.controller.RootController;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -18,12 +19,14 @@ class ControllerIntegrationTest {
 
     private PublicApiController publicApiController;
     private ProtectedApiController protectedApiController;
+    private RootController rootController;
 
     @BeforeEach
     void setUp() {
         // Create controller instances directly without Spring Boot context
         publicApiController = new PublicApiController();
         protectedApiController = new ProtectedApiController();
+        rootController = new RootController();
     }
 
     @Test
@@ -31,20 +34,22 @@ class ControllerIntegrationTest {
         // Test controller instantiation
         assertNotNull(publicApiController, "PublicApiController should be instantiated");
         assertNotNull(protectedApiController, "ProtectedApiController should be instantiated");
+        assertNotNull(rootController, "RootController should be instantiated");
     }
 
     @Test
     void testPublicApiControllerIntegration() {
         // Test public API controller functionality
         assertNotNull(publicApiController, "PublicApiController should be instantiated");
+        assertNotNull(rootController, "RootController should be instantiated");
         
         // Test health endpoints
-        Map<String, String> healthResponse = publicApiController.health();
+        Map<String, String> healthResponse = rootController.health();
         assertNotNull(healthResponse, "Health response should not be null");
         assertEquals("UP", healthResponse.get("status"), "Health status should be UP");
         assertEquals("Metal Investment API", healthResponse.get("service"), "Service name should be correct");
         
-        Map<String, String> apiHealthResponse = publicApiController.apiHealth();
+        Map<String, String> apiHealthResponse = rootController.apiHealth();
         assertNotNull(apiHealthResponse, "API health response should not be null");
         assertEquals("UP", apiHealthResponse.get("status"), "API health status should be UP");
         assertEquals("Metal Investment API", apiHealthResponse.get("api"), "API name should be correct");
@@ -63,8 +68,8 @@ class ControllerIntegrationTest {
     @Test
     void testControllerResponseStructure() {
         // Test response structure consistency
-        Map<String, String> healthResponse = publicApiController.health();
-        Map<String, String> apiHealthResponse = publicApiController.apiHealth();
+        Map<String, String> healthResponse = rootController.health();
+        Map<String, String> apiHealthResponse = rootController.apiHealth();
         
         // Test that responses have expected keys
         assertTrue(healthResponse.containsKey("status"), "Health response should contain 'status' key");
@@ -76,8 +81,8 @@ class ControllerIntegrationTest {
     @Test
     void testControllerResponseValues() {
         // Test response values
-        Map<String, String> healthResponse = publicApiController.health();
-        Map<String, String> apiHealthResponse = publicApiController.apiHealth();
+        Map<String, String> healthResponse = rootController.health();
+        Map<String, String> apiHealthResponse = rootController.apiHealth();
         
         // Test status values
         assertEquals("UP", healthResponse.get("status"), "Health status should be UP");
@@ -91,8 +96,8 @@ class ControllerIntegrationTest {
     @Test
     void testControllerResponseTypes() {
         // Test response types
-        Map<String, String> healthResponse = publicApiController.health();
-        Map<String, String> apiHealthResponse = publicApiController.apiHealth();
+        Map<String, String> healthResponse = rootController.health();
+        Map<String, String> apiHealthResponse = rootController.apiHealth();
         
         // Test that values are strings
         assertInstanceOf(String.class, healthResponse.get("status"), "Status should be String");
@@ -104,10 +109,10 @@ class ControllerIntegrationTest {
     @Test
     void testControllerResponseConsistency() {
         // Test response consistency across multiple calls
-        Map<String, String> healthResponse1 = publicApiController.health();
-        Map<String, String> healthResponse2 = publicApiController.health();
-        Map<String, String> apiHealthResponse1 = publicApiController.apiHealth();
-        Map<String, String> apiHealthResponse2 = publicApiController.apiHealth();
+        Map<String, String> healthResponse1 = rootController.health();
+        Map<String, String> healthResponse2 = rootController.health();
+        Map<String, String> apiHealthResponse1 = rootController.apiHealth();
+        Map<String, String> apiHealthResponse2 = rootController.apiHealth();
         
         // Test that responses are consistent
         assertEquals(healthResponse1, healthResponse2, "Health responses should be consistent");
@@ -118,8 +123,8 @@ class ControllerIntegrationTest {
     void testControllerMultipleCalls() {
         // Test multiple calls to controllers
         for (int i = 0; i < 5; i++) {
-            Map<String, String> healthResponse = publicApiController.health();
-            Map<String, String> apiHealthResponse = publicApiController.apiHealth();
+            Map<String, String> healthResponse = rootController.health();
+            Map<String, String> apiHealthResponse = rootController.apiHealth();
             
             assertNotNull(healthResponse, "Health response should not be null on call " + i);
             assertNotNull(apiHealthResponse, "API health response should not be null on call " + i);
@@ -131,8 +136,8 @@ class ControllerIntegrationTest {
     @Test
     void testControllerResponseKeys() {
         // Test that response keys are as expected
-        Map<String, String> healthResponse = publicApiController.health();
-        Map<String, String> apiHealthResponse = publicApiController.apiHealth();
+        Map<String, String> healthResponse = rootController.health();
+        Map<String, String> apiHealthResponse = rootController.apiHealth();
         
         // Test health response keys
         assertTrue(healthResponse.containsKey("status"), "Health response should have 'status' key");
@@ -151,8 +156,8 @@ class ControllerIntegrationTest {
     @Test
     void testControllerResponseContent() {
         // Test response content validity
-        Map<String, String> healthResponse = publicApiController.health();
-        Map<String, String> apiHealthResponse = publicApiController.apiHealth();
+        Map<String, String> healthResponse = rootController.health();
+        Map<String, String> apiHealthResponse = rootController.apiHealth();
         
         // Test that values are not null or empty
         assertNotNull(healthResponse.get("status"), "Health status should not be null");
@@ -169,7 +174,7 @@ class ControllerIntegrationTest {
     @Test
     void testHealthEndpointResponseStructure() {
         // Test health endpoint response structure
-        Map<String, String> healthResponse = publicApiController.health();
+        Map<String, String> healthResponse = rootController.health();
         
         // Test structure
         assertNotNull(healthResponse, "Health response should not be null");
@@ -185,7 +190,7 @@ class ControllerIntegrationTest {
     @Test
     void testApiHealthEndpointResponseStructure() {
         // Test API health endpoint response structure
-        Map<String, String> apiHealthResponse = publicApiController.apiHealth();
+        Map<String, String> apiHealthResponse = rootController.apiHealth();
         
         // Test structure
         assertNotNull(apiHealthResponse, "API health response should not be null");
@@ -207,8 +212,8 @@ class ControllerIntegrationTest {
         assertNotNull(protectedApiController, "ProtectedApiController should be instantiated");
         
         // Test that controllers can perform basic operations
-        Map<String, String> healthResponse = publicApiController.health();
-        assertNotNull(healthResponse, "PublicApiController should be able to return health response");
+        Map<String, String> healthResponse = rootController.health();
+        assertNotNull(healthResponse, "RootController should be able to return health response");
     }
 
     @Test

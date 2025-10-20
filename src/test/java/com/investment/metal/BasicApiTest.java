@@ -2,6 +2,7 @@ package com.investment.metal;
 
 import com.investment.metal.infrastructure.controller.PublicApiController;
 import com.investment.metal.infrastructure.controller.ProtectedApiController;
+import com.investment.metal.infrastructure.controller.RootController;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -18,13 +19,14 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(MockitoExtension.class)
 class BasicApiTest {
 
-    private PublicApiController publicApiController = new PublicApiController();
-    private ProtectedApiController protectedApiController = new ProtectedApiController();
+    private final PublicApiController publicApiController = new PublicApiController();
+    private final ProtectedApiController protectedApiController = new ProtectedApiController();
+    private final RootController rootController = new RootController();
 
     @Test
     void testHealthCheck() {
         // When
-        Map<String, String> response = publicApiController.health();
+        Map<String, String> response = rootController.health();
 
         // Then
         assertNotNull(response);
@@ -35,7 +37,7 @@ class BasicApiTest {
     @Test
     void testApiHealthCheck() {
         // When
-        Map<String, String> response = publicApiController.apiHealth();
+        Map<String, String> response = rootController.apiHealth();
 
         // Then
         assertNotNull(response);
@@ -53,7 +55,7 @@ class BasicApiTest {
     @Test
     void testResponseStructure() {
         // When
-        Map<String, String> response = publicApiController.health();
+        Map<String, String> response = rootController.health();
 
         // Then
         assertNotNull(response, "Response should not be null");
@@ -66,8 +68,8 @@ class BasicApiTest {
     @Test
     void testResponseContent() {
         // When
-        Map<String, String> healthResponse = publicApiController.health();
-        Map<String, String> apiHealthResponse = publicApiController.apiHealth();
+        Map<String, String> healthResponse = rootController.health();
+        Map<String, String> apiHealthResponse = rootController.apiHealth();
 
         // Then
         assertEquals("UP", healthResponse.get("status"), "Health status should be UP");
@@ -81,7 +83,7 @@ class BasicApiTest {
     @Test
     void testResponseKeys() {
         // When
-        Map<String, String> response = publicApiController.health();
+        Map<String, String> response = rootController.health();
 
         // Then
         assertTrue(response.size() >= 2, "Response should have at least 2 keys");
@@ -92,19 +94,19 @@ class BasicApiTest {
     @Test
     void testResponseBodyType() {
         // When
-        Map<String, String> response = publicApiController.health();
+        Map<String, String> response = rootController.health();
 
         // Then
-        assertTrue(response instanceof Map, "Response should be of type Map");
+      assertNotNull(response, "Response should be of type Map");
         assertTrue(response instanceof java.util.HashMap, "Response should be of type HashMap");
     }
 
     @Test
     void testMultipleHealthCalls() {
         // When - call health endpoint multiple times
-        Map<String, String> response1 = publicApiController.health();
-        Map<String, String> response2 = publicApiController.health();
-        Map<String, String> response3 = publicApiController.apiHealth();
+        Map<String, String> response1 = rootController.health();
+        Map<String, String> response2 = rootController.health();
+        Map<String, String> response3 = rootController.apiHealth();
 
         // Then - all should return the same result
         assertEquals(response1.get("status"), response2.get("status"));
@@ -127,8 +129,8 @@ class BasicApiTest {
     void testBasicFunctionality() {
         // Test that basic controller methods can be called without exceptions
         assertDoesNotThrow(() -> {
-            publicApiController.health();
-            publicApiController.apiHealth();
+          rootController.health();
+          rootController.apiHealth();
         }, "Basic controller methods should not throw exceptions");
     }
 

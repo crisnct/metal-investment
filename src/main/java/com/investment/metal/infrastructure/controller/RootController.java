@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * Controller that forwards root requests to the SPA entry point. Any non-API path is forwarded to index.html so the frontend router can handle it.
@@ -42,6 +43,7 @@ public class RootController {
   }
 
   @GetMapping("/health")
+  @ResponseBody
   @Operation(
       summary = "Health check",
       description = "Returns the health status of the application"
@@ -59,6 +61,7 @@ public class RootController {
   }
 
   @GetMapping("/api/health")
+  @ResponseBody
   @Operation(
       summary = "API health check",
       description = "Returns the health status of the API with additional information"
