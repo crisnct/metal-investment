@@ -14,7 +14,7 @@ class ApiService {
 
   async getUiBanner() {
     try {
-      const response = await fetch(`${this.baseURL}/api/ui-banner`, {
+      const response = await fetch(`${this.baseURL}/api/public/ui-banner`, {
         method: 'GET',
         headers: {
           'Accept': 'application/json'
@@ -118,7 +118,7 @@ class ApiService {
   async forceRefreshCsrfToken() {
     try {
       console.log('=== FORCE REFRESH CSRF TOKEN ===');
-      const response = await fetch(`${this.baseURL}/csrf-token`, {
+      const response = await fetch(`${this.baseURL}/api/public/csrf-token`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -158,9 +158,9 @@ class ApiService {
     this.csrfRefreshPromise = (async () => {
       try {
         console.log('=== REFRESHING CSRF TOKEN ===');
-        console.log('Calling /csrf-token endpoint...');
+        console.log('Calling /api/public/csrf-token endpoint...');
         
-        const response = await fetch(`${this.baseURL}/csrf-token`, {
+        const response = await fetch(`${this.baseURL}/api/public/csrf-token`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -295,7 +295,7 @@ class ApiService {
         headers[this.csrfHeaderName] = csrfToken;
       }
       
-      const response = await fetch(`${this.baseURL}/userRegistration`, {
+      const response = await fetch(`${this.baseURL}/api/public/userRegistration`, {
         method: 'POST',
         headers: headers,
         mode: 'cors',
@@ -355,7 +355,7 @@ class ApiService {
 
   async login(username, password) {
     try {
-      const response = await fetch(`${this.baseURL}/login`, {
+      const response = await fetch(`${this.baseURL}/api/public/login`, {
         method: 'POST',
         headers: {
           'username': username,
@@ -414,7 +414,7 @@ class ApiService {
 
   async validateAccount(username, code) {
     try {
-      const response = await fetch(`${this.baseURL}/validateAccount`, {
+      const response = await fetch(`${this.baseURL}/api/public/validateAccount`, {
         method: 'POST',
         headers: {
           'username': username,
@@ -473,7 +473,7 @@ class ApiService {
 
   async checkUserPendingValidation(username, email) {
     try {
-      const response = await fetch(`${this.baseURL}/checkUserPendingValidation`, {
+      const response = await fetch(`${this.baseURL}/api/public/checkUserPendingValidation`, {
         method: 'POST',
         headers: {
           'username': username,
@@ -528,7 +528,7 @@ class ApiService {
 
   async resendValidationEmail(username, email) {
     try {
-      const response = await fetch(`${this.baseURL}/resendValidationEmail`, {
+      const response = await fetch(`${this.baseURL}/api/public/resendValidationEmail`, {
         method: 'POST',
         headers: {
           'username': username,
@@ -583,7 +583,7 @@ class ApiService {
 
   // Protected API methods
   async getProfit() {
-    const response = await fetch(`${this.baseURL}/api/profit`, {
+    const response = await fetch(`${this.baseURL}/api/private/profit`, {
       method: 'GET',
       headers: {
         ...await this.getAuthHeadersFromStorageWithCsrf(),
@@ -614,7 +614,7 @@ class ApiService {
   }
 
   async addAlert(metalSymbol, expression, frequency) {
-    const response = await fetch(`${this.baseURL}/api/addAlert`, {
+    const response = await fetch(`${this.baseURL}/api/private/addAlert`, {
       method: 'POST',
       headers: {
         ...await this.getAuthHeadersFromStorageWithCsrf(),
@@ -646,7 +646,7 @@ class ApiService {
   }
 
   async getAlerts() {
-    const response = await fetch(`${this.baseURL}/api/getAlerts`, {
+    const response = await fetch(`${this.baseURL}/api/private/getAlerts`, {
       method: 'GET',
       headers: {
         ...await this.getAuthHeadersFromStorageWithCsrf(),
@@ -697,13 +697,13 @@ class ApiService {
       };
       
       console.log('Full headers being sent:', fullHeaders);
-      console.log('Request URL:', `${this.baseURL}/api/purchase`);
+      console.log('Request URL:', `${this.baseURL}/api/private/purchase`);
       const csrfHeader = this.csrfHeaderName;
       console.log('CSRF token in headers:', fullHeaders[csrfHeader] ? 'PRESENT' : 'MISSING');
       console.log('CSRF token value:', fullHeaders[csrfHeader] ? fullHeaders[csrfHeader].substring(0, 20) + '...' : 'null');
       console.log('Authorization header:', fullHeaders['Authorization'] ? 'PRESENT' : 'MISSING');
       
-      const response = await fetch(`${this.baseURL}/api/purchase`, {
+      const response = await fetch(`${this.baseURL}/api/private/purchase`, {
         method: 'POST',
         headers: fullHeaders,
         mode: 'cors',
@@ -732,7 +732,7 @@ class ApiService {
             const retryCsrfHeader = this.csrfHeaderName;
             console.log('Retry CSRF token:', retryHeaders[retryCsrfHeader] ? retryHeaders[retryCsrfHeader].substring(0, 20) + '...' : 'null');
             
-            const retryResponse = await fetch(`${this.baseURL}/api/purchase`, {
+            const retryResponse = await fetch(`${this.baseURL}/api/private/purchase`, {
               method: 'POST',
               headers: {
                 ...retryHeaders,
@@ -782,7 +782,7 @@ class ApiService {
 
   async resetPassword(email) {
     try {
-      const response = await fetch(`${this.baseURL}/resetPassword`, {
+      const response = await fetch(`${this.baseURL}/api/public/resetPassword`, {
         method: 'POST',
         headers: {
           'email': email,
@@ -816,7 +816,7 @@ class ApiService {
 
   async changePassword(token, code, newPassword, email) {
     try {
-      const response = await fetch(`${this.baseURL}/changePassword`, {
+      const response = await fetch(`${this.baseURL}/api/public/changePassword`, {
         method: 'PUT',
         headers: {
           'token': token,
@@ -856,7 +856,7 @@ class ApiService {
     console.log('Sell API - Auth headers:', authHeaders);
     console.log('Sell API - Token from storage:', this.getToken());
     
-    const response = await fetch(`${this.baseURL}/api/sell`, {
+    const response = await fetch(`${this.baseURL}/api/private/sell`, {
       method: 'DELETE',
       headers: {
         ...authHeaders,
@@ -887,7 +887,7 @@ class ApiService {
     console.log('Get Notification API - Auth headers:', authHeaders);
     console.log('Get Notification API - Token from storage:', this.getToken());
     
-    const response = await fetch(`${this.baseURL}/api/getNotificationPeriod`, {
+    const response = await fetch(`${this.baseURL}/api/private/getNotificationPeriod`, {
       method: 'GET',
       headers: {
         ...authHeaders,
@@ -914,7 +914,7 @@ class ApiService {
     console.log('Set Notification API - Sending period:', days);
     console.log('Set Notification API - Period type:', typeof days);
     
-    const response = await fetch(`${this.baseURL}/api/setNotificationPeriod`, {
+    const response = await fetch(`${this.baseURL}/api/private/setNotificationPeriod`, {
       method: 'PUT',
       headers: {
         ...await this.getAuthHeadersFromStorageWithCsrf(),
@@ -940,7 +940,7 @@ class ApiService {
 
   // Account deletion methods
   async deleteAccountPreparation() {
-    const response = await fetch(`${this.baseURL}/api/deleteAccountPreparation`, {
+    const response = await fetch(`${this.baseURL}/api/private/deleteAccountPreparation`, {
       method: 'POST',
       headers: {
         ...await this.getAuthHeadersFromStorageWithCsrf(),
@@ -964,7 +964,7 @@ class ApiService {
   }
 
   async deleteAccount(password, code) {
-    const response = await fetch(`${this.baseURL}/api/deleteAccount`, {
+    const response = await fetch(`${this.baseURL}/api/private/deleteAccount`, {
       method: 'DELETE',
       headers: {
         ...await this.getAuthHeadersFromStorageWithCsrf(),
@@ -995,7 +995,7 @@ class ApiService {
   async logout() {
     try {
       const authHeaders = await this.getAuthHeadersFromStorageWithCsrf();
-      const response = await fetch(`${this.baseURL}/api/logout`, {
+      const response = await fetch(`${this.baseURL}/api/private/logout`, {
         method: 'POST',
         headers: authHeaders,
         mode: 'cors',

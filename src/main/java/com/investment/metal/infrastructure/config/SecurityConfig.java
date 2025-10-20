@@ -5,6 +5,7 @@ import com.investment.metal.infrastructure.security.CustomAuthenticationProvider
 import com.investment.metal.infrastructure.security.SecurityHeadersFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Arrays;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -91,7 +92,7 @@ public class SecurityConfig {
                 .filter(origin -> !origin.isEmpty())
                 .toList());
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 
@@ -111,7 +112,7 @@ public class SecurityConfig {
             String uri = request.getRequestURI();
             String contextPath = request.getContextPath() != null ? request.getContextPath() : "";
             String path = uri.startsWith(contextPath) ? uri.substring(contextPath.length()) : uri;
-            return path.startsWith("/api/") && !"/api/ui-banner".equals(path);
+            return path.startsWith("/api/private");
         });
         AuthenticationManager localAuthManager = new ProviderManager(customAuthenticationProvider);
         authFilter.setAuthenticationManager(localAuthManager);
@@ -126,7 +127,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf
                 .csrfTokenRequestHandler(requestHandler)
                 .csrfTokenRepository(csrfTokenRepository)
-                .ignoringRequestMatchers("/login", "/userRegistration", "/validateAccount", "/resetPassword", "/changePassword", "/csrf-token", "/api/ui-banner")
+                .ignoringRequestMatchers("/api/public/**")
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
             .exceptionHandling(ex -> ex
@@ -136,10 +137,11 @@ public class SecurityConfig {
             .addFilterBefore(securityHeadersFilter, AnonymousAuthenticationFilter.class)
             .addFilterBefore(authFilter, AnonymousAuthenticationFilter.class)
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.GET, "/csrf-token").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/ui-banner").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/public/csrf-token").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/public/ui-banner").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/api/**").permitAll()
-                .requestMatchers("/api/**").authenticated()
+                .requestMatchers("/api/public/**").permitAll()
+                .requestMatchers("/api/private/**").authenticated()
                 .anyRequest().permitAll()
             );
         

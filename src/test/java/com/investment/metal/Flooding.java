@@ -43,7 +43,7 @@ public class Flooding {
                 String hs = encryptor.encrypt(String.valueOf(System.currentTimeMillis()));
                 while (true) {
                     // Continuously send requests to the profit endpoint
-                    HttpResponse<String> response = Unirest.get("http://localhost:8080/api/profit")
+                    HttpResponse<String> response = Unirest.get("http://localhost:8080/api/private/profit")
                             .header("hs", hs)
                             .header("Authorization", "Bearer 4594ac0c-4fd2-471a-93c7-c89b95b3a555")
                             .asString()

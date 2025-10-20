@@ -18,6 +18,7 @@ import com.investment.metal.domain.dto.ExpressionHelperDto;
 import com.investment.metal.domain.exception.NoRollbackBusinessException;
 import com.investment.metal.domain.model.AlertFrequency;
 import com.investment.metal.domain.model.CurrencyType;
+import com.investment.metal.domain.model.MetalPrice;
 import com.investment.metal.domain.model.MetalPurchase;
 import com.investment.metal.domain.model.MetalType;
 import com.investment.metal.infrastructure.dto.AppStatusInfoDto;
@@ -27,7 +28,6 @@ import com.investment.metal.infrastructure.mapper.DtoMapper;
 import com.investment.metal.infrastructure.persistence.entity.Currency;
 import com.investment.metal.infrastructure.persistence.entity.Customer;
 import com.investment.metal.infrastructure.persistence.entity.Login;
-import com.investment.metal.domain.model.MetalPrice;
 import com.investment.metal.infrastructure.security.AuthorizationService;
 import com.investment.metal.infrastructure.service.AccountService;
 import com.investment.metal.infrastructure.service.BannedAccountsService;
@@ -55,13 +55,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -72,7 +71,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * REST Controller for protected API endpoints that require JWT authentication.
@@ -84,7 +82,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author cristian.tone
  */
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/private")
 @Tag(name = "Protected API", description = "Protected endpoints requiring JWT authentication")
 @SecurityRequirement(name = "bearerAuth")
 @Slf4j

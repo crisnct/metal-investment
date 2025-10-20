@@ -6,9 +6,9 @@ import com.investment.metal.infrastructure.service.price.ExternalMetalPriceReade
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import java.util.concurrent.CompletableFuture;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * Resilient wrapper service for external price API calls.

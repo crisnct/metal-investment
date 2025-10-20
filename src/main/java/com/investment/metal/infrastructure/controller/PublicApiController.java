@@ -3,8 +3,8 @@ package com.investment.metal.infrastructure.controller;
 import com.investment.metal.MessageKey;
 import com.investment.metal.application.dto.UserLoginDto;
 import com.investment.metal.domain.dto.ResetPasswordDto;
-import com.investment.metal.domain.exception.NoRollbackBusinessException;
 import com.investment.metal.domain.exception.BusinessException;
+import com.investment.metal.domain.exception.NoRollbackBusinessException;
 import com.investment.metal.infrastructure.dto.SimpleMessageDto;
 import com.investment.metal.infrastructure.exception.ExceptionService;
 import com.investment.metal.infrastructure.persistence.entity.Customer;
@@ -26,6 +26,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
@@ -42,7 +43,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * REST Controller for public API endpoints that don't require authentication.
@@ -52,6 +52,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author cristian.tone
  */
 @RestController
+@RequestMapping("/api/public")
 @Tag(name = "Public API", description = "Public endpoints with no authentication")
 @Slf4j
 public class PublicApiController {
@@ -132,7 +133,7 @@ public class PublicApiController {
         return new ResponseEntity<>(tokenMap, HttpStatus.OK);
     }
 
-    @GetMapping("/api/ui-banner")
+    @GetMapping("/ui-banner")
     @Operation(summary = "Retrieve UI banner message", description = "Returns the configured banner text that should be displayed in the UI when available")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Banner message found",
@@ -308,10 +309,11 @@ public class PublicApiController {
         this.blockedIpService.checkBlockedIPGlobal();
         final Customer user = this.accountService.findByEmail(email);
         this.bannedAccountsService.checkBanned(user.getId());
-        this.loginService.validateAccount(user, true);
-
+        int validationCode = this.loginService.generateValidationCode(user, true);
         String token = this.loginService.generateResetPasswordToken(user);
-        String message = "A message with a code was sent to " + email;
+        this.loginService.sendResetPasswordEmail(user, validationCode, token);
+
+        String message = "A message with a code and reset token was sent to " + email;
         return new ResponseEntity<>(new ResetPasswordDto(token, message), HttpStatus.OK);
     }
 

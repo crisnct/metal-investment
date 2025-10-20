@@ -10,11 +10,11 @@ import com.investment.metal.infrastructure.service.RSSFeedParser;
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Transactional;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * Scheduler configuration for automated tasks.

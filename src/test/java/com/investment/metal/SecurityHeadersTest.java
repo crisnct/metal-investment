@@ -59,7 +59,7 @@ public class SecurityHeadersTest {
             .addFilter(new SecurityHeadersFilter())
             .build();
 
-        mockMvc.perform(get("/api/test"))
+        mockMvc.perform(get("/api/private/test"))
             .andExpect(status().isNotFound()) // Expected 404 since no controller is mapped
             .andExpect(header().string("X-Frame-Options", "DENY"))
             .andExpect(header().string("X-Content-Type-Options", "nosniff"))

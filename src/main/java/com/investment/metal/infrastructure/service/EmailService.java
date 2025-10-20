@@ -10,12 +10,12 @@ import com.investment.metal.infrastructure.util.Util;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
@@ -44,6 +44,17 @@ public class EmailService extends AbstractService {
         final String emailContent = MailParameterBuilder.newInstance(MailTemplates.VERIFICATION_CODE)
                 .replace("{user}", user.getUsername())
                 .replace("{code}", codeGenerated)
+                .replace("{ip}", ip)
+                .build();
+        this.sendMail(user.getEmail(), appName, emailContent);
+    }
+
+    public void sendResetPasswordEmail(Customer user, int codeGenerated, String token) {
+        final String ip = Util.getClientIpAddress(request);
+        final String emailContent = MailParameterBuilder.newInstance(MailTemplates.RESET_PASSWORD)
+                .replace("{user}", user.getUsername())
+                .replace("{code}", codeGenerated)
+                .replace("{token}", token)
                 .replace("{ip}", ip)
                 .build();
         this.sendMail(user.getEmail(), appName, emailContent);

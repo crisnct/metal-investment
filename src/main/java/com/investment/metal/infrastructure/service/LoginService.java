@@ -11,10 +11,10 @@ import com.investment.metal.infrastructure.security.JwtService;
 import com.investment.metal.infrastructure.util.SecureRandomGenerator;
 import java.sql.Timestamp;
 import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * Service for managing user login and authentication operations.
@@ -68,19 +68,24 @@ public class LoginService extends AbstractService {
     }
 
     public void validateAccount(Customer user, boolean strongCode) throws BusinessException {
+        int codeGenerated = this.generateValidationCode(user, strongCode);
+        this.emailService.sendMailWithCode(user, codeGenerated);
+    }
+
+    public int generateValidationCode(Customer user, boolean strongCode) throws BusinessException {
         if (strongCode) {
-            this.validateAccount(user, 100000000, 899999999);
+            return this.generateValidationCode(user, 100000000, 899999999);
         } else {
-            this.validateAccount(user, 100000, 899999);
+            return this.generateValidationCode(user, 100000, 899999);
         }
     }
 
-    private void validateAccount(Customer user, int minValue, int maxValue) throws BusinessException {
+    private int generateValidationCode(Customer user, int minValue, int maxValue) throws BusinessException {
         // SECURITY FIX: Use secure random generation instead of Math.abs(Random.nextInt())
         // This prevents predictable patterns and ensures uniform distribution
         final int codeGenerated = SecureRandomGenerator.nextIntInclusive(minValue, maxValue);
-        this.emailService.sendMailWithCode(user, codeGenerated);
         this.saveLoginAttempt(user.getId(), codeGenerated);
+        return codeGenerated;
     }
 
     public void verifyCodeAndToken(Integer userId, int code, String rawToken) throws BusinessException {
@@ -155,6 +160,10 @@ public class LoginService extends AbstractService {
             throw exceptionService.createException(MessageKey.USER_NOT_REGISTERED);
         }
         return token;
+    }
+
+    public void sendResetPasswordEmail(Customer user, int codeGenerated, String token) throws BusinessException {
+        this.emailService.sendResetPasswordEmail(user, codeGenerated, token);
     }
 
     public void markLoginFailed(Integer userId) throws BusinessException {

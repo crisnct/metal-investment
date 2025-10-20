@@ -7,9 +7,9 @@ import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * Infrastructure utility class for common operations.

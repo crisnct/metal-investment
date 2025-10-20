@@ -38,6 +38,13 @@ public enum MailTemplates {
         public String getFilename() {
             return "mail-template-delete-account-preparation.html";
         }
+    },
+
+    RESET_PASSWORD {
+        @Override
+        public String getFilename() {
+            return "mail-template-reset-password.html";
+        }
     };
 
     public abstract String getFilename();
