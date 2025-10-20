@@ -5,8 +5,11 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import javax.sql.DataSource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
@@ -20,6 +23,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 public class RootController {
+
+  private final DataSource dataSource;
+
+  public RootController(DataSource dataSource) {
+    this.dataSource = dataSource;
+  }
 
   @GetMapping("/")
   @Operation(
@@ -57,6 +66,7 @@ public class RootController {
     response.put("status", "UP");
     response.put("service", "Metal Investment API");
     response.put("version", "1.0.0");
+    response.put("database", determineDatabaseStatus());
     return response;
   }
 
@@ -76,7 +86,22 @@ public class RootController {
     response.put("api", "Metal Investment API");
     response.put("swagger", "/swagger-ui.html");
     response.put("docs", "/api-docs");
+    response.put("database", determineDatabaseStatus());
     return response;
+  }
+
+  private String determineDatabaseStatus() {
+    if (this.dataSource == null) {
+      return "UNKNOWN";
+    }
+    try (Connection connection = this.dataSource.getConnection()) {
+      if (connection != null && connection.isValid(2)) {
+        return "UP";
+      }
+      return "DOWN";
+    } catch (SQLException ex) {
+      return "DOWN";
+    }
   }
 
 }

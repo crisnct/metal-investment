@@ -10,6 +10,8 @@ import Profile from './components/Profile';
 import Footer from './components/Footer';
 import ApiService from './services/api';
 
+const DB_DOWN_MESSAGE = 'The database has been temporarily shut down by the platform owner for cost-saving purposes. Sign-up and login functionality are currently unavailable. If you would like to test the platform, please reach out to the owner at hello@cristiantone.me.';
+
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userToken, setUserToken] = useState(null);
@@ -33,21 +35,29 @@ function App() {
 
     let isMounted = true;
 
-    const fetchBannerMessage = async () => {
+    const checkDatabaseStatus = async () => {
       try {
-        const message = await ApiService.getUiBanner();
-        if (isMounted) {
-          setBannerMessage(message || '');
+        const health = await ApiService.getHealthStatus();
+        if (!isMounted) {
+          return;
+        }
+        const dbStatus = health && typeof health.database === 'string'
+          ? health.database.toUpperCase()
+          : 'UNKNOWN';
+        if (dbStatus !== 'UP') {
+          setBannerMessage(DB_DOWN_MESSAGE);
+        } else {
+          setBannerMessage('');
         }
       } catch (error) {
-        console.error('Failed to load UI banner message:', error);
+        console.error('Failed to evaluate database status from health endpoint:', error);
         if (isMounted) {
-          setBannerMessage('');
+          setBannerMessage(DB_DOWN_MESSAGE);
         }
       }
     };
 
-    fetchBannerMessage();
+    checkDatabaseStatus();
 
     return () => {
       isMounted = false;

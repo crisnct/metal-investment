@@ -12,9 +12,9 @@ class ApiService {
     this.csrfToken = null;
   }
 
-  async getUiBanner() {
+  async getHealthStatus() {
     try {
-      const response = await fetch(`${this.baseURL}/api/public/ui-banner`, {
+      const response = await fetch(`${this.baseURL}/health`, {
         method: 'GET',
         headers: {
           'Accept': 'application/json'
@@ -23,21 +23,15 @@ class ApiService {
         credentials: 'include'
       });
 
-      if (response.status === 204) {
-        return '';
-      }
-
       if (!response.ok) {
-        console.warn('Failed to fetch UI banner:', response.status);
-        return '';
+        const errorText = await response.text();
+        throw new Error(`Health endpoint failed with status ${response.status}: ${errorText}`);
       }
 
-      const data = await this.parseJsonSafely(response);
-      const message = data && typeof data.message === 'string' ? data.message.trim() : '';
-      return message;
+      return await this.parseJsonSafely(response);
     } catch (error) {
-      console.error('Error while fetching UI banner:', error);
-      return '';
+      console.error('Error while fetching health information:', error);
+      throw error;
     }
   }
 

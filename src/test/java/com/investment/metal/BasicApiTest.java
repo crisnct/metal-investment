@@ -21,7 +21,7 @@ class BasicApiTest {
 
     private final PublicApiController publicApiController = new PublicApiController();
     private final ProtectedApiController protectedApiController = new ProtectedApiController();
-    private final RootController rootController = new RootController();
+    private final RootController rootController = new RootController(null);
 
     @Test
     void testHealthCheck() {
@@ -32,6 +32,7 @@ class BasicApiTest {
         assertNotNull(response);
         assertEquals("UP", response.get("status"));
         assertEquals("Metal Investment API", response.get("service"));
+        assertEquals("UNKNOWN", response.get("database"));
     }
 
     @Test
@@ -43,6 +44,7 @@ class BasicApiTest {
         assertNotNull(response);
         assertEquals("UP", response.get("status"));
         assertEquals("Metal Investment API", response.get("api"));
+        assertEquals("UNKNOWN", response.get("database"));
     }
 
     @Test
@@ -61,8 +63,10 @@ class BasicApiTest {
         assertNotNull(response, "Response should not be null");
         assertTrue(response.containsKey("status"), "Response should contain 'status' key");
         assertTrue(response.containsKey("service"), "Response should contain 'service' key");
+        assertTrue(response.containsKey("database"), "Response should contain 'database' key");
         assertNotNull(response.get("status"), "Status should not be null");
         assertNotNull(response.get("service"), "Service should not be null");
+        assertNotNull(response.get("database"), "Database should not be null");
     }
 
     @Test
@@ -78,6 +82,8 @@ class BasicApiTest {
                   "Service name should contain 'Metal Investment'");
         assertTrue(apiHealthResponse.get("api").contains("Metal Investment"), 
                   "API name should contain 'Metal Investment'");
+        assertEquals("UNKNOWN", healthResponse.get("database"), "Database status should be UNKNOWN for tests");
+        assertEquals("UNKNOWN", apiHealthResponse.get("database"), "API health should report UNKNOWN database status for tests");
     }
 
     @Test
@@ -86,9 +92,10 @@ class BasicApiTest {
         Map<String, String> response = rootController.health();
 
         // Then
-        assertTrue(response.size() >= 2, "Response should have at least 2 keys");
+        assertTrue(response.size() >= 3, "Response should have at least 3 keys");
         assertTrue(response.containsKey("status"), "Response should contain 'status' key");
         assertTrue(response.containsKey("service"), "Response should contain 'service' key");
+        assertTrue(response.containsKey("database"), "Response should contain 'database' key");
     }
 
     @Test
@@ -112,6 +119,7 @@ class BasicApiTest {
         assertEquals(response1.get("status"), response2.get("status"));
         assertEquals(response1.get("service"), response2.get("service"));
         assertEquals("UP", response3.get("status"));
+        assertEquals(response1.get("database"), response2.get("database"));
     }
 
     @Test

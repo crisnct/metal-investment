@@ -138,7 +138,6 @@ public class SecurityConfig {
             .addFilterBefore(authFilter, AnonymousAuthenticationFilter.class)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.GET, "/api/public/csrf-token").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/public/ui-banner").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/api/**").permitAll()
                 .requestMatchers("/api/public/**").permitAll()
                 .requestMatchers("/api/private/**").authenticated()
