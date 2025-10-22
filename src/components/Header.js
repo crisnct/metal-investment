@@ -3,7 +3,7 @@ import { Menu, X, User, LogIn, LogOut } from 'lucide-react';
 import './Header.css';
 import ApiService from '../services/api';
 
-const Header = ({ isLoggedIn, onLogin, onLogout }) => {
+const Header = ({ isLoggedIn, onLogin, onLogout, authDisabled = false, authDisabledMessage = '' }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showLoginForm, setShowLoginForm] = useState(false);
   const [showSignupForm, setShowSignupForm] = useState(false);
@@ -29,6 +29,39 @@ const Header = ({ isLoggedIn, onLogin, onLogout }) => {
   const publicUrl = process.env.PUBLIC_URL || '';
   const normalizedPublicUrl = publicUrl.endsWith('/') ? publicUrl.slice(0, -1) : publicUrl;
   const logoSrc = `${normalizedPublicUrl}/static/images/metal-investment-icon.svg`;
+  const authDisabledTooltip = authDisabledMessage || 'Authentication is temporarily unavailable.';
+
+  useEffect(() => {
+    if (!authDisabled) {
+      return;
+    }
+
+    setShowLoginForm(false);
+    setLoginData({ username: '', password: '' });
+    setLoginMessage('');
+
+    setShowSignupForm(false);
+    setSignupData({ username: '', password: '', email: '' });
+    setSignupErrors({});
+    setSignupMessage('');
+
+    setShowValidationForm(false);
+    setValidationData({ email: '', username: '', code: '' });
+    setValidationErrors({});
+    setValidationMessage('');
+    setEmailSent(false);
+
+    setShowResetPasswordDialog(false);
+    setShowResetPasswordEmailDialog(false);
+    setResetPasswordData({ email: '', code: '', newPassword: '' });
+    setResetPasswordErrors({});
+    setResetPasswordMessage('');
+    setResetPasswordToken(null);
+    setResetPasswordEmail('');
+
+    setShowErrorDialog(false);
+    setErrorDialogMessage('');
+  }, [authDisabled]);
 
   // Handle escape key to close modals
   useEffect(() => {
@@ -471,11 +504,21 @@ const Header = ({ isLoggedIn, onLogin, onLogout }) => {
               </>
             ) : (
               <>
-                <button className="btn-secondary" onClick={() => setShowSignupForm(true)}>
+                <button
+                  className="btn-secondary"
+                  onClick={() => setShowSignupForm(true)}
+                  disabled={authDisabled}
+                  title={authDisabled ? authDisabledTooltip : undefined}
+                >
                   <User className="icon" />
                   Sign Up
                 </button>
-                <button className="btn-primary" onClick={() => setShowLoginForm(true)}>
+                <button
+                  className="btn-primary"
+                  onClick={() => setShowLoginForm(true)}
+                  disabled={authDisabled}
+                  title={authDisabled ? authDisabledTooltip : undefined}
+                >
                   <LogIn className="icon" />
                   Login
                 </button>
@@ -534,7 +577,12 @@ const Header = ({ isLoggedIn, onLogin, onLogout }) => {
             <button type="button" className="btn-secondary" onClick={closeLoginForm}>
               Cancel
             </button>
-            <button type="submit" className="btn-primary btn-login">
+            <button
+              type="submit"
+              className="btn-primary btn-login"
+              disabled={authDisabled}
+              title={authDisabled ? authDisabledTooltip : undefined}
+            >
               <LogIn className="icon" />
               Login
             </button>
@@ -625,7 +673,12 @@ const Header = ({ isLoggedIn, onLogin, onLogout }) => {
                 <button type="button" className="btn-secondary" onClick={closeSignupForm}>
                   Cancel
                 </button>
-                <button type="submit" className="btn-primary">
+                <button
+                  type="submit"
+                  className="btn-primary"
+                  disabled={authDisabled}
+                  title={authDisabled ? authDisabledTooltip : undefined}
+                >
                   Sign Up
                 </button>
               </div>

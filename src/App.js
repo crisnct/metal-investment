@@ -112,6 +112,8 @@ function App() {
         isLoggedIn={isLoggedIn} 
         onLogin={handleLogin} 
         onLogout={handleLogout}
+        authDisabled={Boolean(bannerMessage)}
+        authDisabledMessage={bannerMessage}
       />
       {bannerMessage && (
         <div className="app-banner">
