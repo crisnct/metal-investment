@@ -2,8 +2,11 @@ package com.investment.metal.infrastructure.config;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Properties;
 import javax.sql.DataSource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,6 +24,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  */
 @Configuration
 @EnableJpaRepositories(basePackages = "com.investment.metal.infrastructure.persistence.repository")
+@Slf4j
 public class DatabaseConfig {
 
     @Value("${spring.datasource.url}")
@@ -50,8 +54,11 @@ public class DatabaseConfig {
         config.setLeakDetectionThreshold(60000);
         config.setValidationTimeout(3000);
         config.setConnectionTestQuery("SELECT 1");
+        config.setInitializationFailTimeout(-1);
         
-        return new HikariDataSource(config);
+        HikariDataSource dataSource = new HikariDataSource(config);
+        verifyConnectionAsync(dataSource);
+        return dataSource;
     }
 
     @Bean(name = "entityManagerFactory")
@@ -93,5 +100,23 @@ public class DatabaseConfig {
         JpaTransactionManager transactionManager = new JpaTransactionManager();
         transactionManager.setEntityManagerFactory(entityManagerFactory.getObject());
         return transactionManager;
+    }
+
+    private void verifyConnectionAsync(DataSource dataSource) {
+        Thread verifier = new Thread(() -> {
+            try (Connection connection = dataSource.getConnection()) {
+                if (connection == null || !connection.isValid(1)) {
+                    log.warn("Database connection validation failed during startup");
+                } else {
+                    log.info("Database connection validated successfully");
+                }
+            } catch (SQLException ex) {
+                log.warn("Unable to connect to the database during startup. The application will continue without database access. Cause: {}", ex.getMessage());
+                log.debug("Database connectivity failure during startup", ex);
+            }
+        });
+        verifier.setName("db-connection-verifier");
+        verifier.setDaemon(true);
+        verifier.start();
     }
 }

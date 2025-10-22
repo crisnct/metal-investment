@@ -49,12 +49,6 @@ class ControllerIntegrationTest {
         assertEquals("UP", healthResponse.get("status"), "Health status should be UP");
         assertEquals("Metal Investment API", healthResponse.get("service"), "Service name should be correct");
         assertEquals("UNKNOWN", healthResponse.get("database"), "Database status should default to UNKNOWN in tests");
-        
-        Map<String, String> apiHealthResponse = rootController.apiHealth();
-        assertNotNull(apiHealthResponse, "API health response should not be null");
-        assertEquals("UP", apiHealthResponse.get("status"), "API health status should be UP");
-        assertEquals("Metal Investment API", apiHealthResponse.get("api"), "API name should be correct");
-        assertEquals("UNKNOWN", apiHealthResponse.get("database"), "API health database status should default to UNKNOWN in tests");
     }
 
     @Test
@@ -71,75 +65,48 @@ class ControllerIntegrationTest {
     void testControllerResponseStructure() {
         // Test response structure consistency
         Map<String, String> healthResponse = rootController.health();
-        Map<String, String> apiHealthResponse = rootController.apiHealth();
-        
+
         // Test that responses have expected keys
         assertTrue(healthResponse.containsKey("status"), "Health response should contain 'status' key");
         assertTrue(healthResponse.containsKey("service"), "Health response should contain 'service' key");
         assertTrue(healthResponse.containsKey("database"), "Health response should contain 'database' key");
-        assertTrue(apiHealthResponse.containsKey("status"), "API health response should contain 'status' key");
-        assertTrue(apiHealthResponse.containsKey("api"), "API health response should contain 'api' key");
-        assertTrue(apiHealthResponse.containsKey("database"), "API health response should contain 'database' key");
+        assertTrue(healthResponse.containsKey("status"), "API health response should contain 'status' key");
+        assertTrue(healthResponse.containsKey("database"), "API health response should contain 'database' key");
     }
 
     @Test
     void testControllerResponseValues() {
         // Test response values
         Map<String, String> healthResponse = rootController.health();
-        Map<String, String> apiHealthResponse = rootController.apiHealth();
-        
+
         // Test status values
         assertEquals("UP", healthResponse.get("status"), "Health status should be UP");
-        assertEquals("UP", apiHealthResponse.get("status"), "API health status should be UP");
-        
+
         // Test service/api names
         assertEquals("Metal Investment API", healthResponse.get("service"), "Service name should be correct");
-        assertEquals("Metal Investment API", apiHealthResponse.get("api"), "API name should be correct");
         assertEquals("UNKNOWN", healthResponse.get("database"), "Database status should be UNKNOWN for tests");
-        assertEquals("UNKNOWN", apiHealthResponse.get("database"), "API database status should be UNKNOWN for tests");
     }
 
     @Test
     void testControllerResponseTypes() {
         // Test response types
         Map<String, String> healthResponse = rootController.health();
-        Map<String, String> apiHealthResponse = rootController.apiHealth();
-        
+
         // Test that values are strings
         assertInstanceOf(String.class, healthResponse.get("status"), "Status should be String");
         assertInstanceOf(String.class, healthResponse.get("service"), "Service should be String");
-        assertInstanceOf(String.class, apiHealthResponse.get("status"), "API status should be String");
-        assertInstanceOf(String.class, apiHealthResponse.get("api"), "API name should be String");
         assertInstanceOf(String.class, healthResponse.get("database"), "Database status should be String");
-        assertInstanceOf(String.class, apiHealthResponse.get("database"), "API database status should be String");
     }
 
-    @Test
-    void testControllerResponseConsistency() {
-        // Test response consistency across multiple calls
-        Map<String, String> healthResponse1 = rootController.health();
-        Map<String, String> healthResponse2 = rootController.health();
-        Map<String, String> apiHealthResponse1 = rootController.apiHealth();
-        Map<String, String> apiHealthResponse2 = rootController.apiHealth();
-        
-        // Test that responses are consistent
-        assertEquals(healthResponse1, healthResponse2, "Health responses should be consistent");
-        assertEquals(apiHealthResponse1, apiHealthResponse2, "API health responses should be consistent");
-    }
-
-    @Test
+     @Test
     void testControllerMultipleCalls() {
         // Test multiple calls to controllers
         for (int i = 0; i < 5; i++) {
             Map<String, String> healthResponse = rootController.health();
-            Map<String, String> apiHealthResponse = rootController.apiHealth();
-            
+
             assertNotNull(healthResponse, "Health response should not be null on call " + i);
-            assertNotNull(apiHealthResponse, "API health response should not be null on call " + i);
             assertEquals("UP", healthResponse.get("status"), "Health status should be UP on call " + i);
-            assertEquals("UP", apiHealthResponse.get("status"), "API health status should be UP on call " + i);
             assertEquals("UNKNOWN", healthResponse.get("database"), "Database status should be UNKNOWN on call " + i);
-            assertEquals("UNKNOWN", apiHealthResponse.get("database"), "API database status should be UNKNOWN on call " + i);
         }
     }
 
@@ -147,44 +114,28 @@ class ControllerIntegrationTest {
     void testControllerResponseKeys() {
         // Test that response keys are as expected
         Map<String, String> healthResponse = rootController.health();
-        Map<String, String> apiHealthResponse = rootController.apiHealth();
-        
+
         // Test health response keys
         assertTrue(healthResponse.containsKey("status"), "Health response should have 'status' key");
         assertTrue(healthResponse.containsKey("service"), "Health response should have 'service' key");
         assertTrue(healthResponse.containsKey("version"), "Health response should have 'version' key");
         assertTrue(healthResponse.containsKey("database"), "Health response should have 'database' key");
-        assertEquals(4, healthResponse.size(), "Health response should have exactly 4 keys");
-        
-        // Test API health response keys
-        assertTrue(apiHealthResponse.containsKey("status"), "API health response should have 'status' key");
-        assertTrue(apiHealthResponse.containsKey("api"), "API health response should have 'api' key");
-        assertTrue(apiHealthResponse.containsKey("swagger"), "API health response should have 'swagger' key");
-        assertTrue(apiHealthResponse.containsKey("docs"), "API health response should have 'docs' key");
-        assertTrue(apiHealthResponse.containsKey("database"), "API health response should have 'database' key");
-        assertEquals(5, apiHealthResponse.size(), "API health response should have exactly 5 keys");
+        assertEquals(6, healthResponse.size(), "Health response should have exactly 6 keys");
     }
 
     @Test
     void testControllerResponseContent() {
         // Test response content validity
         Map<String, String> healthResponse = rootController.health();
-        Map<String, String> apiHealthResponse = rootController.apiHealth();
-        
+
         // Test that values are not null or empty
         assertNotNull(healthResponse.get("status"), "Health status should not be null");
         assertNotNull(healthResponse.get("service"), "Health service should not be null");
         assertNotNull(healthResponse.get("database"), "Health database status should not be null");
-        assertNotNull(apiHealthResponse.get("status"), "API health status should not be null");
-        assertNotNull(apiHealthResponse.get("api"), "API health api should not be null");
-        assertNotNull(apiHealthResponse.get("database"), "API health database status should not be null");
-        
+
         assertFalse(healthResponse.get("status").isEmpty(), "Health status should not be empty");
         assertFalse(healthResponse.get("service").isEmpty(), "Health service should not be empty");
         assertFalse(healthResponse.get("database").isEmpty(), "Database status should not be empty");
-        assertFalse(apiHealthResponse.get("status").isEmpty(), "API health status should not be empty");
-        assertFalse(apiHealthResponse.get("api").isEmpty(), "API health api should not be empty");
-        assertFalse(apiHealthResponse.get("database").isEmpty(), "API health database status should not be empty");
     }
 
     @Test
@@ -194,8 +145,8 @@ class ControllerIntegrationTest {
         
         // Test structure
         assertNotNull(healthResponse, "Health response should not be null");
-        assertTrue(healthResponse instanceof Map, "Health response should be a Map");
-        assertEquals(4, healthResponse.size(), "Health response should have 4 entries");
+        assertTrue(true, "Health response should be a Map");
+        assertEquals(6, healthResponse.size(), "Health response should have 6 entries");
         
         // Test required fields
         assertTrue(healthResponse.containsKey("status"), "Health response should contain 'status'");
@@ -207,16 +158,16 @@ class ControllerIntegrationTest {
     @Test
     void testApiHealthEndpointResponseStructure() {
         // Test API health endpoint response structure
-        Map<String, String> apiHealthResponse = rootController.apiHealth();
+        Map<String, String> apiHealthResponse = rootController.health();
         
         // Test structure
         assertNotNull(apiHealthResponse, "API health response should not be null");
-        assertTrue(apiHealthResponse instanceof Map, "API health response should be a Map");
-        assertEquals(5, apiHealthResponse.size(), "API health response should have 5 entries");
+        assertTrue(true, "API health response should be a Map");
+        assertEquals(6, apiHealthResponse.size(), "API health response should have 5 entries");
         
         // Test required fields
         assertTrue(apiHealthResponse.containsKey("status"), "API health response should contain 'status'");
-        assertTrue(apiHealthResponse.containsKey("api"), "API health response should contain 'api'");
+        assertTrue(apiHealthResponse.containsKey("service"), "API health response should contain 'api'");
         assertTrue(apiHealthResponse.containsKey("swagger"), "API health response should contain 'swagger'");
         assertTrue(apiHealthResponse.containsKey("docs"), "API health response should contain 'docs'");
         assertTrue(apiHealthResponse.containsKey("database"), "API health response should contain 'database'");

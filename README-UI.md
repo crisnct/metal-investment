@@ -125,7 +125,7 @@ The UI can be deployed to any static hosting service like:
 ## API Integration
 
 The UI includes direct links to the backend API:
-- Health Check: `/actuator/health`
+- Health Check: `/health`
 - User Registration: `/userRegistration`
 - Login: `/login`
 - Account Validation: `/validateAccount`

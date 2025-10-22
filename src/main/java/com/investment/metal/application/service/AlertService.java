@@ -22,6 +22,7 @@ import java.util.Optional;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +32,7 @@ import org.springframework.stereotype.Service;
  * Follows Clean Architecture principles by orchestrating domain and infrastructure concerns.
  */
 @Service
+@Slf4j
 public class AlertService {
 
     /**
@@ -96,26 +98,32 @@ public class AlertService {
      */
     @PostConstruct
     public void init() {
-        for (ExpressionFunction func : functionRepository.findAll()) {
-            String functionName = func.getName();
-            FunctionInfo info = new FunctionInfo(functionName);
-            info.setDescription(messageService.getMessage("FUNCTION_" + functionName));
-            info.setReturnedType(func.getReturnedType());
+        try {
+            for (ExpressionFunction func : functionRepository.findAll()) {
+                String functionName = func.getName();
+                FunctionInfo info = new FunctionInfo(functionName);
+                info.setDescription(messageService.getMessage("FUNCTION_" + functionName));
+                info.setReturnedType(func.getReturnedType());
 
-            // Load function parameters with their constraints
-            Optional<List<ExpressionParameter>> paramsOp = parameterRepository.findByExpressionFunctionId(func.getId());
-            if (paramsOp.isPresent()) {
-                for (ExpressionParameter param : paramsOp.get()) {
-                    String paramName = param.getName();
-                    info.addParam(FunctionParam.builder()
-                            .name(paramName)
-                            .description(messageService.getMessage("FUNCTION_PARAM_" + functionName + "_" + paramName))
-                            .min(param.getMin())
-                            .max(param.getMax())
-                            .build());
+                // Load function parameters with their constraints
+                Optional<List<ExpressionParameter>> paramsOp = parameterRepository.findByExpressionFunctionId(func.getId());
+                if (paramsOp.isPresent()) {
+                    for (ExpressionParameter param : paramsOp.get()) {
+                        String paramName = param.getName();
+                        info.addParam(FunctionParam.builder()
+                                .name(paramName)
+                                .description(messageService.getMessage("FUNCTION_PARAM_" + functionName + "_" + paramName))
+                                .min(param.getMin())
+                                .max(param.getMax())
+                                .build());
+                    }
                 }
+                expressionFunctions.put(functionName, info);
             }
-            expressionFunctions.put(functionName, info);
+        } catch (Exception ex) {
+            expressionFunctions.clear();
+            log.warn("Skipping expression function preload because the database is unavailable. The cache will remain empty until the next successful load. Cause: {}", ex.getMessage());
+            log.debug("Expression function preload failure", ex);
         }
     }
 

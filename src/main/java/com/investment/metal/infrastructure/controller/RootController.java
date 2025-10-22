@@ -20,6 +20,7 @@ import java.util.concurrent.TimeoutException;
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
@@ -40,6 +41,8 @@ public class RootController {
 
   private ExecutorService healthCheckExecutor;
 
+  private BuildProperties buildProperties;
+
   @PostConstruct
   public void init(){
     this.healthCheckExecutor = Executors.newCachedThreadPool(new HealthThreadFactory());
@@ -48,6 +51,11 @@ public class RootController {
   @Autowired(required = false)
   public void setDataSource(DataSource dataSource) {
     this.dataSource = dataSource;
+  }
+
+  @Autowired(required = false)
+  public void setBuildProperties(BuildProperties buildProperties) {
+    this.buildProperties = buildProperties;
   }
 
   @GetMapping("/")
@@ -85,25 +93,7 @@ public class RootController {
     Map<String, String> response = new HashMap<>();
     response.put("status", "UP");
     response.put("service", "Metal Investment API");
-    response.put("version", "1.0.0");
-    response.put("database", determineDatabaseStatus());
-    return response;
-  }
-
-  @GetMapping("/api/health")
-  @ResponseBody
-  @Operation(
-      summary = "API health check",
-      description = "Returns the health status of the API with additional information"
-  )
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "API is healthy",
-          content = @Content(schema = @Schema(implementation = Map.class)))
-  })
-  public Map<String, String> apiHealth() {
-    Map<String, String> response = new HashMap<>();
-    response.put("status", "UP");
-    response.put("api", "Metal Investment API");
+    response.put("version", resolveVersion());
     response.put("swagger", "/swagger-ui.html");
     response.put("docs", "/api-docs");
     response.put("database", determineDatabaseStatus());
@@ -140,6 +130,14 @@ public class RootController {
     } catch (ExecutionException ex) {
       return "DOWN";
     }
+  }
+
+  private String resolveVersion() {
+    if (this.buildProperties != null && this.buildProperties.getVersion() != null) {
+      return this.buildProperties.getVersion();
+    }
+    String implementationVersion = RootController.class.getPackage().getImplementationVersion();
+    return implementationVersion != null ? implementationVersion : "UNKNOWN";
   }
 
   @PreDestroy

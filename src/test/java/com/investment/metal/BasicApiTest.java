@@ -3,6 +3,7 @@ package com.investment.metal;
 import com.investment.metal.infrastructure.controller.PublicApiController;
 import com.investment.metal.infrastructure.controller.ProtectedApiController;
 import com.investment.metal.infrastructure.controller.RootController;
+import java.util.HashMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,12 +47,12 @@ class BasicApiTest {
     @Test
     void testApiHealthCheck() {
         // When
-        Map<String, String> response = rootController.apiHealth();
+        Map<String, String> response = rootController.health();
 
         // Then
         assertNotNull(response);
         assertEquals("UP", response.get("status"));
-        assertEquals("Metal Investment API", response.get("api"));
+        assertEquals("Metal Investment API", response.get("service"));
         assertEquals("UNKNOWN", response.get("database"));
     }
 
@@ -81,17 +82,16 @@ class BasicApiTest {
     void testResponseContent() {
         // When
         Map<String, String> healthResponse = rootController.health();
-        Map<String, String> apiHealthResponse = rootController.apiHealth();
 
         // Then
         assertEquals("UP", healthResponse.get("status"), "Health status should be UP");
-        assertEquals("UP", apiHealthResponse.get("status"), "API health status should be UP");
+        assertEquals("UP", healthResponse.get("status"), "API health status should be UP");
         assertTrue(healthResponse.get("service").contains("Metal Investment"), 
                   "Service name should contain 'Metal Investment'");
-        assertTrue(apiHealthResponse.get("api").contains("Metal Investment"), 
+        assertTrue(healthResponse.get("service").contains("Metal Investment"),
                   "API name should contain 'Metal Investment'");
         assertEquals("UNKNOWN", healthResponse.get("database"), "Database status should be UNKNOWN for tests");
-        assertEquals("UNKNOWN", apiHealthResponse.get("database"), "API health should report UNKNOWN database status for tests");
+        assertEquals("UNKNOWN", healthResponse.get("database"), "API health should report UNKNOWN database status for tests");
     }
 
     @Test
@@ -113,21 +113,19 @@ class BasicApiTest {
 
         // Then
       assertNotNull(response, "Response should be of type Map");
-        assertTrue(response instanceof java.util.HashMap, "Response should be of type HashMap");
+      assertInstanceOf(HashMap.class, response, "Response should be of type HashMap");
     }
 
     @Test
     void testMultipleHealthCalls() {
         // When - call health endpoint multiple times
-        Map<String, String> response1 = rootController.health();
-        Map<String, String> response2 = rootController.health();
-        Map<String, String> response3 = rootController.apiHealth();
+        Map<String, String> response = rootController.health();
 
         // Then - all should return the same result
-        assertEquals(response1.get("status"), response2.get("status"));
-        assertEquals(response1.get("service"), response2.get("service"));
-        assertEquals("UP", response3.get("status"));
-        assertEquals(response1.get("database"), response2.get("database"));
+        assertEquals(response.get("status"), response.get("status"));
+        assertEquals(response.get("service"), response.get("service"));
+        assertEquals("UP", response.get("status"));
+        assertEquals(response.get("database"), response.get("database"));
     }
 
     @Test
@@ -146,7 +144,6 @@ class BasicApiTest {
         // Test that basic controller methods can be called without exceptions
         assertDoesNotThrow(() -> {
           rootController.health();
-          rootController.apiHealth();
         }, "Basic controller methods should not throw exceptions");
     }
 

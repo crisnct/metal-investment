@@ -45,8 +45,7 @@ This directory contains comprehensive unit tests and integration tests for the M
 - `PUT /changePassword` - Password change
 - `POST /checkUserPendingValidation` - Check validation status
 - `POST /resendValidationEmail` - Resend validation email
-- `GET /health` - Health check
-- `GET /api/health` - API health check
+- `GET /health` - Application and API health check
 
 #### Protected Endpoints (JWT Authentication)
 - `POST /api/blockIp` - Block IP address

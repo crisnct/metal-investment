@@ -68,8 +68,18 @@ public class Scheduler {
     @PostConstruct
     public void init() {
         log.info("Initializing scheduler - fetching initial data");
-        this.fetchCurrencyValues();
-        this.updateAllMetalPrices();
+        try {
+            this.fetchCurrencyValues();
+        } catch (Exception ex) {
+            log.warn("Unable to fetch initial currency data. Scheduled job will retry. Cause: {}", ex.getMessage());
+            log.debug("Initial currency fetch failure", ex);
+        }
+        try {
+            this.updateAllMetalPrices();
+        } catch (Exception ex) {
+            log.warn("Unable to update initial metal prices. Scheduled job will retry. Cause: {}", ex.getMessage());
+            log.debug("Initial metal price update failure", ex);
+        }
     }
 
     /**
@@ -129,6 +139,8 @@ public class Scheduler {
             log.info("Successfully updated currency values");
         } catch (IOException e) {
             log.error("Failed to read currency values from RSS feed", e);
+        } catch (Exception e) {
+            log.error("Failed to update currency values in the data store", e);
         }
     }
 
@@ -139,6 +151,11 @@ public class Scheduler {
     @Scheduled(fixedDelay = NOTIFICATION_CHECK_INTERVAL)
     public void checkNotifications() {
         log.debug("Starting scheduled notification check");
-        this.notificationService.checkNotifications();
+        try {
+            this.notificationService.checkNotifications();
+        } catch (Exception ex) {
+            log.warn("Skipping notification check because the data store is unavailable. Cause: {}", ex.getMessage());
+            log.debug("Notification check failure", ex);
+        }
     }
 }
